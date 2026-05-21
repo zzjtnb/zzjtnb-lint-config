@@ -1,0 +1,68 @@
+{
+  "name": "stylelint-config-zzjtnb",
+  "type": "module",
+  "version": "0.0.10",
+  "description": "Shareable Stylelint 17 config for CSS, SCSS, Vue SFC, UnoCSS, Tailwind-style workflows and uni-app.",
+  "author": "zzjtnb(https://github.com/zzjtnb)",
+  "license": "MIT",
+  "homepage": "https://github.com/zzjtnb/zzjtnb-lint-config#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzjtnb/zzjtnb-lint-config.git",
+    "directory": "packages/stylelint-config"
+  },
+  "bugs": {
+    "url": "https://github.com/zzjtnb/zzjtnb-lint-config/issues"
+  },
+  "keywords": [
+    "stylelint",
+    "stylelint-config",
+    "shareable-config",
+    "css",
+    "scss",
+    "vue",
+    "unocss",
+    "tailwindcss",
+    "uni-app",
+    "rpx"
+  ],
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "README.md",
+    "README.zh-CN.md",
+    "index.d.ts",
+    "index.js"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "build": "node --check index.js",
+    "lint": "pnpm run lint:eslint",
+    "lint:eslint": "eslint . --fix --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "version:patch": "pnpm version patch --no-git-tag-version --no-git-checks",
+    "version:minor": "pnpm version minor --no-git-tag-version --no-git-checks",
+    "version:major": "pnpm version major --no-git-tag-version --no-git-checks",
+    "release:pack": "pnpm pack --dry-run",
+    "release:publish": "pnpm publish --access public --tag latest --registry https://registry.npmjs.org/ --no-git-checks",
+    "release:verify": "pnpm view stylelint-config-zzjtnb version --registry https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "stylelint": "^17.12.0"
+  },
+  "dependencies": {
+    "postcss-html": "^1.8.1",
+    "postcss-scss": "^4.0.9",
+    "stylelint-config-clean-order": "^8.0.2",
+    "stylelint-config-recommended-scss": "^17.0.1",
+    "stylelint-config-recommended-vue": "^1.6.1"
+  }
+}

@@ -1,0 +1,54 @@
+// markdownlint-cli2 配置文件
+// https://github.com/DavidAnson/markdownlint-cli2
+// 检查: markdownlint-cli2 "**/*.md"
+// 修复: markdownlint-cli2 --fix "**/*.md"
+//
+// ⚠️ 重要：markdownlint-cli2 不会自动排除 node_modules
+// 必须通过以下方式之一显式配置：
+// 1. 配置文件：ignores: ["node_modules/**"]（推荐）
+// 2. 命令行：markdownlint-cli2 "**/*.md" "#node_modules"
+{
+  // 自动读取 .gitignore 文件（补充 ignores 配置，不能替代）
+  "gitignore": true,
+  // 公共忽略项需与 ESLint / Stylelint 默认忽略保持同一份语义
+  // （markdownlint-cli2 不会自动忽略任何目录，必须显式配置）。
+  "ignores": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.nuxt/**",
+    "**/.turbo/**",
+    "**/.vercel/**",
+    "**/.wrangler/**",
+    "**/coverage/**",
+    "**/backup/**",
+    "**/src-tauri/**",
+    "**/src-tauri-harmony/**",
+    "**/stats.html",
+    "**/twa/project/**",
+    "**/fonts/**",
+    "**/shadcn-vue/**",
+    "**/packages/*/README*.md"
+  ],
+  // markdownlint 规则配置
+  "config": {
+    // 启用所有默认规则
+    "default": true,
+    "MD001": false,
+    // MD003/header-style : Header style : https://github.com/DavidAnson/markdownlint/blob/main/doc/md003.md
+    "MD003": { "style": "atx" }, // 使用 ATX 样式的标题(即 # 标记),而不是 Setext 样式(下划线)
+    // MD013/line-length : Line length : https://github.com/DavidAnson/markdownlint/blob/main/doc/md013.md
+    "MD013": false, // 禁用行长度限制(AI 模型描述等内容可能很长)
+    // MD024/no-duplicate-heading : Multiple headings with the same content
+    "MD024": {
+      "siblings_only": true // 仅检查同级标题,允许不同模型下有相同的子标题
+    },
+    // MD033/no-inline-html : Inline HTML : https://github.com/DavidAnson/markdownlint/blob/main/doc/md033.md
+    "MD033": false,
+    // MD041/first-line-heading : First line in file should be a top level heading :https://github.com/DavidAnson/markdownlint/blob/main/doc/md044.md
+    "MD041": false, // 禁用首行必须是一级标题的规则(某些文档可能不需要标题)
+    // MD059/descriptive-link-text : Link text should be descriptive
+    "MD059": false, // 禁用链接文本描述性检查(模型描述中可能包含 [here] 等通用链接文本)
+    "MD060": false
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "lint": {
+      "dependsOn": ["transit"],
+      "cache": false,
+      "outputs": []
+    },
+    "lint:eslint": {
+      "dependsOn": ["transit"],
+      "cache": false,
+      "outputs": []
+    },
+    "lint:stylelint": {
+      "dependsOn": ["transit"],
+      "cache": false,
+      "outputs": []
+    },
+    "lint:markdownlint": {
+      "dependsOn": ["transit"],
+      "cache": false,
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "check-types": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.json"],
+      "outputs": []
+    },
+    "version:patch": {
+      "cache": false,
+      "outputs": []
+    },
+    "version:minor": {
+      "cache": false,
+      "outputs": []
+    },
+    "version:major": {
+      "cache": false,
+      "outputs": []
+    },
+    "release:pack": {
+      "cache": false,
+      "outputs": []
+    },
+    "release:publish": {
+      "cache": false,
+      "outputs": []
+    },
+    "release:verify": {
+      "cache": false,
+      "outputs": []
+    }
+  }
+}

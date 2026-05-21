@@ -1,0 +1,12 @@
+{
+  "name": "@zzjtnb/lint-docs",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "pnpm run lint:markdownlint",
+    "lint:markdownlint": "markdownlint-cli2 --config ../../.markdownlint-cli2.jsonc --fix \"../../README.md\" \"*.md\""
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.22.1"
+  }
+}

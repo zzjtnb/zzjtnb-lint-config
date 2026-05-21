@@ -1,0 +1,8 @@
+@use 'sass:math';
+
+.fixture {
+  @apply p-4 rounded-lg;
+
+  width: math.div(10px, 2);
+  color: theme('colors.gray.900');
+}

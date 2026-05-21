@@ -1,0 +1,12 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'tests/*'
+
+overrides:
+  '@stylistic/eslint-plugin>picomatch': 4.0.4
+  micromatch>picomatch: 2.3.2

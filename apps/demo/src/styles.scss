@@ -1,0 +1,16 @@
+@use 'sass:math';
+
+.demo-card {
+  @apply rounded-lg px-4 py-2 text-center;
+
+  width: math.div(320px, 2);
+  color: theme('colors.gray.900');
+}
+
+@container-queries {
+  @container (min-width: 400px) {
+    .demo-card {
+      padding: 2rem;
+    }
+  }
+}
