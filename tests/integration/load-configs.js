@@ -8,6 +8,7 @@ import eslintConfig, {
   eslintDefaultMarkdown,
   eslintDefaultStylistic,
   eslintLinterOptions,
+  eslintPnpmWorkspaceOverrides,
   eslintRuleOverrides,
   eslintRules,
   uno,
@@ -59,13 +60,10 @@ async function main() {
     '**/.wrangler/**',
     '**/coverage/**',
     '**/backup/**',
+    '**/releases/**',
     '**/src-tauri/**',
-    '**/src-tauri-harmony/**',
     '**/stats.html',
     '**/twa/project/**',
-    '**/fonts/**',
-    '**/shadcn-vue/**',
-    '**/packages/*/README*.md',
   ]
   assert.deepEqual(eslintDefaultIgnores, sharedIgnoreGlobs)
   assert.deepEqual(eslintLinterOptions, {
@@ -74,6 +72,16 @@ async function main() {
   })
   assert.equal(eslintRules['no-console'], 'off')
   assert.equal(eslintRuleOverrides.rules, eslintRules)
+  assert.deepEqual(eslintPnpmWorkspaceOverrides.files, ['pnpm-workspace.yaml', '**/pnpm-workspace.yaml'])
+  assert.ok(eslintPnpmWorkspaceOverrides.rules, 'pnpm workspace override should define rules')
+  const pnpmWorkspaceRule = eslintPnpmWorkspaceOverrides.rules['pnpm/yaml-enforce-settings']
+  assert.deepEqual(pnpmWorkspaceRule, ['error', {
+    forbiddenFields: ['shellEmulator', 'trustPolicy'],
+  }])
+  assert.ok(
+    eslintFlatConfig.some(config => config.rules?.['pnpm/yaml-enforce-settings'] === pnpmWorkspaceRule),
+    'eslint config should override pnpm workspace settings enforcement',
+  )
   assert.ok(stylelintConfig.extends.includes('stylelint-config-recommended-scss'), 'stylelint config should include recommended SCSS rules')
   assert.ok(stylelintConfig.extends.includes('stylelint-config-recommended-vue/scss'), 'stylelint config should include Vue SCSS rules')
 

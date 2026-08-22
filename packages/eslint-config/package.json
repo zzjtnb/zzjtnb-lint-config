@@ -1,7 +1,7 @@
 {
   "name": "eslint-config-zzjtnb",
   "type": "module",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Shareable ESLint 10 flat config built on top of @antfu/eslint-config for TypeScript, Vue, UnoCSS and HTML formatting workflows.",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",

@@ -125,10 +125,12 @@ export declare const stylelintOverrides: NonNullable<Config['overrides']>
  *
  * 普通消费方通常只需要：
  *
- * ```js
+ * ```ts
+ * import type { Config } from 'stylelint'
+ *
  * export default {
  *   extends: ['stylelint-config-zzjtnb'],
- * }
+ * } satisfies Config
  * ```
  */
 declare const stylelintConfig: StylelintConfig

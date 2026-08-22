@@ -214,13 +214,10 @@ export const stylelintIgnoreFiles = [
   `${cwd}/**/.wrangler/**`,
   `${cwd}/**/coverage/**`,
   `${cwd}/**/backup/**`,
+  `${cwd}/**/releases/**`,
   `${cwd}/**/src-tauri/**`,
-  `${cwd}/**/src-tauri-harmony/**`,
   `${cwd}/**/stats.html`,
   `${cwd}/**/twa/project/**`,
-  `${cwd}/**/fonts/**`,
-  `${cwd}/**/shadcn-vue/**`,
-  `${cwd}/**/packages/*/README*.md`,
 ]
 
 /**
@@ -255,10 +252,12 @@ export const stylelintOverrides = [
  * Stylelint 官方示例和生态里的 `stylelint-config-*` 包都以普通配置对象作为主入口，
  * 这样用户才能继续使用最直观的：
  *
- * ```js
+ * ```ts
+ * import type { Config } from 'stylelint'
+ *
  * export default {
  *   extends: ['stylelint-config-zzjtnb'],
- * }
+ * } satisfies Config
  * ```
  *
  * @satisfies {StylelintConfig}

@@ -34,7 +34,7 @@
 | Node.js | `^20.19.0 || ^22.13.0 || >=24` |
 | ESLint | `^10.4.0` |
 
-This package is ESM-only. Use `eslint.config.js` in a project with `"type": "module"`, or use `eslint.config.mjs` if your project is not ESM.
+This package is ESM-only. Use `eslint.config.ts` by default for typed configuration. If a project cannot load TypeScript config files, use `eslint.config.js` in a project with `"type": "module"`, or `eslint.config.mjs` otherwise.
 
 ## Installation
 
@@ -50,9 +50,9 @@ The config already depends on the shared integrations it enables:
 
 ## Basic usage
 
-Create `eslint.config.js`:
+Create `eslint.config.ts`:
 
-```js
+```ts
 import zzjtnb from 'eslint-config-zzjtnb'
 
 export default zzjtnb()
@@ -60,7 +60,7 @@ export default zzjtnb()
 
 ## TypeScript usage
 
-The package exports types for projects that use `eslint.config.ts` or want stronger editor hints:
+The package also exports option types for stronger editor hints:
 
 ```ts
 import type { EslintConfigOptions } from 'eslint-config-zzjtnb'
@@ -75,7 +75,7 @@ export default zzjtnb(options)
 
 ## Presets
 
-```js
+```ts
 import zzjtnb, { base, uno, vue } from 'eslint-config-zzjtnb'
 
 // Full default: TypeScript + Vue + UnoCSS + HTML formatter
@@ -95,7 +95,7 @@ export const unoConfig = uno()
 
 The default export accepts the same first-argument options as `@antfu/eslint-config`, plus these commonly used fields:
 
-```js
+```ts
 import zzjtnb from 'eslint-config-zzjtnb'
 
 export default zzjtnb({
@@ -139,7 +139,7 @@ export default zzjtnb({
 
 Additional flat config objects can be passed after the options object:
 
-```js
+```ts
 import zzjtnb from 'eslint-config-zzjtnb'
 
 export default zzjtnb(
@@ -171,6 +171,10 @@ export default zzjtnb(
 | CSS formatter | disabled by default, use Stylelint instead |
 | HTML formatter | enabled |
 
+### pnpm workspace settings
+
+For `pnpm-workspace.yaml`, this config overrides the upstream `pnpm/yaml-enforce-settings` defaults and forbids `shellEmulator` and `trustPolicy`. Those fields are machine or installation policy preferences and should not be written back automatically during `eslint --fix`.
+
 ### Default ignores
 
 The config ignores common generated directories, local-only paths and special documentation files:
@@ -184,13 +188,10 @@ The config ignores common generated directories, local-only paths and special do
 - `.wrangler`
 - `coverage`
 - `backup`
+- `releases`
 - `src-tauri`
-- `src-tauri-harmony`
 - `stats.html`
 - `twa/project`
-- `fonts`
-- `shadcn-vue`
-- `packages/*/README*.md`
 
 ## VS Code setup
 

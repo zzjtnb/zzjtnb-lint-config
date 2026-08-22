@@ -1,12 +1,24 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
-  "ui": "tui",
+  // "ui": "tui",
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
     },
     "build": {
       "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "//#lint:eslint": {
+      "cache": false,
+      "outputs": []
+    },
+    "//#lint:stylelint": {
+      "cache": false,
+      "outputs": []
+    },
+    "//#lint:markdownlint": {
+      "cache": false,
       "outputs": []
     },
     "lint": {

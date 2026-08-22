@@ -70,6 +70,9 @@ export declare const eslintRules: NonNullable<TypedFlatConfigItem['rules']>
 /** 传给 `@antfu/eslint-config` 的规则覆盖 Flat Config 片段。 */
 export declare const eslintRuleOverrides: TypedFlatConfigItem
 
+/** 禁止把本机安装策略固化进 pnpm workspace 配置。 */
+export declare const eslintPnpmWorkspaceOverrides: TypedFlatConfigItem
+
 /** 创建本包默认 ESLint Flat Config。 */
 export declare function defineEslintConfig(
   options?: EslintConfigOptions,

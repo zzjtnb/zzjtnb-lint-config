@@ -34,13 +34,10 @@ export const eslintDefaultIgnores = [
   '**/.wrangler/**',
   '**/coverage/**',
   '**/backup/**',
+  '**/releases/**',
   '**/src-tauri/**',
-  '**/src-tauri-harmony/**',
   '**/stats.html',
   '**/twa/project/**',
-  '**/fonts/**',
-  '**/shadcn-vue/**',
-  '**/packages/*/README*.md',
 ]
 
 /**
@@ -107,6 +104,23 @@ export const eslintRules = {
  */
 export const eslintRuleOverrides = {
   rules: eslintRules,
+}
+
+/**
+ * 禁止把本机安装策略固化进 pnpm workspace 配置。
+ *
+ * `@antfu/eslint-config` 上游会通过 `pnpm/yaml-enforce-settings` 写入这些字段；
+ * 本包默认改为禁止，避免格式化时反复新增机器偏好。
+ *
+ * @type {TypedFlatConfigItem}
+ */
+export const eslintPnpmWorkspaceOverrides = {
+  files: ['pnpm-workspace.yaml', '**/pnpm-workspace.yaml'],
+  rules: {
+    'pnpm/yaml-enforce-settings': ['error', {
+      forbiddenFields: ['shellEmulator', 'trustPolicy'],
+    }],
+  },
 }
 
 /**
@@ -231,6 +245,7 @@ export function defineEslintConfig(options = {}, ...configs) {
       ...antfuOptions,
     },
     eslintRuleOverrides,
+    eslintPnpmWorkspaceOverrides,
     ...configs,
   )
 }

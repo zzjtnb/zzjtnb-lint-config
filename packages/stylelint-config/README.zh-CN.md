@@ -35,7 +35,7 @@
 | Node.js | `>=20.19.0` |
 | Stylelint | `^17.12.0` |
 
-本包以 ESM 为主。项目已设置 `"type": "module"` 时可使用 `stylelint.config.js`；非 ESM 项目可使用 `stylelint.config.mjs`。
+本包以 ESM 为主。默认推荐使用 `stylelint.config.ts` 获得类型化配置；如果项目无法加载 TypeScript 配置文件，已设置 `"type": "module"` 时可使用 `stylelint.config.js`，否则使用 `stylelint.config.mjs`。
 
 ## 安装
 
@@ -53,19 +53,7 @@ pnpm add -D stylelint stylelint-config-zzjtnb
 
 ## 基础用法
 
-创建 `stylelint.config.js`：
-
-```js
-export default {
-  extends: [
-    'stylelint-config-zzjtnb',
-  ],
-}
-```
-
-本包遵循 Stylelint 标准共享配置契约：默认导出是普通 Stylelint 配置对象，消费方应继续在 `extends` 中保留 `stylelint-config-zzjtnb` 这个清晰入口。`stylelintExecutionOptions`、`stylelintLanguageOptions`、`stylelintReportOptions`、`stylelintRules`、`stylelintIgnoreFiles`、`stylelintOverrides` 等命名导出只用于需要追加项目本地配置时做显式组合。
-
-TypeScript 项目可以使用 `stylelint.config.ts` 并配合 Stylelint 官方 `Config` 类型：
+创建 `stylelint.config.ts`：
 
 ```ts
 import type { Config } from 'stylelint'
@@ -77,12 +65,14 @@ export default {
 } satisfies Config
 ```
 
+本包遵循 Stylelint 标准共享配置契约：默认导出是普通 Stylelint 配置对象，消费方应继续在 `extends` 中保留 `stylelint-config-zzjtnb` 这个清晰入口。`stylelintExecutionOptions`、`stylelintLanguageOptions`、`stylelintReportOptions`、`stylelintRules`、`stylelintIgnoreFiles`、`stylelintOverrides` 等命名导出只用于需要追加项目本地配置时做显式组合。
+
 在 `package.json` 中添加脚本：
 
 ```json
 {
   "scripts": {
-    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.js --fix --cache --cache-location node_modules/.cache/.stylelintcache"
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --fix --cache --cache-location node_modules/.cache/.stylelintcache"
   }
 }
 ```
@@ -163,23 +153,20 @@ export default {
 - `.wrangler`
 - `coverage`
 - `backup`
+- `releases`
 - `src-tauri`
-- `src-tauri-harmony`
 - `stats.html`
 - `twa/project`
-- `fonts`
-- `shadcn-vue`
-- `packages/*/README*.md`
 
 如果你需要追加本地忽略项，可以导入共享片段并用展开语法显式组合。
 
-和 ESLint 不同，不要把文件 glob 替换成 `stylelint .`。Stylelint 配置文件没有类似 ESLint `files` 的白名单能力，因此 CLI 输入仍应限制在可能包含样式的文件上。如果脚本使用 `stylelint "**/*.{css,scss,vue,html}"` 这类全仓库宽 glob，请保留 `--config stylelint.config.js`。这会强制 Stylelint 使用项目根配置，避免在共享忽略规则生效前，先加载备份目录或生成子项目里的 `.stylelintrc`。
+和 ESLint 不同，不要把文件 glob 替换成 `stylelint .`。Stylelint 配置文件没有类似 ESLint `files` 的白名单能力，因此 CLI 输入仍应限制在可能包含样式的文件上。如果脚本使用 `stylelint "**/*.{css,scss,vue,html}"` 这类全仓库宽 glob，请保留 `--config stylelint.config.ts`。这会强制 Stylelint 使用项目根配置，避免在共享忽略规则生效前，先加载备份目录或生成子项目里的 `.stylelintrc`。
 
 ## 自定义配置
 
 简单零配置场景可以继续使用 `extends`：
 
-```js
+```ts
 export default {
   extends: [
     'stylelint-config-zzjtnb',
@@ -189,7 +176,7 @@ export default {
 
 需要透明地追加本地配置时，保留 `extends` 里的包入口，只覆盖需要调整的部分：
 
-```js
+```ts
 import {
   stylelintIgnoreFiles,
 } from 'stylelint-config-zzjtnb'
@@ -220,7 +207,7 @@ export default {
 
 如果你希望属性分组之间保留明显空行：
 
-```js
+```ts
 export default {
   extends: [
     'stylelint-config-zzjtnb',

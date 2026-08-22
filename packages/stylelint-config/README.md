@@ -35,7 +35,7 @@
 | Node.js | `>=20.19.0` |
 | Stylelint | `^17.12.0` |
 
-This package is ESM-first. Use `stylelint.config.js` in a project with `"type": "module"`, or use `stylelint.config.mjs` if your project is not ESM.
+This package is ESM-first. Use `stylelint.config.ts` by default for typed configuration. If a project cannot load TypeScript config files, use `stylelint.config.js` in a project with `"type": "module"`, or `stylelint.config.mjs` otherwise.
 
 ## Installation
 
@@ -53,19 +53,7 @@ The config includes these shared presets and syntax parsers:
 
 ## Basic usage
 
-Create `stylelint.config.js`:
-
-```js
-export default {
-  extends: [
-    'stylelint-config-zzjtnb',
-  ],
-}
-```
-
-This package follows the standard Stylelint shareable config contract: the default export is a plain Stylelint configuration object, and consumers should keep `stylelint-config-zzjtnb` as the visible entry in `extends`. Named exports such as `stylelintExecutionOptions`, `stylelintLanguageOptions`, `stylelintReportOptions`, `stylelintRules`, `stylelintIgnoreFiles` and `stylelintOverrides` are only for local composition when you need to append project-specific settings.
-
-TypeScript projects can use `stylelint.config.ts` with Stylelint's official `Config` type:
+Create `stylelint.config.ts`:
 
 ```ts
 import type { Config } from 'stylelint'
@@ -77,12 +65,14 @@ export default {
 } satisfies Config
 ```
 
+This package follows the standard Stylelint shareable config contract: the default export is a plain Stylelint configuration object, and consumers should keep `stylelint-config-zzjtnb` as the visible entry in `extends`. Named exports such as `stylelintExecutionOptions`, `stylelintLanguageOptions`, `stylelintReportOptions`, `stylelintRules`, `stylelintIgnoreFiles` and `stylelintOverrides` are only for local composition when you need to append project-specific settings.
+
 Add scripts to `package.json`:
 
 ```json
 {
   "scripts": {
-    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.js --fix --cache --cache-location node_modules/.cache/.stylelintcache"
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --fix --cache --cache-location node_modules/.cache/.stylelintcache"
   }
 }
 ```
@@ -163,23 +153,20 @@ Default ignored paths are resolved from `process.cwd()` so they work from the co
 - `.wrangler`
 - `coverage`
 - `backup`
+- `releases`
 - `src-tauri`
-- `src-tauri-harmony`
 - `stats.html`
 - `twa/project`
-- `fonts`
-- `shadcn-vue`
-- `packages/*/README*.md`
 
 If you need to append local ignores, import the shared pieces and spread them explicitly.
 
-Unlike ESLint, do not replace the file glob with `stylelint .`. Stylelint does not provide an ESLint-like `files` allowlist in config files, so the CLI input should stay restricted to style-bearing files. When using broad globs such as `stylelint "**/*.{css,scss,vue,html}"`, keep `--config stylelint.config.js` in the script. This forces Stylelint to use the project root config instead of loading nested `.stylelintrc` files from backup or generated subprojects before shared ignores can apply.
+Unlike ESLint, do not replace the file glob with `stylelint .`. Stylelint does not provide an ESLint-like `files` allowlist in config files, so the CLI input should stay restricted to style-bearing files. When using broad globs such as `stylelint "**/*.{css,scss,vue,html}"`, keep `--config stylelint.config.ts` in the script. This forces Stylelint to use the project root config instead of loading nested `.stylelintrc` files from backup or generated subprojects before shared ignores can apply.
 
 ## Customization
 
 For simple zero-config usage, keep using `extends`:
 
-```js
+```ts
 export default {
   extends: [
     'stylelint-config-zzjtnb',
@@ -189,7 +176,7 @@ export default {
 
 For transparent local customization, keep the package entry in `extends` and override only the pieces you need:
 
-```js
+```ts
 import {
   stylelintIgnoreFiles,
 } from 'stylelint-config-zzjtnb'
@@ -220,7 +207,7 @@ export default {
 
 If you prefer visible blank lines between declaration groups:
 
-```js
+```ts
 export default {
   extends: [
     'stylelint-config-zzjtnb',

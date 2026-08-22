@@ -10,7 +10,8 @@
 {
   // 自动读取 .gitignore 文件（补充 ignores 配置，不能替代）
   "gitignore": true,
-  // 公共忽略项需与 ESLint / Stylelint 默认忽略保持同一份语义
+  // 通用忽略项需与 ESLint / Stylelint 默认忽略保持同一份语义；
+  // 仓库专属忽略项只保留在本地配置中。
   // （markdownlint-cli2 不会自动忽略任何目录，必须显式配置）。
   "ignores": [
     "**/node_modules/**",
@@ -22,12 +23,10 @@
     "**/.wrangler/**",
     "**/coverage/**",
     "**/backup/**",
+    "**/releases/**",
     "**/src-tauri/**",
-    "**/src-tauri-harmony/**",
     "**/stats.html",
     "**/twa/project/**",
-    "**/fonts/**",
-    "**/shadcn-vue/**",
     "**/packages/*/README*.md"
   ],
   // markdownlint 规则配置

@@ -34,7 +34,7 @@
 | Node.js | `^20.19.0 || ^22.13.0 || >=24` |
 | ESLint | `^10.4.0` |
 
-本包仅支持 ESM。项目已设置 `"type": "module"` 时可使用 `eslint.config.js`；非 ESM 项目可使用 `eslint.config.mjs`。
+本包仅支持 ESM。默认推荐使用 `eslint.config.ts` 获得类型化配置；如果项目无法加载 TypeScript 配置文件，已设置 `"type": "module"` 时可使用 `eslint.config.js`，否则使用 `eslint.config.mjs`。
 
 ## 安装
 
@@ -50,9 +50,9 @@ pnpm add -D eslint eslint-config-zzjtnb
 
 ## 基础用法
 
-创建 `eslint.config.js`：
+创建 `eslint.config.ts`：
 
-```js
+```ts
 import zzjtnb from 'eslint-config-zzjtnb'
 
 export default zzjtnb()
@@ -60,7 +60,7 @@ export default zzjtnb()
 
 ## TypeScript 配置体验
 
-本包导出类型声明，适合使用 `eslint.config.ts` 或希望获得更完整编辑器提示的项目：
+本包也导出配置选项类型，便于获得更完整的编辑器提示：
 
 ```ts
 import type { EslintConfigOptions } from 'eslint-config-zzjtnb'
@@ -75,7 +75,7 @@ export default zzjtnb(options)
 
 ## 预设
 
-```js
+```ts
 import zzjtnb, { base, uno, vue } from 'eslint-config-zzjtnb'
 
 // 默认完整配置：TypeScript + Vue + UnoCSS + HTML formatter
@@ -95,7 +95,7 @@ export const unoConfig = uno()
 
 默认导出函数兼容 `@antfu/eslint-config` 第一参数选项，并常用以下字段：
 
-```js
+```ts
 import zzjtnb from 'eslint-config-zzjtnb'
 
 export default zzjtnb({
@@ -139,7 +139,7 @@ export default zzjtnb({
 
 你也可以在选项对象后继续传入 ESLint Flat Config 对象：
 
-```js
+```ts
 import zzjtnb from 'eslint-config-zzjtnb'
 
 export default zzjtnb(
@@ -171,6 +171,10 @@ export default zzjtnb(
 | CSS formatter | 默认关闭，交给 Stylelint |
 | HTML formatter | 启用 |
 
+### pnpm workspace 设置
+
+针对 `pnpm-workspace.yaml`，本配置会覆盖上游 `pnpm/yaml-enforce-settings` 的默认值，并禁止 `shellEmulator` 和 `trustPolicy`。这两个字段属于本机或安装策略偏好，不应在执行 `eslint --fix` 时被自动写回。
+
 ### 默认忽略项
 
 配置会忽略常见生成目录、本地目录或特殊文档：
@@ -184,13 +188,10 @@ export default zzjtnb(
 - `.wrangler`
 - `coverage`
 - `backup`
+- `releases`
 - `src-tauri`
-- `src-tauri-harmony`
 - `stats.html`
 - `twa/project`
-- `fonts`
-- `shadcn-vue`
-- `packages/*/README*.md`
 
 ## VS Code 推荐设置
 
