@@ -61,16 +61,28 @@ The config bundles PostCSS and includes these shared presets and syntax parsers:
 Create `stylelint.config.ts`:
 
 ```ts
-import type { Config } from 'stylelint'
+import zzjtnb from '@zzjtnb/stylelint-config'
 
-export default {
-  extends: [
-    '@zzjtnb/stylelint-config',
-  ],
-} satisfies Config
+export default zzjtnb
 ```
 
-This package follows the standard Stylelint shareable config contract: the default export is a plain Stylelint configuration object, and consumers should keep `@zzjtnb/stylelint-config` as the visible entry in `extends`. Named exports such as `stylelintExecutionOptions`, `stylelintLanguageOptions`, `stylelintReportOptions`, `stylelintRules`, `stylelintIgnoreFiles` and `stylelintOverrides` are only for local composition when you need to append project-specific settings.
+The default import is the complete Stylelint configuration object and is not called. If you prefer the same factory-style syntax as the ESLint package, use the named export:
+
+```ts
+import { zzjtnb } from '@zzjtnb/stylelint-config'
+
+export default zzjtnb()
+```
+
+The named `zzjtnb()` factory is aligned with the ESLint package. The default export remains a plain Stylelint configuration object, so the standard shareable-config form is still supported:
+
+```ts
+export default {
+  extends: ['@zzjtnb/stylelint-config'],
+}
+```
+
+Named exports such as `stylelintExecutionOptions`, `stylelintLanguageOptions`, `stylelintReportOptions`, `stylelintRules`, `stylelintIgnoreFiles` and `stylelintOverrides` are only for local composition when you need to append project-specific settings.
 
 Add scripts to `package.json`:
 
@@ -87,6 +99,7 @@ Add scripts to `package.json`:
 | Export | Purpose |
 | --- | --- |
 | Default export | Complete Stylelint shareable configuration object |
+| Named export `zzjtnb()` | Return the complete Stylelint configuration object |
 | `stylelintRules` | Shared rule map for local composition or inspection |
 | `stylelintScssRules` | SCSS plugin rules scoped to SCSS and Vue SFC overrides |
 | `stylelintOverrides` | Vue / HTML / SCSS parser and preset overrides |
@@ -94,7 +107,7 @@ Add scripts to `package.json`:
 | `stylelintExecutionOptions` | Explicit `allowEmptyInput`, `cache` and `fix` defaults |
 | `stylelintIgnoreFiles` / `createStylelintIgnoreFiles()` | Shared ignore paths and custom-root generation |
 
-This package exports a normal Stylelint configuration object, not an async factory. Keep the package name in `extends`; use named exports only when a project has a real local composition requirement.
+The default export is a normal Stylelint configuration object. The named `zzjtnb()` export returns the same object for projects that prefer a factory-style entry. Keep the package name in `extends` when using Stylelint's standard shareable-config resolution.
 
 The ownership is intentionally split:
 

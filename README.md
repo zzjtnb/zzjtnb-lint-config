@@ -27,7 +27,7 @@ tests/
 - 使用 `pnpm` 管理依赖和 workspace。
 - 根目录脚本只负责委托 Turborepo，具体任务放在 workspace 包内。
 - lint 脚本默认允许自动修复，并尽量启用工具自身缓存。
-- Markdownlint 检查根 README 和仓库维护文档；发布包 README 面向 npm 展示，单独维护，不纳入仓库 Markdownlint。
+- Markdownlint 检查根 README、仓库维护文档和发布包 README，确保 npm 展示文档也保持可维护。
 
 ## 常用命令
 
@@ -53,7 +53,9 @@ pnpm test
 # 执行发布前检查。
 pnpm release:check
 
-# 交互式发布：登录检查、版本检查、完整校验、打包、逐包发布和结果核验。
+# 交互式发布：登录检查、版本检查、完整校验、打包和逐包发布。
+# 发布成功后立即结束，不等待 npm registry 同步；脚本会输出页面和检查命令。
+# npm 启用 2FA 时，发布命令会在当前终端中提示输入 OTP。
 pnpm release
 
 # 预览发布包内容。

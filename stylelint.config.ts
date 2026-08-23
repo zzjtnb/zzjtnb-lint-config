@@ -1,4 +1,3 @@
-import type { Config } from 'stylelint'
 import { stylelintIgnoreFiles } from '@zzjtnb/stylelint-config'
 
 export default {
@@ -9,4 +8,4 @@ export default {
     ...stylelintIgnoreFiles,
     'packages/*/README*.md',
   ],
-} satisfies Config
+}

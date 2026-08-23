@@ -37,8 +37,19 @@ const stylelintConfig = {
   overrides: stylelintOverrides,
 } satisfies Config
 
+/**
+ * 返回共享 Stylelint 配置对象。
+ *
+ * 命名工厂与 ESLint 配置保持一致；默认导出仍保留为普通配置对象，继续支持
+ * Stylelint 官方的 `extends: ['@zzjtnb/stylelint-config']` 用法。
+ */
+function zzjtnb(): Config {
+  return stylelintConfig
+}
+
 export {
   createStylelintIgnoreFiles,
+  zzjtnb,
   stylelintDefaultIgnoreGlobs,
   stylelintExecutionOptions,
   stylelintExtends,

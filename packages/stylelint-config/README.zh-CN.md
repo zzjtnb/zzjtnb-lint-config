@@ -61,16 +61,28 @@ pnpm add -D stylelint @zzjtnb/stylelint-config
 创建 `stylelint.config.ts`：
 
 ```ts
-import type { Config } from 'stylelint'
+import zzjtnb from '@zzjtnb/stylelint-config'
 
-export default {
-  extends: [
-    '@zzjtnb/stylelint-config',
-  ],
-} satisfies Config
+export default zzjtnb
 ```
 
-本包遵循 Stylelint 标准共享配置契约：默认导出是普通 Stylelint 配置对象，消费方应继续在 `extends` 中保留 `@zzjtnb/stylelint-config` 这个清晰入口。`stylelintExecutionOptions`、`stylelintLanguageOptions`、`stylelintReportOptions`、`stylelintRules`、`stylelintIgnoreFiles`、`stylelintOverrides` 等命名导出只用于需要追加项目本地配置时做显式组合。
+默认导入得到完整的 Stylelint 配置对象，不能调用。如果希望和 ESLint 包一样使用工厂式写法，则使用命名导出：
+
+```ts
+import { zzjtnb } from '@zzjtnb/stylelint-config'
+
+export default zzjtnb()
+```
+
+命名导出 `zzjtnb()` 与 ESLint 包保持一致。默认导出仍然是普通 Stylelint 配置对象，因此仍支持 Stylelint 标准共享配置写法：
+
+```ts
+export default {
+  extends: ['@zzjtnb/stylelint-config'],
+}
+```
+
+`stylelintExecutionOptions`、`stylelintLanguageOptions`、`stylelintReportOptions`、`stylelintRules`、`stylelintIgnoreFiles`、`stylelintOverrides` 等命名导出只用于需要追加项目本地配置时做显式组合。
 
 需要在不同工作目录运行 Stylelint 时，可以使用 `createStylelintIgnoreFiles` 生成指定根目录的忽略项；需要完全自定义忽略目录时，使用 `stylelintDefaultIgnoreGlobs` 作为起点，而不是复制整份共享配置。
 
@@ -89,6 +101,7 @@ export default {
 | 导出 | 用途 |
 | --- | --- |
 | 默认导出 | 完整的 Stylelint 共享配置对象 |
+| 命名导出 `zzjtnb()` | 返回完整的 Stylelint 配置对象 |
 | `stylelintRules` | 供本地组合或检查的共享规则映射 |
 | `stylelintScssRules` | 只在 SCSS 和 Vue SFC override 中启用的 SCSS 插件规则 |
 | `stylelintOverrides` | Vue / HTML / SCSS 的 parser 和预设覆盖配置 |
@@ -96,7 +109,7 @@ export default {
 | `stylelintExecutionOptions` | 明确的 `allowEmptyInput`、`cache`、`fix` 默认值 |
 | `stylelintIgnoreFiles` / `createStylelintIgnoreFiles()` | 共享忽略项和自定义项目根目录生成器 |
 
-本包导出的是普通 Stylelint 配置对象，不是异步工厂。常规项目应在 `extends` 中保留包名；只有确实需要组合本地规则或路径时，才使用命名导出。
+默认导出是普通 Stylelint 配置对象，命名导出 `zzjtnb()` 返回同一个配置对象，方便与 ESLint 包统一使用工厂式入口。使用 Stylelint 标准共享配置解析时，常规项目仍应在 `extends` 中保留包名。
 
 职责边界如下：
 

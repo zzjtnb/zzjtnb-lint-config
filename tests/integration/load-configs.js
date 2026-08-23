@@ -1,18 +1,18 @@
 import assert from 'node:assert/strict'
 import process from 'node:process'
 
-import {
+import eslintDefaultConfig, {
   base,
   defaultFormatters,
   defaultIgnores,
   defaultLinterOptions,
   defaultMarkdown,
   defaultStylistic,
-  defineConfig,
   ruleOverrides,
   rules,
   uno,
   vue,
+  zzjtnb,
 } from '@zzjtnb/eslint-config'
 import stylelintConfig, {
   createStylelintIgnoreFiles,
@@ -24,10 +24,13 @@ import stylelintConfig, {
   stylelintRules,
   stylelintScssAtRuleOptions,
   stylelintScssRules,
+  zzjtnb as stylelintZzjtnb,
 } from '@zzjtnb/stylelint-config'
 
 async function main() {
-  const eslintResult = defineConfig({
+  assert.equal(eslintDefaultConfig, zzjtnb, 'default export should point to zzjtnb')
+  assert.equal(stylelintZzjtnb(), stylelintConfig, 'stylelint zzjtnb should return the default config')
+  const eslintResult = zzjtnb({
     unocss: false,
     vue: false,
   })
@@ -81,7 +84,7 @@ async function main() {
   })
   assert.equal(rules['no-console'], 'off')
   assert.equal(ruleOverrides.rules, rules)
-  const strictRules = await defineConfig({
+  const strictRules = await zzjtnb({
     defaultIgnores: false,
     pnpm: false,
     pnpmWorkspace: false,

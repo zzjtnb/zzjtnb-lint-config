@@ -6,7 +6,7 @@ import type {
 
 type AntfuConfigInput = Parameters<typeof antfu>[1]
 
-/** 传给 `defineConfig` 的后续 Flat Config 片段。 */
+/** 传给 `zzjtnb` 的后续 Flat Config 片段。 */
 export type ESLintUserConfig = NonNullable<AntfuConfigInput>
 
 /**

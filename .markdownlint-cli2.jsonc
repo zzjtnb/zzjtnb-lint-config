@@ -26,8 +26,7 @@
     "**/releases/**",
     "**/src-tauri/**",
     "**/stats.html",
-    "**/twa/project/**",
-    "**/packages/*/README*.md"
+    "**/twa/project/**"
   ],
   // markdownlint 规则配置
   "config": {

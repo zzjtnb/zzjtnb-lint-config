@@ -47,7 +47,7 @@ export type {
  * antfu 负责插件注册和基础规则，本包只追加组织级差异，不重复维护
  * Vue、TypeScript、JSONC、YAML、Node 和 perfectionist 的基础实现。
  */
-export async function defineConfig(
+export async function zzjtnb(
   options: ESLintConfigOptions = {},
   ...configs: ESLintUserConfig[]
 ): Promise<Linter.Config[]> {
@@ -108,7 +108,7 @@ export async function base(
   options: ESLintConfigOptions = {},
   ...configs: ESLintUserConfig[]
 ): Promise<Linter.Config[]> {
-  return defineConfig({ vue: false, unocss: false, ...options }, ...configs)
+  return zzjtnb({ vue: false, unocss: false, ...options }, ...configs)
 }
 
 /** Vue 项目配置；其余默认集成保持不变。 */
@@ -116,7 +116,7 @@ export async function vue(
   options: ESLintConfigOptions = {},
   ...configs: ESLintUserConfig[]
 ): Promise<Linter.Config[]> {
-  return defineConfig({ vue: true, ...options }, ...configs)
+  return zzjtnb({ vue: true, ...options }, ...configs)
 }
 
 /** 显式启用 UnoCSS；消费方必须自行安装可选 peer。 */
@@ -124,5 +124,11 @@ export async function uno(
   options: ESLintConfigOptions = {},
   ...configs: ESLintUserConfig[]
 ): Promise<Linter.Config[]> {
-  return defineConfig({ unocss: true, ...options }, ...configs)
+  return zzjtnb({ unocss: true, ...options }, ...configs)
 }
+
+/**
+ * 默认导出与命名导出 `zzjtnb` 指向同一个配置工厂，避免消费者
+ * 因为默认导入和命名导入的选择不同而遇到入口不一致的问题。
+ */
+export default zzjtnb

@@ -8,8 +8,6 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const REGISTRY = 'https://registry.npmjs.org/'
-const VERIFY_ATTEMPTS = 12
-const VERIFY_INTERVAL = 5000
 const PACKAGE_DIRECTORIES = {
   '@zzjtnb/eslint-config': 'eslint-config',
   '@zzjtnb/stylelint-config': 'stylelint-config',
@@ -138,12 +136,39 @@ function chooseRetryOrAbort(question, retryDescription) {
 function run(command, args, options = {}) {
   return new Promise((resolveRun, reject) => {
     const child = spawn(command, args, {
-      cwd: ROOT,
+      cwd: options.cwd ?? ROOT,
       stdio: options.stdio ?? 'inherit',
     })
     child.on('error', reject)
     child.on('close', code => resolveRun(code ?? 1))
   })
+}
+
+/**
+ * 在真实终端中发布单个包。
+ *
+ * 不通过 `pnpm --filter ... run` 或管道转发发布命令，否则 npm 要求 OTP
+ * 时会判断当前进程不是交互终端，直接报 `ERR_PNPM_OTP_NON_INTERACTIVE`。
+ */
+async function publishPackage(packageName) {
+  closePrompt()
+  try {
+    return await run('pnpm', [
+      'publish',
+      '--access',
+      'public',
+      '--tag',
+      'latest',
+      '--registry',
+      REGISTRY,
+      '--no-git-checks',
+    ], {
+      cwd: packageVersionPath(packageName),
+    })
+  }
+  finally {
+    openPrompt()
+  }
 }
 
 async function capture(command, args) {
@@ -162,27 +187,6 @@ async function capture(command, args) {
     })
     child.on('error', reject)
     child.on('close', code => resolveCapture({ code: code ?? 1, stderr, stdout }))
-  })
-}
-
-function runWithOutput(command, args) {
-  return new Promise((resolveRun, reject) => {
-    const child = spawn(command, args, {
-      cwd: ROOT,
-      stdio: ['inherit', 'pipe', 'pipe'],
-    })
-    let output = ''
-    const forward = (stream, target) => {
-      stream.on('data', (chunk) => {
-        const text = chunk.toString()
-        output += text
-        target.write(text)
-      })
-    }
-    forward(child.stdout, process.stdout)
-    forward(child.stderr, process.stderr)
-    child.on('error', reject)
-    child.on('close', code => resolveRun({ code: code ?? 1, output }))
   })
 }
 
@@ -211,15 +215,30 @@ function compareVersions(left, right) {
   return 0
 }
 
+function isNextVersion(local, remote) {
+  const [localMajor, localMinor, localPatch] = parseVersion(local)
+  const [remoteMajor, remoteMinor, remotePatch] = parseVersion(remote)
+
+  return (
+    localMajor === remoteMajor
+    && localMinor === remoteMinor
+    && localPatch === remotePatch + 1
+  ) || (
+    localMajor === remoteMajor
+    && localMinor === remoteMinor + 1
+    && localPatch === 0
+  ) || (
+    localMajor === remoteMajor + 1
+    && localMinor === 0
+    && localPatch === 0
+  )
+}
+
 function packageVersionPath(packageName) {
   const packageDirectory = PACKAGE_DIRECTORIES[packageName]
   if (!packageDirectory)
     throw new Error(`未知的发布包：${packageName}`)
   return resolve(ROOT, 'packages', packageDirectory)
-}
-
-function wait(milliseconds) {
-  return new Promise(resolveWait => setTimeout(resolveWait, milliseconds))
 }
 
 async function npmUser() {
@@ -404,16 +423,20 @@ async function editPackageVersion(packageName) {
 
 async function confirmAheadVersions(state) {
   while (true) {
-    const ahead = state.filter(item => item.remote && compareVersions(item.local, item.remote) > 0)
+    const ahead = state.filter(item => (
+      item.remote
+      && compareVersions(item.local, item.remote) > 0
+      && !isNextVersion(item.local, item.remote)
+    ))
     if (!ahead.length)
       return state
 
-    console.warn('\n发现本地版本高于 npm 版本。可能是未发布的中间版本，也可能是手动填写错误：')
+    console.warn('\n发现本地版本跳过了 npm 版本。可能是未发布的中间版本，也可能是手动填写错误：')
     for (const item of ahead)
       console.warn(`- ${item.name}: npm ${item.remote} / 本地 ${item.local}`)
 
-    const action = await chooseMenu('请确认本地版本处理方式', [
-      { description: '按当前本地版本继续发布，不修改版本号', key: 'c', label: '继续发布' },
+    const action = await chooseMenu('请确认跳过版本的处理方式', [
+      { description: '确认中间版本不需要发布，按当前版本继续', key: 'c', label: '继续发布' },
       { description: '重新输入可用的版本号，并再次检查状态', key: 'e', label: '修改版本' },
       { description: '退出发布流程，保留当前文件内容', key: 'a', label: '中止' },
     ])
@@ -506,13 +529,10 @@ async function publishPackages(state) {
 
     while (true) {
       console.log(`\n准备发布 ${item.name}@${item.local}`)
-      const result = await runWithOutput('pnpm', ['--filter', item.name, 'run', 'release:publish'])
-      if (result.code === 0)
+      const code = await publishPackage(item.name)
+      if (code === 0)
         break
-      if (/24\s+hours?/i.test(result.output)) {
-        console.error(`\n${item.name} 触发 npm 的整包取消发布保护期：整包取消发布后，24 小时内不能重新发布。请等待保护期结束后重新执行 pnpm release。`)
-        return false
-      }
+      console.error('\n发布命令失败；如果终端要求 OTP，请直接在上方 npm 提示中输入一次性验证码。')
       const action = await chooseRetryOrAbort(`${item.name} 发布失败，请选择操作`, '重新执行当前包的发布命令；已成功发布的包不会回滚')
       if (action === 'a')
         return false
@@ -521,19 +541,13 @@ async function publishPackages(state) {
   return true
 }
 
-async function verifyPublishedVersions(packageNames) {
-  for (let attempt = 1; attempt <= VERIFY_ATTEMPTS; attempt++) {
-    const state = await readReleaseState(packageNames)
-    if (!state)
-      return undefined
-    if (state.every(item => item.remote === item.local))
-      return state
-    if (attempt < VERIFY_ATTEMPTS) {
-      console.log(`npm 仍在同步版本，${VERIFY_INTERVAL / 1000} 秒后重试（${attempt}/${VERIFY_ATTEMPTS - 1}）`)
-      await wait(VERIFY_INTERVAL)
-    }
+function printPublishedInfo(packageNames) {
+  console.log('\n发布命令已完成。npm 页面和 registry 版本可能需要一段时间同步，请使用以下地址或命令检查：')
+  for (const packageName of packageNames) {
+    console.log(`- ${packageName}`)
+    console.log(`  页面：https://www.npmjs.com/package/${packageName}`)
+    console.log(`  命令：pnpm view ${packageName} version --registry ${REGISTRY}`)
   }
-  return undefined
 }
 
 async function main() {
@@ -567,12 +581,8 @@ async function main() {
     if (!(await publishPackages(state)))
       return 1
 
-    const finalState = await verifyPublishedVersions(packageNames)
-    if (!finalState) {
-      console.error('发布命令已成功执行，但 npm 版本同步超时；请稍后重新执行 pnpm release，已发布的版本会自动跳过。')
-      return 1
-    }
-    console.log('\n全部发布完成。')
+    printPublishedInfo(packageNames)
+    console.log('\n全部发布命令已完成。')
     return 0
   }
   finally {

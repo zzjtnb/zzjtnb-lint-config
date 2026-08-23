@@ -37,9 +37,17 @@ pnpm add -D eslint @zzjtnb/eslint-config
 
 ```ts
 // eslint.config.ts
-import { defineConfig } from '@zzjtnb/eslint-config'
+import zzjtnb from '@zzjtnb/eslint-config'
 
-export default defineConfig()
+export default zzjtnb()
+```
+
+The default export and the named `zzjtnb` export point to the same configuration factory. If you prefer named imports, this is equivalent:
+
+```ts
+import { zzjtnb } from '@zzjtnb/eslint-config'
+
+export default zzjtnb()
 ```
 
 The default config enables TypeScript, Vue, JSON / JSONC, YAML, TOML, Node, pnpm and antfu sorting. CSS / SCSS are not handled by ESLint; use `@zzjtnb/stylelint-config`. UnoCSS and Markdown lint remain opt-in.
@@ -50,13 +58,13 @@ The default config enables TypeScript, Vue, JSON / JSONC, YAML, TOML, Node, pnpm
 
 ```ts
 // Disable all antfu stylistic formatting rules.
-export default defineConfig({ stylistic: false })
+export default zzjtnb({ stylistic: false })
 
 // Enable stylistic and require semicolons; all other fields keep upstream defaults.
-export default defineConfig({ stylistic: { semi: true } })
+export default zzjtnb({ stylistic: { semi: true } })
 
 // Explicitly enable upstream stylistic defaults.
-export default defineConfig({ stylistic: true })
+export default zzjtnb({ stylistic: true })
 ```
 
 In the current `@antfu/eslint-config`, `OptionsConfig['stylistic']` exposes:
@@ -95,7 +103,8 @@ The public API has three groups:
 
 | Export | Purpose |
 | --- | --- |
-| Named export `defineConfig()` | Create the complete ESLint flat config |
+| Default export `zzjtnb()` | Create the complete ESLint flat config |
+| Named export `zzjtnb()` | Create the complete ESLint flat config |
 | `base()`, `vue()`, `uno()` | Create common project presets |
 | `javascript()`, `ignores()`, `jsonc()`, `node()`, `perfectionist()`, `pnpm()`, `typescript()`, `yaml()` | Compose individual configuration factories |
 | `ESLintConfigOptions`, `ESLintStylisticOptions` | Typed consumer options |
@@ -131,9 +140,9 @@ The package accepts `@antfu/eslint-config` options and adds these fields:
 | `linterOptions` | Two warnings | Set the report level for unused ESLint comments |
 
 ```ts
-import { defineConfig } from '@zzjtnb/eslint-config'
+import { zzjtnb } from '@zzjtnb/eslint-config'
 
-export default defineConfig({
+export default zzjtnb({
   // Upstream option: enable stricter library-oriented rules.
   type: 'lib',
 
@@ -165,10 +174,10 @@ For the full upstream option set, use [`OptionsConfig`](https://github.com/antfu
 ## Presets
 
 ```ts
-import { base, defineConfig, uno, vue } from '@zzjtnb/eslint-config'
+import { base, zzjtnb, uno, vue } from '@zzjtnb/eslint-config'
 
 // Full default configuration.
-export default defineConfig()
+export default zzjtnb()
 
 // JavaScript / TypeScript without Vue and UnoCSS.
 export const baseConfig = base()
@@ -201,7 +210,7 @@ export const unoConfig = uno()
 When a consumer does not use the project's Stylelint or Markdownlint setup, enable antfu's built-in integrations explicitly:
 
 ```ts
-export default defineConfig({
+export default zzjtnb({
   // Requires antfu's optional eslint-plugin-format peer.
   formatters: { css: true },
   // Enables antfu's Markdown rules instead of markdownlint-cli2.

@@ -37,9 +37,17 @@ pnpm add -D eslint @zzjtnb/eslint-config
 
 ```ts
 // eslint.config.ts
-import { defineConfig } from '@zzjtnb/eslint-config'
+import zzjtnb from '@zzjtnb/eslint-config'
 
-export default defineConfig()
+export default zzjtnb()
+```
+
+默认导出与命名导出 `zzjtnb` 指向同一个配置工厂。如果更喜欢命名导入，也可以这样写：
+
+```ts
+import { zzjtnb } from '@zzjtnb/eslint-config'
+
+export default zzjtnb()
 ```
 
 默认配置启用 TypeScript、Vue、JSON / JSONC、YAML、TOML、Node、pnpm 和 antfu 的排序规则。CSS / SCSS 不由 ESLint 处理，请使用 `@zzjtnb/stylelint-config`；UnoCSS 和 Markdown lint 默认保持可选。
@@ -50,13 +58,13 @@ export default defineConfig()
 
 ```ts
 // 关闭全部 antfu stylistic 格式规则。
-export default defineConfig({ stylistic: false })
+export default zzjtnb({ stylistic: false })
 
 // 开启 stylistic，并只把分号改为必需；其它字段继续使用 antfu 默认值。
-export default defineConfig({ stylistic: { semi: true } })
+export default zzjtnb({ stylistic: { semi: true } })
 
 // 显式开启上游默认格式规则。
-export default defineConfig({ stylistic: true })
+export default zzjtnb({ stylistic: true })
 ```
 
 当前 `@antfu/eslint-config` 的 `OptionsConfig['stylistic']` 对象支持以下字段：
@@ -95,7 +103,8 @@ const styleOptions = {
 
 | 导出 | 用途 |
 | --- | --- |
-| 命名导出 `defineConfig()` | 创建完整 ESLint Flat Config |
+| 默认导出 `zzjtnb()` | 创建完整 ESLint Flat Config |
+| 命名导出 `zzjtnb()` | 创建完整 ESLint Flat Config |
 | `base()`、`vue()`、`uno()` | 创建常用项目预设 |
 | `javascript()`、`ignores()`、`jsonc()`、`node()`、`perfectionist()`、`pnpm()`、`typescript()`、`yaml()` | 按需组合单项配置工厂 |
 | `ESLintConfigOptions`、`ESLintStylisticOptions` | 为消费方提供 TypeScript 类型提示 |
@@ -131,9 +140,9 @@ const styleOptions = {
 | `linterOptions` | 两项 warning | 控制未使用 ESLint 注释的报告级别 |
 
 ```ts
-import { defineConfig } from '@zzjtnb/eslint-config'
+import { zzjtnb } from '@zzjtnb/eslint-config'
 
-export default defineConfig({
+export default zzjtnb({
   // 上游选项：库项目启用更严格的 library 规则。
   type: 'lib',
 
@@ -165,10 +174,10 @@ export default defineConfig({
 ## 预设函数
 
 ```ts
-import { base, defineConfig, uno, vue } from '@zzjtnb/eslint-config'
+import { base, zzjtnb, uno, vue } from '@zzjtnb/eslint-config'
 
 // 默认完整配置。
-export default defineConfig()
+export default zzjtnb()
 
 // JavaScript / TypeScript 配置，关闭 Vue 和 UnoCSS。
 export const baseConfig = base()
@@ -201,7 +210,7 @@ export const unoConfig = uno()
 如果消费方没有使用项目的 Stylelint 或 Markdownlint 配置，可以显式启用 antfu 自带的能力：
 
 ```ts
-export default defineConfig({
+export default zzjtnb({
   // 需要安装 antfu 的可选 peer：eslint-plugin-format。
   formatters: { css: true },
   // 启用 antfu 的 Markdown 规则，替代 markdownlint-cli2。

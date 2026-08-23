@@ -1,7 +1,7 @@
 {
   "name": "@zzjtnb/stylelint-config",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Shareable Stylelint 17 config for CSS, SCSS, Vue SFC, UnoCSS, Tailwind-style workflows and uni-app.",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",
