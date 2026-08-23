@@ -1,6 +1,7 @@
-import zzjtnb from 'eslint-config-zzjtnb'
+import { defineConfig } from '@zzjtnb/eslint-config'
 
-export default zzjtnb({
+export default defineConfig({
+  pnpm: true,
   unocss: false,
   vue: false,
 })

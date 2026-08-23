@@ -1,30 +1,33 @@
 import assert from 'node:assert/strict'
 import process from 'node:process'
 
-import eslintConfig, {
+import {
   base,
-  eslintDefaultFormatters,
-  eslintDefaultIgnores,
-  eslintDefaultMarkdown,
-  eslintDefaultStylistic,
-  eslintLinterOptions,
-  eslintPnpmWorkspaceOverrides,
-  eslintRuleOverrides,
-  eslintRules,
+  defaultFormatters,
+  defaultIgnores,
+  defaultLinterOptions,
+  defaultMarkdown,
+  defaultStylistic,
+  defineConfig,
+  ruleOverrides,
+  rules,
   uno,
   vue,
-} from 'eslint-config-zzjtnb'
+} from '@zzjtnb/eslint-config'
 import stylelintConfig, {
+  createStylelintIgnoreFiles,
+  stylelintDefaultIgnoreGlobs,
   stylelintExecutionOptions,
   stylelintIgnoreFiles,
   stylelintLanguageOptions,
   stylelintReportOptions,
   stylelintRules,
   stylelintScssAtRuleOptions,
-} from 'stylelint-config-zzjtnb'
+  stylelintScssRules,
+} from '@zzjtnb/stylelint-config'
 
 async function main() {
-  const eslintResult = eslintConfig({
+  const eslintResult = defineConfig({
     unocss: false,
     vue: false,
   })
@@ -34,59 +37,94 @@ async function main() {
   const eslintVueResult = vue()
   const eslintUnoResult = uno()
 
-  assert.ok(eslintResult, 'eslint-config-zzjtnb should return an ESLint flat config composer')
-  assert.ok(eslintBaseResult, 'base preset should return an ESLint flat config composer')
-  assert.ok(eslintVueResult, 'vue preset should return an ESLint flat config composer')
-  assert.ok(eslintUnoResult, 'uno preset should return an ESLint flat config composer')
+  assert.ok(eslintResult, '@zzjtnb/eslint-config should return an ESLint flat config promise')
+  assert.ok(eslintBaseResult, 'base preset should return an ESLint flat config promise')
+  assert.ok(eslintVueResult, 'vue preset should return an ESLint flat config promise')
+  assert.ok(eslintUnoResult, 'uno preset should return an ESLint flat config promise')
   assert.ok(eslintConfigNames.includes('antfu/jsonc/setup'), 'eslint config should enable JSON / JSONC support')
   assert.ok(eslintConfigNames.includes('antfu/yaml/setup'), 'eslint config should enable YAML support')
   assert.ok(eslintConfigNames.includes('antfu/toml/setup'), 'eslint config should enable TOML support')
-  assert.deepEqual(eslintDefaultFormatters, {
-    html: true,
-  })
-  assert.equal(eslintDefaultMarkdown, false)
-  assert.deepEqual(eslintDefaultStylistic, {
-    indent: 2,
-    quotes: 'single',
-  })
+  assert.equal(defaultFormatters, false)
+  assert.equal(defaultMarkdown, false)
+  assert.equal(defaultStylistic, true)
 
   const sharedIgnoreGlobs = [
-    '**/node_modules/**',
-    '**/dist/**',
-    '**/build/**',
-    '**/.nuxt/**',
-    '**/.turbo/**',
-    '**/.vercel/**',
-    '**/.wrangler/**',
-    '**/coverage/**',
-    '**/backup/**',
+    '**/dist-*',
+    '**/*-dist',
+    '**/.husky',
+    '**/.nitro',
+    '**/.output',
+    '**/Dockerfile',
+    '**/output',
+    '**/.github',
+    '**/lefthook.yml',
+    '**/.agent/**',
+    '**/.codex/**',
+    '**/.cursor/**',
+    '**/.claude/**',
+    '**/.agents/**',
+    '**/fixtures/**',
+    '**/*.snap',
+    '**/.vitepress/cache/**',
+    '**/*.sh',
+    '**/*.ttf',
+    '**/*.woff',
     '**/releases/**',
     '**/src-tauri/**',
     '**/stats.html',
     '**/twa/project/**',
   ]
-  assert.deepEqual(eslintDefaultIgnores, sharedIgnoreGlobs)
-  assert.deepEqual(eslintLinterOptions, {
+  assert.deepEqual(defaultIgnores, sharedIgnoreGlobs)
+  assert.deepEqual(defaultLinterOptions, {
     reportUnusedDisableDirectives: 'warn',
     reportUnusedInlineConfigs: 'warn',
   })
-  assert.equal(eslintRules['no-console'], 'off')
-  assert.equal(eslintRuleOverrides.rules, eslintRules)
-  assert.deepEqual(eslintPnpmWorkspaceOverrides.files, ['pnpm-workspace.yaml', '**/pnpm-workspace.yaml'])
-  assert.ok(eslintPnpmWorkspaceOverrides.rules, 'pnpm workspace override should define rules')
-  const pnpmWorkspaceRule = eslintPnpmWorkspaceOverrides.rules['pnpm/yaml-enforce-settings']
-  assert.deepEqual(pnpmWorkspaceRule, ['error', {
-    forbiddenFields: ['shellEmulator', 'trustPolicy'],
-  }])
+  assert.equal(rules['no-console'], 'off')
+  assert.equal(ruleOverrides.rules, rules)
+  const strictRules = await defineConfig({
+    defaultIgnores: false,
+    pnpm: false,
+    pnpmWorkspace: false,
+    rules: { 'no-console': 'error' },
+  })
   assert.ok(
-    eslintFlatConfig.some(config => config.rules?.['pnpm/yaml-enforce-settings'] === pnpmWorkspaceRule),
-    'eslint config should override pnpm workspace settings enforcement',
+    strictRules.some(config => config.rules?.['no-console'] === 'error'),
+    'consumer rules should override shared rules',
   )
-  assert.ok(stylelintConfig.extends.includes('stylelint-config-recommended-scss'), 'stylelint config should include recommended SCSS rules')
-  assert.ok(stylelintConfig.extends.includes('stylelint-config-recommended-vue/scss'), 'stylelint config should include Vue SCSS rules')
+  assert.equal(
+    strictRules.some(config => config.rules?.['pnpm/yaml-enforce-settings']),
+    false,
+    'consumer should be able to disable pnpm workspace rules',
+  )
+  const upstreamPnpmConfig = eslintFlatConfig.find(config => config.name === 'antfu/pnpm/pnpm-workspace-yaml')
+  assert.deepEqual(
+    upstreamPnpmConfig?.rules?.['pnpm/yaml-enforce-settings'],
+    ['error', { settings: { shellEmulator: true, trustPolicy: 'no-downgrade' } }],
+    'eslint config should keep antfu pnpm workspace policy unchanged',
+  )
+  assert.equal(eslintFlatConfig.some(config => config.name === 'antfu/unocss'), false)
+  assert.equal(eslintFlatConfig.some(config => config.name?.startsWith('antfu/formatter/')), false)
+  assert.ok(
+    stylelintConfig.extends.some(path => path.endsWith('/stylelint-config-standard/index.js')),
+    'stylelint config should include standard CSS rules',
+  )
+  const stylelintScssOverride = stylelintConfig.overrides.find(override => override.files.includes('*.scss'))
+  assert.ok(
+    Array.isArray(stylelintScssOverride?.extends)
+    && stylelintScssOverride.extends.some(path => path.endsWith('/stylelint-config-standard-scss/index.js')),
+    'stylelint SCSS override should include the official standard SCSS rules',
+  )
+  assert.ok(
+    (() => {
+      const vueOverride = stylelintConfig.overrides?.find(override => override.files.includes('*.vue'))
+      return Array.isArray(vueOverride?.extends)
+        && vueOverride.extends.some(path => path.endsWith('/stylelint-config-recommended-vue/scss/index.js'))
+    })(),
+    'stylelint Vue override should include Vue SCSS container rules',
+  )
 
-  assert.equal(Object.hasOwn(stylelintRules, 'at-rule-no-unknown'), false)
-  assert.equal(stylelintRules['scss/at-rule-no-unknown'][1], stylelintScssAtRuleOptions)
+  assert.equal(Object.hasOwn(stylelintRules, 'at-rule-no-unknown'), true)
+  assert.equal(stylelintScssRules['scss/at-rule-no-unknown'][1], stylelintScssAtRuleOptions)
   assert.ok(stylelintScssAtRuleOptions.ignoreAtRules.includes('container-queries'))
   assert.equal(Object.hasOwn(stylelintRules, 'unit-no-unknown'), false)
   assert.equal(stylelintConfig.languageOptions, stylelintLanguageOptions)
@@ -106,7 +144,27 @@ async function main() {
   })
 
   const cwd = process.cwd().replace(/\\/g, '/')
-  assert.deepEqual(stylelintIgnoreFiles, sharedIgnoreGlobs.map(glob => `${cwd}/${glob}`))
+  assert.deepEqual(
+    createStylelintIgnoreFiles({ cwd: '/workspace/project', globs: ['generated/**'] }),
+    ['/workspace/project/generated/**'],
+  )
+  assert.ok(stylelintDefaultIgnoreGlobs.includes('**/backup/**'))
+  const stylelintIgnoreGlobs = [
+    '**/node_modules/**',
+    '**/dist/**',
+    '**/build/**',
+    '**/.nuxt/**',
+    '**/.turbo/**',
+    '**/.vercel/**',
+    '**/.wrangler/**',
+    '**/coverage/**',
+    '**/backup/**',
+    '**/releases/**',
+    '**/src-tauri/**',
+    '**/stats.html',
+    '**/twa/project/**',
+  ]
+  assert.deepEqual(stylelintIgnoreFiles, stylelintIgnoreGlobs.map(glob => `${cwd}/${glob}`))
 
   const mergedIgnoreFiles = [
     ...stylelintIgnoreFiles,

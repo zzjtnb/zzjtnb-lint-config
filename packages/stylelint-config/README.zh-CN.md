@@ -1,8 +1,8 @@
-# stylelint-config-zzjtnb
+# @zzjtnb/stylelint-config
 
 <p align="center">
-  <a href="https://npmjs.com/package/stylelint-config-zzjtnb"><img src="https://img.shields.io/npm/v/stylelint-config-zzjtnb?color=a1b858&label=npm" alt="npm version"></a>
-  <a href="https://npmjs.com/package/stylelint-config-zzjtnb"><img src="https://img.shields.io/npm/dm/stylelint-config-zzjtnb?color=50a8d8" alt="npm downloads"></a>
+  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/v/%40zzjtnb%2Fstylelint-config?color=a1b858&label=npm" alt="npm version"></a>
+  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/dm/%40zzjtnb%2Fstylelint-config?color=50a8d8" alt="npm downloads"></a>
   <a href="https://github.com/zzjtnb/zzjtnb-lint-config"><img src="https://img.shields.io/github/stars/zzjtnb/zzjtnb-lint-config?style=social" alt="GitHub stars"></a>
 </p>
 
@@ -22,7 +22,7 @@
 - 推荐级 CSS / SCSS 错误检测规则
 - 支持 Vue SFC 的 `<style>` 块
 - 支持 HTML 内联样式
-- 通过 `stylelint-config-clean-order` 提供逻辑化 CSS 属性排序
+- 通过 `stylelint-config-recess-order` 保留项目现有 CSS 属性顺序，并由支持自动修复的 `stylelint-order` 执行
 - 支持 UnoCSS 和 Tailwind 风格的 at-rules / 函数
 - 支持 `@use`、`@mixin`、`@include` 等 SCSS 指令
 - 支持 uni-app 等项目常用的 `rpx` 单位
@@ -32,7 +32,7 @@
 
 | 包 | 版本 |
 | --- | --- |
-| Node.js | `>=20.19.0` |
+| Node.js | `^22.12.0 \|\| >=24.0.0` |
 | Stylelint | `^17.12.0` |
 
 本包以 ESM 为主。默认推荐使用 `stylelint.config.ts` 获得类型化配置；如果项目无法加载 TypeScript 配置文件，已设置 `"type": "module"` 时可使用 `stylelint.config.js`，否则使用 `stylelint.config.mjs`。
@@ -40,16 +40,21 @@
 ## 安装
 
 ```bash
-pnpm add -D stylelint stylelint-config-zzjtnb
+pnpm add -D stylelint @zzjtnb/stylelint-config
 ```
 
-本配置包含以下共享预设和语法解析器：
+本配置会内置 PostCSS，并包含以下共享预设和语法解析器：
 
-- `stylelint-config-recommended-scss`
+- `stylelint-config-standard-scss`（官方 SCSS 预设，内部包含 recommended SCSS 规则和插件）
 - `stylelint-config-recommended-vue`
-- `stylelint-config-clean-order`
+- `stylelint-config-standard`
+- `stylelint-config-recess-order`
+- `stylelint-order`
+- `stylelint-scss`
 - `postcss-html`
 - `postcss-scss`
+
+`stylelint` 是本包的 peer dependency，仍需要由项目安装；PostCSS、parser、SCSS 规则和排序规则由本包的运行依赖自动安装，项目不需要重复声明。
 
 ## 基础用法
 
@@ -60,12 +65,14 @@ import type { Config } from 'stylelint'
 
 export default {
   extends: [
-    'stylelint-config-zzjtnb',
+    '@zzjtnb/stylelint-config',
   ],
 } satisfies Config
 ```
 
-本包遵循 Stylelint 标准共享配置契约：默认导出是普通 Stylelint 配置对象，消费方应继续在 `extends` 中保留 `stylelint-config-zzjtnb` 这个清晰入口。`stylelintExecutionOptions`、`stylelintLanguageOptions`、`stylelintReportOptions`、`stylelintRules`、`stylelintIgnoreFiles`、`stylelintOverrides` 等命名导出只用于需要追加项目本地配置时做显式组合。
+本包遵循 Stylelint 标准共享配置契约：默认导出是普通 Stylelint 配置对象，消费方应继续在 `extends` 中保留 `@zzjtnb/stylelint-config` 这个清晰入口。`stylelintExecutionOptions`、`stylelintLanguageOptions`、`stylelintReportOptions`、`stylelintRules`、`stylelintIgnoreFiles`、`stylelintOverrides` 等命名导出只用于需要追加项目本地配置时做显式组合。
+
+需要在不同工作目录运行 Stylelint 时，可以使用 `createStylelintIgnoreFiles` 生成指定根目录的忽略项；需要完全自定义忽略目录时，使用 `stylelintDefaultIgnoreGlobs` 作为起点，而不是复制整份共享配置。
 
 在 `package.json` 中添加脚本：
 
@@ -77,17 +84,39 @@ export default {
 }
 ```
 
+## 公共导出与职责归属
+
+| 导出 | 用途 |
+| --- | --- |
+| 默认导出 | 完整的 Stylelint 共享配置对象 |
+| `stylelintRules` | 供本地组合或检查的共享规则映射 |
+| `stylelintScssRules` | 只在 SCSS 和 Vue SFC override 中启用的 SCSS 插件规则 |
+| `stylelintOverrides` | Vue / HTML / SCSS 的 parser 和预设覆盖配置 |
+| `stylelintLanguageOptions` | Stylelint 17 语法扩展，例如 utility at-rules 和 `rpx` |
+| `stylelintExecutionOptions` | 明确的 `allowEmptyInput`、`cache`、`fix` 默认值 |
+| `stylelintIgnoreFiles` / `createStylelintIgnoreFiles()` | 共享忽略项和自定义项目根目录生成器 |
+
+本包导出的是普通 Stylelint 配置对象，不是异步工厂。常规项目应在 `extends` 中保留包名；只有确实需要组合本地规则或路径时，才使用命名导出。
+
+职责边界如下：
+
+- Stylelint 本体和 CLI 由消费项目通过 peer dependency 提供；
+- PostCSS 和自定义语法 parser 是本包的运行依赖；
+- CSS、SCSS、Vue 和排序预设由本包统一携带；
+- CSS / SCSS 由 Stylelint 处理，不交给 ESLint；Markdown 也不属于本包职责。
+
 ## 配置内容
 
 ### 基础预设
 
-该配置按以下顺序继承预设：
+该配置按以下范围和顺序应用预设：
 
-1. `stylelint-config-recommended-scss`
-2. `stylelint-config-recommended-vue/scss`
-3. `stylelint-config-clean-order`
+1. `stylelint-config-standard` 提供通用 CSS 风格规则。
+2. `stylelint-config-recess-order` 保留项目现有属性顺序，底层由 `stylelint-order` 提供规则。
+3. `stylelint-config-standard-scss` 只应用于 `.scss` 文件。官方 SCSS 预设已经包含 recommended SCSS 规则和 `stylelint-scss`；由于 override 还要直接处理 `.scss` 输入，本包仍以 parser 对象形式提供 `postcss-scss`。
+4. `stylelint-config-recommended-vue/scss` 只应用于 `.vue` 文件。Vue preset 负责 Vue 容器及其中可能出现的 SCSS style block，本包的 `stylelintScssRules` 会在同一个 override 作用域追加。
 
-顺序很重要：CSS / SCSS 基础错误检测先应用，Vue SFC + SCSS 组合规则随后叠加，属性排序规则最后应用。HTML、Vue 和 SCSS 解析由本包自己的 `overrides` 直接传入 parser 对象。
+范围很重要：通用 CSS 规则和属性排序全局生效，SCSS 和 Vue preset 只在对应的 override 中生效。这会避免普通 CSS 文件因为没有加载 SCSS 插件而出现 `Unknown rule`。当前 `stylelint-order` 排序规则支持 `stylelint --fix`，`stylelint-config-recess-order` 则避免把现有代码强制改成字母排序；HTML 解析由 Vue/HTML override 处理，独立 `.scss` 文件使用本包提供的 `postcss-scss` parser 对象。
 
 ### UnoCSS 和 Tailwind 支持
 
@@ -169,7 +198,7 @@ export default {
 ```ts
 export default {
   extends: [
-    'stylelint-config-zzjtnb',
+    '@zzjtnb/stylelint-config',
   ],
 }
 ```
@@ -178,12 +207,13 @@ export default {
 
 ```ts
 import {
-  stylelintIgnoreFiles,
-} from 'stylelint-config-zzjtnb'
+  createStylelintIgnoreFiles,
+  stylelintDefaultIgnoreGlobs,
+} from '@zzjtnb/stylelint-config'
 
 export default {
   extends: [
-    'stylelint-config-zzjtnb',
+    '@zzjtnb/stylelint-config',
   ],
 
   // 执行参数可以放在 package scripts，也可以按调用方式放在配置里。
@@ -199,9 +229,21 @@ export default {
     'declaration-block-no-duplicate-properties': [true, { severity: 'warning' }],
   },
   ignoreFiles: [
-    ...stylelintIgnoreFiles,
-    'generated/**',
+    ...createStylelintIgnoreFiles({
+      globs: [...stylelintDefaultIgnoreGlobs, 'generated/**'],
+    }),
   ],
+}
+```
+
+在脚本工作目录不是项目根目录的场景：
+
+```js
+import { createStylelintIgnoreFiles } from '@zzjtnb/stylelint-config'
+
+export default {
+  extends: ['@zzjtnb/stylelint-config'],
+  ignoreFiles: createStylelintIgnoreFiles({ cwd: '/workspace/project' }),
 }
 ```
 
@@ -210,7 +252,7 @@ export default {
 ```ts
 export default {
   extends: [
-    'stylelint-config-zzjtnb',
+    '@zzjtnb/stylelint-config',
   ],
   rules: {
     'declaration-empty-line-before': 'always',
@@ -240,6 +282,12 @@ export default {
 - 本地同名 `rules` 会替换共享配置中的规则，不会与 `extends` 中的规则深度合并。
 - 如果需要本地 `ignoreFiles`，推荐导入 `stylelintIgnoreFiles` 并通过 `...stylelintIgnoreFiles` 追加，保持共享忽略列表清晰可见。
 - `allowEmptyInput` 在共享配置中默认开启；`fix` 和 `cache` 默认关闭，可以通过 `--fix --cache --cache-location node_modules/.cache/.stylelintcache` 这类脚本参数开启，也可以在更符合调用方式时通过本地配置开启。
+
+## 官方参考
+
+- [Stylelint 配置](https://stylelint.io/user-guide/configure/)
+- [Stylelint CLI](https://stylelint.io/user-guide/cli/)
+- [Stylelint 规则](https://stylelint.io/user-guide/rules/)
 
 ## 许可证
 

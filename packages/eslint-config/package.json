@@ -1,8 +1,8 @@
 {
-  "name": "eslint-config-zzjtnb",
+  "name": "@zzjtnb/eslint-config",
   "type": "module",
-  "version": "0.0.9",
-  "description": "Shareable ESLint 10 flat config built on top of @antfu/eslint-config for TypeScript, Vue, UnoCSS and HTML formatting workflows.",
+  "version": "1.0.1",
+  "description": "Shareable ESLint 10 flat config built on top of @antfu/eslint-config for TypeScript, Vue and pnpm workspaces.",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",
   "homepage": "https://github.com/zzjtnb/zzjtnb-lint-config#readme",
@@ -28,39 +28,42 @@
   ],
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "default": "./index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     }
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "files": [
     "README.md",
     "README.zh-CN.md",
-    "index.d.ts",
-    "index.js"
+    "dist"
   ],
   "engines": {
     "node": "^20.19.0 || ^22.13.0 || >=24"
   },
   "scripts": {
-    "build": "node --check index.js",
+    "build": "pnpm exec tsdown",
     "lint": "pnpm run lint:eslint",
     "lint:eslint": "eslint . --fix --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "version:patch": "pnpm version patch --no-git-tag-version --no-git-checks",
     "version:minor": "pnpm version minor --no-git-tag-version --no-git-checks",
     "version:major": "pnpm version major --no-git-tag-version --no-git-checks",
     "release:pack": "pnpm pack --dry-run",
     "release:publish": "pnpm publish --access public --tag latest --registry https://registry.npmjs.org/ --no-git-checks",
-    "release:verify": "pnpm view eslint-config-zzjtnb version --registry https://registry.npmjs.org/"
+    "release:verify": "pnpm view @zzjtnb/eslint-config version --registry https://registry.npmjs.org/"
   },
   "peerDependencies": {
     "eslint": "^10.4.0"
   },
   "dependencies": {
-    "@antfu/eslint-config": "^9.0.0",
-    "@unocss/eslint-plugin": "^66.6.8",
-    "eslint-plugin-format": "^2.0.1"
+    "@antfu/eslint-config": "catalog:"
+  },
+  "devDependencies": {
+    "eslint": "catalog:",
+    "typescript": "catalog:"
   }
 }

@@ -159,22 +159,22 @@
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*",
     "dockerfile": ".dockerignore, docker-compose.*, dockerfile*",
     "shims.d.ts": "*.d.ts",
-    "vite.config.*": "*.env, .babelrc*, .env.*, babel.config.*, env.d.ts, jsconfig.*,  playwright.config.*, postcss.config.*, tsconfig.*, vitest.config.*, webpack.config.* ",
-    "vue.config.*": "*.env, .babelrc*, .env.*, babel.config.*, env.d.ts, jsconfig.*,  playwright.config.*, postcss.config.*, tailwind.config.*, tsconfig.*, vitest.config.*, webpack.config.*",
-    "nuxt.config.*": "*.env, .babelrc*, .env.*, env.d.ts, jsconfig.*, playwright.config.*, postcss.config.*, tailwind.config.*, tsconfig.*, vitest.config.*",
+    "vite.config.*": "*.env, .babelrc*, .env.*, babel.config.*, env.d.ts, jsconfig.*,  playwright.config.*, postcss.config.*, vitest.config.*, webpack.config.* ",
+    "vue.config.*": "*.env, .babelrc*, .env.*, babel.config.*, env.d.ts, jsconfig.*,  playwright.config.*, postcss.config.*, tailwind.config.*, vitest.config.*, webpack.config.*",
+    "nuxt.config.*": "*.env, .babelrc*, .env.*, env.d.ts, jsconfig.*, playwright.config.*, postcss.config.*, tailwind.config.*, vitest.config.*",
     "package.json": ".browserslist*, .commitlint*, .cz-config.js, .editorconfig, .eslint*, .github*, .nodemon*, .npm*, .nvmrc, .pm2*, .pnpm*, .prettier*, .vscode*, .yamllint*, .yarnrc*, gulp*, lint-staged*,package-lock.json, pm2.*, pnpm*, prettier*, stylelint*, eslint*, typedoc*, webpack*, workspace.json, yarn*,package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .editorconfig, .markdownlint-cli2.*, components.json",
     "pubspec.yaml": ".metadata, .packages, all_lint_rules.yaml, analysis_options.yaml, build.yaml, pubspec.lock, pubspec_overrides.yaml",
     "README.md": "README.zh-CN.md, CHANGELOG.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md",
     "LICENSE": "LICENSE.*",
-    "eslint.config.ts": ".eslint*, eslint.config.cjs, eslint.config.js, eslint.config.mjs, tsconfig.eslint.json",
-    "stylelint.config.ts": ".stylelint*, stylelint.config.cjs, stylelint.config.js, stylelint.config.mjs",
+    "eslint.config.js": ".eslint*, eslint.config.cjs, eslint.config.mjs, eslint.config.ts",
+    "stylelint.config.js": ".stylelint*, stylelint.config.cjs, stylelint.config.mjs, stylelint.config.ts",
     "tsconfig.json": "tsconfig.*.json, jsconfig.json, jsconfig.*.json",
     "pnpm-workspace.yaml": "pnpm-lock.yaml, pnpmfile.*, .npmrc",
     "turbo.json": "turbo.*",
     "unocss.config.js": "uno.config.*, unocss.config.cjs, unocss.config.mjs, unocss.config.ts, uno.css, uno.generated.*"
   },
   "cSpell.words": [
+    "lucide",
     "zzjtnb"
   ]
-
 }

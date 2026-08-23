@@ -7,7 +7,9 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@zzjtnb/eslint-config": ["./packages/eslint-config/src/index.ts"],
+      "@zzjtnb/stylelint-config": ["./packages/stylelint-config/src/index.ts"]
     },
 
     "resolveJsonModule": true,
@@ -40,10 +42,8 @@
     "vite.config.ts",
     "eslint.config.ts",
     "uno.config.ts",
-    "packages/eslint-config/index.js",
-    "packages/eslint-config/index.d.ts",
-    "packages/stylelint-config/index.js",
-    "packages/stylelint-config/index.d.ts",
+    "packages/eslint-config/src/**/*.ts",
+    "packages/stylelint-config/src/**/*.ts",
     "tests/integration/load-configs.js"
   ],
   "exclude": ["node_modules", "dist", "coverage"]

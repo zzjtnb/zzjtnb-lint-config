@@ -6,13 +6,13 @@
     "lint": "pnpm run lint:eslint && pnpm run lint:stylelint",
     "lint:eslint": "eslint . --fix --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
     "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --fix --cache --cache-location node_modules/.cache/.stylelintcache",
-    "check-types": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "eslint": "^10.4.0",
-    "eslint-config-zzjtnb": "workspace:*",
-    "stylelint": "^17.12.0",
-    "stylelint-config-zzjtnb": "workspace:*",
-    "typescript": "6.0.3"
+    "eslint": "catalog:",
+    "@zzjtnb/eslint-config": "workspace:*",
+    "stylelint": "catalog:",
+    "@zzjtnb/stylelint-config": "workspace:*",
+    "typescript": "catalog:"
   }
 }

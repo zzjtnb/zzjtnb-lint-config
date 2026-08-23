@@ -2,7 +2,7 @@
   "name": "zzjtnb-lint-config",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@11.1.3",
+  "packageManager": "pnpm@11.21.0",
   "engines": {
     "node": ">=22.13",
     "pnpm": ">=11"
@@ -21,28 +21,30 @@
     "lint": "turbo run //#lint:eslint //#lint:stylelint //#lint:markdownlint",
     "lint:tui": "turbo run //#lint:eslint //#lint:stylelint //#lint:markdownlint --ui=tui",
     "test": "turbo run test",
-    "check-types": "turbo run check-types",
+    "release": "node scripts/release.js",
+    "typecheck": "turbo run typecheck",
     "clean": "rm -rf node_modules packages/*/dist packages/*/node_modules",
-    "version:patch": "turbo run version:patch --filter=stylelint-config-zzjtnb --filter=eslint-config-zzjtnb && pnpm install",
-    "version:minor": "turbo run version:minor --filter=stylelint-config-zzjtnb --filter=eslint-config-zzjtnb && pnpm install",
-    "version:major": "turbo run version:major --filter=stylelint-config-zzjtnb --filter=eslint-config-zzjtnb && pnpm install",
-    "release:check": "turbo run build check-types test lint:eslint lint:stylelint lint:markdownlint //#lint:eslint //#lint:stylelint //#lint:markdownlint",
-    "release:pack": "turbo run release:pack --filter=stylelint-config-zzjtnb --filter=eslint-config-zzjtnb",
+    "version:patch": "turbo run version:patch --filter=@zzjtnb/stylelint-config --filter=@zzjtnb/eslint-config && pnpm install",
+    "version:minor": "turbo run version:minor --filter=@zzjtnb/stylelint-config --filter=@zzjtnb/eslint-config && pnpm install",
+    "version:major": "turbo run version:major --filter=@zzjtnb/stylelint-config --filter=@zzjtnb/eslint-config && pnpm install",
+    "release:check": "turbo run build typecheck test lint:eslint lint:stylelint lint:markdownlint //#lint:eslint //#lint:stylelint //#lint:markdownlint",
+    "release:pack": "turbo run release:pack --filter=@zzjtnb/stylelint-config --filter=@zzjtnb/eslint-config",
     "release:whoami": "pnpm whoami --registry https://registry.npmjs.org/",
-    "release:publish": "turbo run release:publish --filter=stylelint-config-zzjtnb --filter=eslint-config-zzjtnb --concurrency=1",
-    "release:verify": "turbo run release:verify --filter=stylelint-config-zzjtnb --filter=eslint-config-zzjtnb"
+    "release:publish": "turbo run release:publish --filter=@zzjtnb/stylelint-config --filter=@zzjtnb/eslint-config --concurrency=1",
+    "release:verify": "turbo run release:verify --filter=@zzjtnb/stylelint-config --filter=@zzjtnb/eslint-config"
   },
   "devDependencies": {
-    "@iconify/utils": "^3.1.3",
-    "@types/node": "^25.9.1",
-    "@unocss/preset-wind4": "^66.7.0",
-    "eslint": "^10.4.0",
-    "eslint-config-zzjtnb": "workspace:*",
-    "markdownlint-cli2": "^0.22.1",
-    "stylelint": "^17.12.0",
-    "stylelint-config-zzjtnb": "workspace:*",
-    "turbo": "^2.9.14",
-    "typescript": "6.0.3",
-    "unocss": "^66.7.0"
+    "@iconify/utils": "catalog:",
+    "@types/node": "catalog:",
+    "@unocss/preset-wind4": "catalog:",
+    "eslint": "catalog:",
+    "@zzjtnb/eslint-config": "workspace:*",
+    "markdownlint-cli2": "catalog:",
+    "stylelint": "catalog:",
+    "@zzjtnb/stylelint-config": "workspace:*",
+    "tsdown": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:",
+    "unocss": "catalog:"
   }
 }

@@ -1,1 +1,1 @@
-export const fixture = 'eslint-config-zzjtnb'
+export const fixture = '@zzjtnb/eslint-config'

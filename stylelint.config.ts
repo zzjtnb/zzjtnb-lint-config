@@ -1,9 +1,9 @@
 import type { Config } from 'stylelint'
-import { stylelintIgnoreFiles } from 'stylelint-config-zzjtnb'
+import { stylelintIgnoreFiles } from '@zzjtnb/stylelint-config'
 
 export default {
   extends: [
-    'stylelint-config-zzjtnb',
+    '@zzjtnb/stylelint-config',
   ],
   ignoreFiles: [
     ...stylelintIgnoreFiles,

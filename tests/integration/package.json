@@ -6,15 +6,15 @@
     "lint": "pnpm run lint:eslint",
     "lint:eslint": "eslint . --fix --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
     "test": "node load-configs.js",
-    "check-types": "tsc -p ../../tsconfig.json"
+    "typecheck": "tsc -p ../../tsconfig.json"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
-    "eslint": "^10.4.0",
-    "eslint-config-zzjtnb": "workspace:*",
-    "markdownlint-cli2": "^0.22.1",
-    "stylelint": "^17.12.0",
-    "stylelint-config-zzjtnb": "workspace:*",
-    "typescript": "6.0.3"
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "@zzjtnb/eslint-config": "workspace:*",
+    "markdownlint-cli2": "catalog:",
+    "stylelint": "catalog:",
+    "@zzjtnb/stylelint-config": "workspace:*",
+    "typescript": "catalog:"
   }
 }

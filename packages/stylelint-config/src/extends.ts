@@ -1,0 +1,33 @@
+import { fileURLToPath } from 'node:url'
+
+/**
+ * 从共享包自身解析基础配置，而不是让 Stylelint 从消费项目根目录解析裸包名。
+ *
+ * Stylelint 的 `extends` 官方类型仍然是文件定位字符串；共享配置如果直接写
+ * `stylelint-config-standard`，pnpm 的严格依赖边界会要求每个消费项目重复安装这些
+ * 实现包。`import.meta.resolve` 会沿当前共享包的依赖边界解析，转换成绝对路径后，
+ * Stylelint 就能稳定加载共享包自己声明的依赖。
+ *
+ * @param {string} locator
+ */
+function resolveStylelintConfig(locator: string): string {
+  return fileURLToPath(import.meta.resolve(locator))
+}
+
+/** 官方 CSS 基础规则和当前项目的属性顺序规则。 */
+export const stylelintExtends = [
+  resolveStylelintConfig('stylelint-config-standard'),
+  resolveStylelintConfig('stylelint-config-recess-order'),
+]
+
+/** SCSS 文件额外使用的官方标准规则和 Vue SFC 兼容规则。 */
+export const stylelintScssExtends = [
+  // 官方 SCSS preset 已包含 standard CSS 规则、SCSS parser 和 stylelint-scss 插件。
+  resolveStylelintConfig('stylelint-config-standard-scss'),
+]
+
+/** Vue SFC 使用的官方 Vue + SCSS 容器规则。 */
+export const stylelintVueExtends = [
+  // `/scss` 变体同时处理 Vue 容器和其中可能出现的 SCSS style block。
+  resolveStylelintConfig('stylelint-config-recommended-vue/scss'),
+]

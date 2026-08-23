@@ -6,8 +6,8 @@
 
 | 包名 | 说明 |
 | --- | --- |
-| [`eslint-config-zzjtnb`](./packages/eslint-config/README.md) | 基于 `@antfu/eslint-config` 的 ESLint 10 Flat Config 共享配置。 |
-| [`stylelint-config-zzjtnb`](./packages/stylelint-config/README.md) | 面向 CSS、SCSS、Vue SFC、UnoCSS、Tailwind 风格工作流和 uni-app 的 Stylelint 17 共享配置。 |
+| [`@zzjtnb/eslint-config`](./packages/eslint-config/README.md) | 基于 `@antfu/eslint-config` 的 ESLint 10 Flat Config 共享配置。 |
+| [`@zzjtnb/stylelint-config`](./packages/stylelint-config/README.md) | 面向 CSS、SCSS、Vue SFC、UnoCSS、Tailwind 风格工作流和 uni-app 的 Stylelint 17 共享配置。 |
 
 ## 工作区结构
 
@@ -16,8 +16,8 @@ apps/
   demo/                 # 配置消费示例
   docs/                 # 仓库维护文档
 packages/
-  eslint-config/        # eslint-config-zzjtnb 发布包
-  stylelint-config/     # stylelint-config-zzjtnb 发布包
+  eslint-config/        # @zzjtnb/eslint-config 发布包
+  stylelint-config/     # @zzjtnb/stylelint-config 发布包
 tests/
   integration/          # 配置加载集成测试
 ```
@@ -42,7 +42,7 @@ pnpm lint
 pnpm lint:markdownlint
 
 # 执行类型检查。
-pnpm check-types
+pnpm typecheck
 
 # 执行构建检查。
 pnpm build
@@ -52,6 +52,9 @@ pnpm test
 
 # 执行发布前检查。
 pnpm release:check
+
+# 交互式发布：登录检查、版本检查、完整校验、打包、逐包发布和结果核验。
+pnpm release
 
 # 预览发布包内容。
 pnpm release:pack

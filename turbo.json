@@ -1,19 +1,27 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": [
+    "pnpm-lock.yaml",
+    "**/.env.*local",
+    "**/tsconfig*.json",
+    "**/tsdown.config.ts",
+    "**/eslint.config.ts",
+    "**/stylelint.config.ts"
+  ],
+  "globalEnv": ["NODE_ENV"],
   // "ui": "tui",
   "tasks": {
-    "transit": {
-      "dependsOn": ["^transit"]
-    },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": []
+      "outputs": ["dist/**"]
     },
     "//#lint:eslint": {
+      "dependsOn": ["^build"],
       "cache": false,
       "outputs": []
     },
     "//#lint:stylelint": {
+      "dependsOn": ["^build"],
       "cache": false,
       "outputs": []
     },
@@ -22,22 +30,20 @@
       "outputs": []
     },
     "lint": {
-      "dependsOn": ["transit"],
       "cache": false,
       "outputs": []
     },
     "lint:eslint": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["build", "^build"],
       "cache": false,
       "outputs": []
     },
     "lint:stylelint": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["build"],
       "cache": false,
       "outputs": []
     },
     "lint:markdownlint": {
-      "dependsOn": ["transit"],
       "cache": false,
       "outputs": []
     },
@@ -45,8 +51,8 @@
       "dependsOn": ["^build"],
       "outputs": []
     },
-    "check-types": {
-      "dependsOn": ["transit"],
+    "typecheck": {
+      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.json"],
       "outputs": []
     },

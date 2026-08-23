@@ -1,135 +1,158 @@
-# eslint-config-zzjtnb
+# @zzjtnb/eslint-config
 
 <p align="center">
-  <a href="https://npmjs.com/package/eslint-config-zzjtnb"><img src="https://img.shields.io/npm/v/eslint-config-zzjtnb?color=a1b858&label=npm" alt="npm version"></a>
-  <a href="https://npmjs.com/package/eslint-config-zzjtnb"><img src="https://img.shields.io/npm/dm/eslint-config-zzjtnb?color=50a8d8" alt="npm downloads"></a>
+  <a href="https://npmjs.com/package/@zzjtnb/eslint-config"><img src="https://img.shields.io/npm/v/%40zzjtnb%2Feslint-config?color=a1b858&label=npm" alt="npm version"></a>
+  <a href="https://npmjs.com/package/@zzjtnb/eslint-config"><img src="https://img.shields.io/npm/dm/%40zzjtnb%2Feslint-config?color=50a8d8" alt="npm downloads"></a>
   <a href="https://github.com/zzjtnb/zzjtnb-lint-config"><img src="https://img.shields.io/github/stars/zzjtnb/zzjtnb-lint-config?style=social" alt="GitHub stars"></a>
 </p>
 
-<p align="center">
-  <strong><a href="./README.md">English</a> | 简体中文</strong>
-</p>
+<p align="center"><strong>基于 @antfu/eslint-config 的 TypeScript / Vue / pnpm ESLint Flat Config</strong></p>
 
-<p align="center">
-  <strong>面向 TypeScript、Vue、UnoCSS 和格式化场景的现代 ESLint Flat Config</strong>
-</p>
+<p align="center"><strong>简体中文</strong> | <a href="./README.md">English</a></p>
 
-## 功能特点
+## 定位
 
-- 基于 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 构建
-- ESM 优先，使用 ESLint Flat Config
-- 默认启用 TypeScript 支持
-- 默认启用 Vue 支持
-- 默认启用 UnoCSS 排序和 blocklist 支持
-- 默认通过 `eslint-plugin-format` 启用 HTML formatter；CSS / SCSS 交给 `stylelint-config-zzjtnb`
-- 内置常见生成目录和本地目录忽略规则
-- 提供配置选项和默认值的类型声明导出
-- 默认对过期或未使用的 ESLint 行内配置注释给出 warning
-- 提供 base、Vue、UnoCSS 等常用预设函数
+本包不是另一套 ESLint 生态，而是对 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 的薄封装：
+
+- parser、插件、推荐规则和排序规则由 antfu 负责；
+- 本包只提供组织级默认值、少量组织约定和可复用的异步配置工厂；
+- 不直接安装 `eslint-plugin-jsonc`、`eslint-plugin-n`、`eslint-plugin-pnpm`、`eslint-plugin-vue` 或 `yaml-eslint-parser`；
+- 不删除或覆盖 antfu 已经提供的排序配置；
+- antfu 没有覆盖的组织约定才由本包补充，例如 cspell 词表数组排序。
 
 ## 环境要求
 
 | 包 | 版本 |
 | --- | --- |
-| Node.js | `^20.19.0 || ^22.13.0 || >=24` |
+| Node.js | `^20.19.0 \|\| ^22.13.0 \|\| >=24` |
 | ESLint | `^10.4.0` |
 
-本包仅支持 ESM。默认推荐使用 `eslint.config.ts` 获得类型化配置；如果项目无法加载 TypeScript 配置文件，已设置 `"type": "module"` 时可使用 `eslint.config.js`，否则使用 `eslint.config.mjs`。
+本包为 ESM-only，推荐使用 `eslint.config.ts`；无法加载 TypeScript 配置时，ESM 项目使用 `eslint.config.js`，其它项目使用 `eslint.config.mjs`。
 
-## 安装
+## 安装与基本用法
 
 ```bash
-pnpm add -D eslint eslint-config-zzjtnb
+pnpm add -D eslint @zzjtnb/eslint-config
 ```
 
-本配置已内置依赖它启用的集成：
-
-- `@antfu/eslint-config`
-- `eslint-plugin-format`
-- `@unocss/eslint-plugin`
-
-## 基础用法
-
-创建 `eslint.config.ts`：
-
 ```ts
-import zzjtnb from 'eslint-config-zzjtnb'
+// eslint.config.ts
+import { defineConfig } from '@zzjtnb/eslint-config'
 
-export default zzjtnb()
+export default defineConfig()
 ```
 
-## TypeScript 配置体验
+默认配置启用 TypeScript、Vue、JSON / JSONC、YAML、TOML、Node、pnpm 和 antfu 的排序规则。CSS / SCSS 不由 ESLint 处理，请使用 `@zzjtnb/stylelint-config`；UnoCSS 和 Markdown lint 默认保持可选。
 
-本包也导出配置选项类型，便于获得更完整的编辑器提示：
+## `stylistic` 到底有哪些选项
+
+`stylistic` **不是只有 `semi` 一个选项**，它支持两种形态：
 
 ```ts
-import type { EslintConfigOptions } from 'eslint-config-zzjtnb'
-import zzjtnb from 'eslint-config-zzjtnb'
+// 关闭全部 antfu stylistic 格式规则。
+export default defineConfig({ stylistic: false })
 
-const options = {
-  ignores: ['generated/**'],
-} satisfies EslintConfigOptions
+// 开启 stylistic，并只把分号改为必需；其它字段继续使用 antfu 默认值。
+export default defineConfig({ stylistic: { semi: true } })
 
-export default zzjtnb(options)
+// 显式开启上游默认格式规则。
+export default defineConfig({ stylistic: true })
 ```
 
-## 预设
+当前 `@antfu/eslint-config` 的 `OptionsConfig['stylistic']` 对象支持以下字段：
+
+| 字段 | 类型 | 作用 | 上游默认值 |
+| --- | --- | --- | --- |
+| `indent` | `2`、`4`、`'tab'` 等上游支持的缩进值 | 控制缩进级别和制表符策略 | `2` |
+| `quotes` | `'single'`、`'double'`、`'backtick'` | 控制字符串引号风格 | `'single'` |
+| `jsx` | `boolean` | 是否对 JSX 启用 stylistic 规则 | `true` |
+| `semi` | `boolean` | 是否要求语句末尾分号 | `false` |
+| `braceStyle` | `'1tbs'`、`'stroustrup'`、`'allman'` | 控制大括号换行风格 | `'stroustrup'` |
+| `experimental` | `boolean` | 是否启用上游实验性 stylistic 规则 | `false` |
+
+这些字段是 **antfu 的上游选项**，不是本包自行设计的字段。当前版本的准确类型会通过本包导出的 `ESLintStylisticOptions` 提供：
 
 ```ts
-import zzjtnb, { base, uno, vue } from 'eslint-config-zzjtnb'
+import type { ESLintStylisticOptions } from '@zzjtnb/eslint-config'
 
-// 默认完整配置：TypeScript + Vue + UnoCSS + HTML formatter
-export default zzjtnb()
-
-// 基础 JavaScript / TypeScript 配置，不启用 Vue 和 UnoCSS
-export const baseConfig = base()
-
-// Vue 项目配置：显式启用 Vue，UnoCSS 仍按默认启用
-export const vueConfig = vue()
-
-// UnoCSS 项目配置：显式启用 UnoCSS，Vue 仍按默认启用
-export const unoConfig = uno()
+const styleOptions = {
+  quotes: 'single',
+  semi: false,
+} satisfies ESLintStylisticOptions
 ```
 
-## 配置选项
+查看来源：
 
-默认导出函数兼容 `@antfu/eslint-config` 第一参数选项，并常用以下字段：
+- antfu 用户配置说明：[Customization](https://github.com/antfu/eslint-config#customization)
+- antfu 的 stylistic 工厂：[src/configs/stylistic.ts](https://github.com/antfu/eslint-config/blob/main/src/configs/stylistic.ts)
+- ESLint Stylistic 官方文档：[eslint.style](https://eslint.style/)
+
+`stylistic: false` 和 `stylistic: { semi: true }` 不是等价写法：前者关闭整组格式规则，后者开启整组格式规则并覆盖一个字段。
+
+## 公共导出与规则归属
+
+本包的公共 API 分为三类：
+
+| 导出 | 用途 |
+| --- | --- |
+| 命名导出 `defineConfig()` | 创建完整 ESLint Flat Config |
+| `base()`、`vue()`、`uno()` | 创建常用项目预设 |
+| `javascript()`、`ignores()`、`jsonc()`、`node()`、`perfectionist()`、`pnpm()`、`typescript()`、`yaml()` | 按需组合单项配置工厂 |
+| `ESLintConfigOptions`、`ESLintStylisticOptions` | 为消费方提供 TypeScript 类型提示 |
+
+这些工厂返回 `Promise<Linter.Config[]>`，可以直接作为 `eslint.config.ts` 的默认导出。parser、插件、推荐规则和排序规则由 `@antfu/eslint-config` 负责；本包只补充组织级默认值和上游没有覆盖的少量约定。
+
+### 排序规则的唯一来源
+
+以下规则不在本包重复实现：
+
+- imports / exports 和 named imports / named exports 排序；
+- package.json、tsconfig.json 和 pnpm workspace YAML 排序；
+- perfectionist 的对象、接口和模块排序。
+
+它们统一跟随 antfu。只有 antfu 没有对应规则时，本包才补充组织约定，例如 cspell 的 `words` 和 `ignorePaths` 数组排序。
+
+### 可选集成和依赖
+
+本包只直接依赖 `@antfu/eslint-config`，不会把上游已经管理的 parser 或 `eslint-plugin-*` 再安装一遍。UnoCSS 和 formatter 遵循 antfu 的可选依赖方式：只有在消费方启用时，才按上游文档安装对应依赖。
+
+本包提供 CSS / SCSS 的 antfu `formatters` 能力，但默认关闭，因为项目使用 `@zzjtnb/stylelint-config`。Markdown lint 也默认关闭，因为项目使用 `markdownlint-cli2`。
+
+## 选项
+
+本包接受 `@antfu/eslint-config` 的选项，并额外增加以下字段：
+
+| 字段 | 默认值 | 作用 |
+| --- | --- | --- |
+| `defaultIgnores` | 本包默认忽略项 | 传数组替换共享忽略项，传 `false` 完全关闭本包默认忽略项 |
+| `pnpmWorkspace` | `true` | 是否启用 `pnpm-workspace.yaml` 的 parser、规则和排序 |
+| `rules` | `{}` | 追加或覆盖本包的通用规则 |
+| `ignores` | `[]` | 在选定默认忽略项后追加消费方路径 |
+| `linterOptions` | 两项 warning | 控制未使用 ESLint 注释的报告级别 |
 
 ```ts
-import zzjtnb from 'eslint-config-zzjtnb'
+import { defineConfig } from '@zzjtnb/eslint-config'
 
-export default zzjtnb({
-  // 默认已启用
-  typescript: true,
-  vue: true,
-  unocss: true,
-  jsonc: true,
-  yaml: true,
-  toml: true,
-
-  // 如果项目是库包，可以启用更偏库包的规则
+export default defineConfig({
+  // 上游选项：库项目启用更严格的 library 规则。
   type: 'lib',
 
-  // 扩展默认忽略列表
+  // 上游选项：关闭格式规则，由其它 formatter 完全负责格式。
+  stylistic: false,
+
+  // 上游选项：开启分号，其它 stylistic 字段保持上游默认值。
+  // stylistic: { semi: true },
+
+  // 本包选项：追加生成目录忽略项。
   ignores: ['generated/**'],
 
-  // 覆盖代码风格偏好
-  stylistic: {
-    indent: 2,
-    quotes: 'single',
-  },
+  // 本包选项：不检查 pnpm-workspace.yaml。
+  pnpmWorkspace: false,
 
-  // 扩展格式化器设置，或传 false 关闭 formatter
-  formatters: {
-    html: true,
-    // 如果 CSS / SCSS 不交给 Stylelint，再开启这一项
-    // css: true,
-  },
+  // 本包选项：消费方覆盖通用规则。
+  rules: { 'no-console': 'error' },
 
-  // 默认关闭 Markdown lint，交给 markdownlint-cli2
-  markdown: false,
-
-  // 扩展 ESLint Flat Config linter 级选项
+  // Flat Config 选项：warning 不会直接让 ESLint 失败。
   linterOptions: {
     reportUnusedDisableDirectives: 'warn',
     reportUnusedInlineConfigs: 'warn',
@@ -137,65 +160,80 @@ export default zzjtnb({
 })
 ```
 
-你也可以在选项对象后继续传入 ESLint Flat Config 对象：
+完整的上游选项以 [`OptionsConfig`](https://github.com/antfu/eslint-config/blob/main/src/types.ts) 和 antfu README 为准；不要把上游已有字段再次写成本包自己的配置。
+
+## 预设函数
 
 ```ts
-import zzjtnb from 'eslint-config-zzjtnb'
+import { base, defineConfig, uno, vue } from '@zzjtnb/eslint-config'
 
-export default zzjtnb(
-  {
-    vue: false,
-    unocss: false,
-  },
-  {
-    rules: {
-      'no-console': 'warn',
-    },
-  },
-)
+// 默认完整配置。
+export default defineConfig()
+
+// JavaScript / TypeScript 配置，关闭 Vue 和 UnoCSS。
+export const baseConfig = base()
+
+// 显式启用 Vue 的配置。
+export const vueConfig = vue()
+
+// 显式启用 UnoCSS；消费方需要自行安装上游要求的可选依赖。
+export const unoConfig = uno()
 ```
 
 ## 默认行为
 
-### 默认启用的集成
+| 集成 | 默认状态 | 责任来源 |
+| --- | --- | --- |
+| TypeScript | 启用 | antfu `typescript()` |
+| Vue | 启用 | antfu `vue()` + 本包 Vue 约定 |
+| Node | 启用 | antfu `node()` |
+| JSON / JSONC | 启用 | antfu `jsonc()` + cspell 补充规则 |
+| YAML | 启用 | antfu `yaml()` |
+| TOML | 启用 | antfu 主工厂 |
+| pnpm | 启用 | antfu `pnpm()` |
+| perfectionist | 启用 | antfu 主工厂 |
+| UnoCSS | 关闭 | 上游可选集成 |
+| Markdown | 关闭 | 交给 markdownlint-cli2 |
+| 外部 formatter | 关闭 | CSS / SCSS 默认交给 Stylelint，antfu fallback 可选 |
 
-| 集成 | 默认状态 |
-| --- | --- |
-| TypeScript | 启用 |
-| Vue | 启用 |
-| UnoCSS | 启用 |
-| JSON / JSONC | 启用 |
-| YAML | 启用 |
-| TOML | 启用 |
-| Markdown lint | 关闭 |
-| CSS formatter | 默认关闭，交给 Stylelint |
-| HTML formatter | 启用 |
+### CSS / SCSS 与 Markdown 的备用能力
 
-### pnpm workspace 设置
+如果消费方没有使用项目的 Stylelint 或 Markdownlint 配置，可以显式启用 antfu 自带的能力：
 
-针对 `pnpm-workspace.yaml`，本配置会覆盖上游 `pnpm/yaml-enforce-settings` 的默认值，并禁止 `shellEmulator` 和 `trustPolicy`。这两个字段属于本机或安装策略偏好，不应在执行 `eslint --fix` 时被自动写回。
+```ts
+export default defineConfig({
+  // 需要安装 antfu 的可选 peer：eslint-plugin-format。
+  formatters: { css: true },
+  // 启用 antfu 的 Markdown 规则，替代 markdownlint-cli2。
+  markdown: true,
+})
+```
+
+如果还需要格式化 Markdown，可以额外使用 `formatters: { markdown: 'prettier' }`。可选 formatter 依赖和支持的值以 antfu 官方文档为准。
+
+### pnpm workspace
+
+`pnpm()` 调用 antfu 的公开工厂并传入：
+
+- `json: true`：检查 package.json 中的 pnpm catalog / workspace 配置；
+- `yaml: true`：解析 pnpm-workspace.yaml；
+- `sort: true`：默认启用 workspace YAML 排序。
+
+设置 `pnpmWorkspace: false` 只关闭 workspace YAML 这一段，仍保留 package.json 的 pnpm 检查。默认会关闭上游的 `pnpm/yaml-enforce-settings`，因此不会自动写入 `shellEmulator: true` 或 `trustPolicy: no-downgrade`；catalog 校验和 YAML 排序仍然保留。只有明确需要时，才使用 `pnpm({ enforceSettings: true })` 开启这项行为。
 
 ### 默认忽略项
 
-配置会忽略常见生成目录、本地目录或特殊文档：
+本包额外忽略构建产物、测试夹具、原生工程和本地 Agent 目录，例如：
 
-- `node_modules`
-- `dist`
-- `build`
-- `.nuxt`
-- `.turbo`
-- `.vercel`
-- `.wrangler`
-- `coverage`
-- `backup`
-- `releases`
-- `src-tauri`
-- `stats.html`
-- `twa/project`
+- `dist-*`、`*-dist`、`.output`、`output`；
+- `.github`、`.agent`、`.codex`、`.cursor`、`.claude`、`.agents`；
+- `fixtures`、快照、VitePress 缓存；
+- `releases`、`src-tauri`、`twa/project`；
+- Shell 脚本和字体资源。
 
-## VS Code 推荐设置
+传入 `defaultIgnores: false` 可关闭这组本包默认项；传入数组可替换它们。`ignores` 会在最终结果中继续追加。
 
-推荐 `.vscode/settings.json`：
+## VS Code
 
 ```json
 {
@@ -205,20 +243,11 @@ export default zzjtnb(
     "source.fixAll.eslint": "always",
     "source.organizeImports": "never"
   },
-  "eslint.validate": [
-    "javascript",
-    "typescript",
-    "vue",
-    "html",
-    "json",
-    "jsonc",
-    "yaml",
-    "toml"
-  ]
+  "eslint.validate": ["javascript", "typescript", "vue", "json", "jsonc", "yaml", "toml"]
 }
 ```
 
-## 常用脚本
+## 检查命令
 
 ```json
 {
@@ -228,15 +257,7 @@ export default zzjtnb(
 }
 ```
 
-`--fix`、`--cache`、`--cache-location` 是 ESLint CLI / Node API 执行选项，不是 Flat Config 字段；共享配置里不能像 Stylelint 那样内置这些执行开关，所以推荐 `lint` 脚本默认就带 `--fix`。
-
-如果希望 CI 连 warning 也不允许，可以在脚本后追加 `--max-warnings 0`。它没有放进默认示例，是因为业务项目可能希望逐步推进零 warning 约束。
-
-## 注意事项
-
-- 本配置面向现代 ESM 项目。
-- 默认遵循 `@antfu/eslint-config` 约定：单引号、无分号、排序 imports、Flat Config 组合方式。
-- 如果某个包不需要 Vue 或 UnoCSS，请使用 `base()`。
+`--fix`、`--cache` 和 `--cache-location` 是 ESLint CLI 参数，不属于 Flat Config；共享配置不会偷偷修改消费方的执行方式。
 
 ## 许可证
 
