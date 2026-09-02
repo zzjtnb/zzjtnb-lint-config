@@ -45,7 +45,7 @@ pnpm add -D stylelint @zzjtnb/stylelint-config
 
 本配置会内置 PostCSS，并包含以下共享预设和语法解析器：
 
-- `stylelint-config-standard-scss`（官方 SCSS 预设，内部包含 recommended SCSS 规则和插件）
+- `stylelint-config-recommended-scss`
 - `stylelint-config-recommended-vue`
 - `stylelint-config-standard`
 - `stylelint-config-recess-order`
@@ -125,9 +125,9 @@ export default {
 该配置按以下范围和顺序应用预设：
 
 1. `stylelint-config-standard` 提供通用 CSS 风格规则。
-2. `stylelint-config-recess-order` 保留项目现有属性顺序，底层由 `stylelint-order` 提供规则。
-3. `stylelint-config-standard-scss` 只应用于 `.scss` 文件。官方 SCSS 预设已经包含 recommended SCSS 规则和 `stylelint-scss`；由于 override 还要直接处理 `.scss` 输入，本包仍以 parser 对象形式提供 `postcss-scss`。
-4. `stylelint-config-recommended-vue/scss` 只应用于 `.vue` 文件。Vue preset 负责 Vue 容器及其中可能出现的 SCSS style block，本包的 `stylelintScssRules` 会在同一个 override 作用域追加。
+2. `stylelint-config-recess-order` 通过 `stylelint-order` 提供属性排序。
+3. `.scss` 文件使用 `stylelint-config-recommended-scss` 和 `stylelint-config-recommended-vue/scss`。
+4. `.vue` 文件使用 `stylelint-config-recommended-vue/scss`。Vue preset 负责 Vue 容器及其中可能出现的 SCSS style block，本包的 `stylelintScssRules` 会在同一个 override 作用域追加。
 
 范围很重要：通用 CSS 规则和属性排序全局生效，SCSS 和 Vue preset 只在对应的 override 中生效。这会避免普通 CSS 文件因为没有加载 SCSS 插件而出现 `Unknown rule`。当前 `stylelint-order` 排序规则支持 `stylelint --fix`，`stylelint-config-recess-order` 则避免把现有代码强制改成字母排序；HTML 解析由 Vue/HTML override 处理，独立 `.scss` 文件使用本包提供的 `postcss-scss` parser 对象。
 
@@ -194,15 +194,10 @@ export default {
 - `.vercel`
 - `.wrangler`
 - `coverage`
-- `backup`
-- `releases`
-- `src-tauri`
-- `stats.html`
-- `twa/project`
 
 如果你需要追加本地忽略项，可以导入共享片段并用展开语法显式组合。
 
-和 ESLint 不同，不要把文件 glob 替换成 `stylelint .`。Stylelint 配置文件没有类似 ESLint `files` 的白名单能力，因此 CLI 输入仍应限制在可能包含样式的文件上。如果脚本使用 `stylelint "**/*.{css,scss,vue,html}"` 这类全仓库宽 glob，请保留 `--config stylelint.config.ts`。这会强制 Stylelint 使用项目根配置，避免在共享忽略规则生效前，先加载备份目录或生成子项目里的 `.stylelintrc`。
+和 ESLint 不同，不要把文件 glob 替换成 `stylelint .`。Stylelint 配置文件没有类似 ESLint `files` 的白名单能力，因此 CLI 输入仍应限制在可能包含样式的文件上。如果脚本使用 `stylelint "**/*.{css,scss,vue,html}"` 这类全仓库宽 glob，请保留 `--config stylelint.config.ts`。这会强制 Stylelint 使用消费方根配置，避免在共享忽略规则生效前加载无关嵌套目录中的 `.stylelintrc`。
 
 ## 自定义配置
 

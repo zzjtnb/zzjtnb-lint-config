@@ -18,13 +18,13 @@ export * from './vue.js'
 export * from './yaml.js'
 
 /**
- * 组合不含具体仓库路径和内部别名的组织级规则。
+ * 组合本包对外导出的独立语言配置。
  *
  * 每个开关只控制本包对应的动态工厂；上游已经负责的配置仍由上游维护，
  * 这里不通过 composer.remove 或重复规则覆盖它们。
  */
 export async function organizationOverrides(options: {
-  /** 是否启用组织级 JSONC 补充规则。 */
+  /** 是否启用 JSONC 配置。 */
   jsonc?: boolean
   /** 是否启用上游 Node 工厂。 */
   node?: boolean
@@ -34,23 +34,23 @@ export async function organizationOverrides(options: {
   pnpmWorkspace?: boolean
   /** 是否启用 TypeScript 工厂；vue=true 时同时解析 Vue 中的 TS。 */
   typescript?: boolean
-  /** 是否启用组织级 Vue 模板规则。 */
+  /** 是否启用 Vue 配置。 */
   vue?: boolean
   /** 是否启用上游 YAML 工厂。 */
   yaml?: boolean
 } = {}): Promise<Linter.Config[]> {
   const configs = await Promise.all([
-    // cspell.json 只追加上游没有覆盖的数组排序规则。
+    // JSONC parser、推荐规则和标准 JSON 排序完全复用 antfu。
     options.jsonc === false ? [] : jsonc(),
-    // Node 工厂完全复用 antfu，不重复声明 eslint-plugin-n。
+    // Node 工厂由 antfu 注册 eslint-plugin-n，本包不重复声明插件。
     options.node === false ? [] : node(),
-    // pnpm 工厂负责 package.json；workspace 开关单独控制 YAML 文件。
+    // workspace 开关只控制 pnpm-workspace.yaml，不影响 package.json 检查。
     options.pnpm === false ? [] : pnpm({ workspace: options.pnpmWorkspace }),
-    // Vue 项目需要把 .vue 文件交给 TypeScript parser 解析。
+    // 启用 Vue 时，TypeScript parser 同时处理 SFC 中的 TypeScript。
     options.typescript === false ? [] : typescript({ vue: options.vue }),
-    // Vue 工厂只追加组织级模板规则，并把 TS parser 开关传给上游 Vue 工厂。
+    // Vue 工厂复用上游推荐配置，再追加本包公开的 Vue 约定。
     options.vue === false ? [] : vue({ typescript: options.typescript }),
-    // YAML parser 和基础规则完全由 antfu 提供。
+    // YAML parser、插件和推荐规则完全交给 antfu。
     options.yaml === false ? [] : yaml(),
   ])
   return configs.flat()

@@ -11,7 +11,7 @@ import { stylelintScssRules } from './rules.js'
  *
  * - HTML 使用 `postcss-html`，让 Stylelint 能定位内联样式；
  * - Vue 使用 `postcss-html`，并加载官方 Vue + SCSS 容器 preset；
- * - SCSS 使用 `postcss-scss`，并只在独立 SCSS 文件中加载 official standard-scss preset；
+ * - SCSS 使用 `postcss-scss` 和 recommended SCSS / Vue SCSS preset；
  * - 普通 CSS 不加载 SCSS parser，避免把 SCSS 语义扩散到所有文件。
  */
 export const stylelintOverrides: NonNullable<Config['overrides']> = [
@@ -28,7 +28,7 @@ export const stylelintOverrides: NonNullable<Config['overrides']> = [
   {
     files: ['*.scss', '**/*.scss'],
     customSyntax: postcssScss,
-    extends: stylelintScssExtends,
+    extends: [...stylelintScssExtends, ...stylelintVueExtends],
     rules: stylelintScssRules,
   },
 ]

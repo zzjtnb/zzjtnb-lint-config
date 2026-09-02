@@ -1,7 +1,7 @@
 {
   "name": "@zzjtnb/eslint-config",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Shareable ESLint 10 flat config built on top of @antfu/eslint-config for TypeScript, Vue and pnpm workspaces.",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",

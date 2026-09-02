@@ -24,5 +24,5 @@ export function createStylelintIgnoreFiles({
   return globs.map(glob => `${normalizedCwd}/${glob}`)
 }
 
-/** 当前消费方项目使用的默认忽略列表。 */
+/** 基于调用时工作目录生成的默认忽略列表。 */
 export const stylelintIgnoreFiles = createStylelintIgnoreFiles()

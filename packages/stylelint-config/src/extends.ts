@@ -14,16 +14,15 @@ function resolveStylelintConfig(locator: string): string {
   return fileURLToPath(import.meta.resolve(locator))
 }
 
-/** 官方 CSS 基础规则和当前项目的属性顺序规则。 */
+/** 官方 CSS 基础规则和 recess 属性顺序规则。 */
 export const stylelintExtends = [
   resolveStylelintConfig('stylelint-config-standard'),
   resolveStylelintConfig('stylelint-config-recess-order'),
 ]
 
-/** SCSS 文件额外使用的官方标准规则和 Vue SFC 兼容规则。 */
+/** SCSS 文件使用官方 recommended 规则。 */
 export const stylelintScssExtends = [
-  // 官方 SCSS preset 已包含 standard CSS 规则、SCSS parser 和 stylelint-scss 插件。
-  resolveStylelintConfig('stylelint-config-standard-scss'),
+  resolveStylelintConfig('stylelint-config-recommended-scss'),
 ]
 
 /** Vue SFC 使用的官方 Vue + SCSS 容器规则。 */

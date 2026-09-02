@@ -45,7 +45,7 @@ pnpm add -D stylelint @zzjtnb/stylelint-config
 
 The config bundles PostCSS and includes these shared presets and syntax parsers:
 
-- `stylelint-config-standard-scss` (the official SCSS preset; it includes the recommended SCSS rules and plugin)
+- `stylelint-config-recommended-scss`
 - `stylelint-config-recommended-vue`
 - `stylelint-config-standard`
 - `stylelint-config-recess-order`
@@ -123,11 +123,11 @@ The ownership is intentionally split:
 The config applies presets in this order:
 
 1. `stylelint-config-standard`
-2. `stylelint-config-recess-order` preserves the project's existing property order; its rules are powered by `stylelint-order`.
-3. `stylelint-config-standard-scss` only for `.scss` files. The official SCSS preset already includes the recommended SCSS rules and `stylelint-scss`; the package supplies `postcss-scss` as the parser object because the override must also support direct `.scss` input.
-4. `stylelint-config-recommended-vue/scss` only for `.vue` files. The Vue preset handles the Vue container and its possible SCSS style block; the package's `stylelintScssRules` are appended in the same override scope.
+2. `stylelint-config-recess-order`, powered by `stylelint-order`, provides property ordering.
+3. `stylelint-config-recommended-scss` and `stylelint-config-recommended-vue/scss` for `.scss` files.
+4. `stylelint-config-recommended-vue/scss` for `.vue` files. The Vue preset handles the Vue container and its possible SCSS style block; the package's `stylelintScssRules` are appended in the same override scope.
 
-The scope matters: standard CSS rules and property ordering apply globally, while SCSS and Vue presets are isolated to their matching overrides. This prevents SCSS plugin rules from becoming `Unknown rule` errors for ordinary CSS. The configured `stylelint-order` rules support `stylelint --fix`, while `stylelint-config-recess-order` keeps the existing project order instead of forcing alphabetical rewrites. HTML parsing is handled by the Vue/HTML overrides; direct SCSS input uses the package's `postcss-scss` parser object.
+The scope matters: standard CSS rules and property ordering apply globally, while SCSS and Vue presets are isolated to their matching overrides. This prevents SCSS plugin rules from becoming `Unknown rule` errors for ordinary CSS. The configured `stylelint-order` rules support `stylelint --fix` without forcing alphabetical rewrites. HTML parsing is handled by the Vue/HTML overrides; direct SCSS input uses the package's `postcss-scss` parser object.
 
 ### UnoCSS and Tailwind support
 
@@ -192,11 +192,6 @@ Default ignored paths are resolved from `process.cwd()` so they work from the co
 - `.vercel`
 - `.wrangler`
 - `coverage`
-- `backup`
-- `releases`
-- `src-tauri`
-- `stats.html`
-- `twa/project`
 
 If you need to append local ignores, import the shared pieces and spread them explicitly. The default glob list and path resolver are both exported:
 
@@ -211,7 +206,7 @@ const ignoreFiles = createStylelintIgnoreFiles({
 })
 ```
 
-Unlike ESLint, do not replace the file glob with `stylelint .`. Stylelint does not provide an ESLint-like `files` allowlist in config files, so the CLI input should stay restricted to style-bearing files. When using broad globs such as `stylelint "**/*.{css,scss,vue,html}"`, keep `--config stylelint.config.ts` in the script. This forces Stylelint to use the project root config instead of loading nested `.stylelintrc` files from backup or generated subprojects before shared ignores can apply.
+Unlike ESLint, do not replace the file glob with `stylelint .`. Stylelint does not provide an ESLint-like `files` allowlist in config files, so the CLI input should stay restricted to style-bearing files. When using broad globs such as `stylelint "**/*.{css,scss,vue,html}"`, keep `--config stylelint.config.ts` in the script. This forces Stylelint to use the consumer's root config instead of loading unrelated nested `.stylelintrc` files before shared ignores can apply.
 
 ## Customization
 

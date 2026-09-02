@@ -10,11 +10,10 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "eslint": "catalog:",
     "@zzjtnb/eslint-config": "workspace:*",
-    "markdownlint-cli2": "catalog:",
-    "stylelint": "catalog:",
     "@zzjtnb/stylelint-config": "workspace:*",
+    "eslint": "catalog:",
+    "stylelint": "catalog:",
     "typescript": "catalog:"
   }
 }

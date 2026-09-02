@@ -6,7 +6,7 @@ import { interopDefault } from '../util.js'
  * YAML 配置工厂。
  *
  * YAML parser、eslint-plugin-yml 注册和基础 YAML 规则统一复用 antfu；
- * 当前组织没有另一套 YAML 规则，因此这里不再直接声明插件依赖。
+ * 本包不额外声明 YAML 插件或重复维护上游规则。
  */
 export async function yaml(): Promise<Linter.Config[]> {
   // 保持 YAML 文件和 Vue 自定义块使用上游同一套 parser/规则实例。

@@ -1,11 +1,11 @@
 import type { TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { Linter } from 'eslint'
 
-/** 默认不启用外部 formatter；CSS / SCSS 由 Stylelint 负责。 */
+/** 默认不启用 ESLint 的可选外部 formatter 集成。 */
 export const defaultFormatters = false as const
 
-/** Markdown 交给 markdownlint-cli2，避免 ESLint 和 Markdownlint 重复检查。 */
-export const defaultMarkdown = false as const
+/** 默认启用 antfu 的 Markdown 推荐配置。 */
+export const defaultMarkdown = true as const
 
 /**
  * 默认启用 antfu 的 stylistic 规则，并完全使用上游默认风格。
@@ -32,22 +32,22 @@ export const defaultLinterOptions = {
  * 不依赖额外插件的通用规则调整。
  *
  * antfu 已经提供 JavaScript、TypeScript、perfectionist 等基础规则，这里
- * 只覆盖本组织和上游默认值不同的部分，避免复制整套上游实现。
+ * 只覆盖本包与上游默认值不同的部分，避免复制整套上游实现。
  */
 export const rules = {
-  // 要求同一条链式调用保持一致的换行风格；组织默认关闭。
+  // 不额外限制链式调用的换行方式。
   'antfu/consistent-chaining': 'off',
-  // 要求列表换行保持一致；组织默认关闭。
+  // 不额外限制列表的换行方式。
   'antfu/consistent-list-newline': 'off',
-  // 要求控制流语句使用大括号；组织默认关闭。
+  // 不强制控制流语句使用大括号。
   'antfu/curly': 'off',
-  // 要求 if 条件换行符合 antfu 的个人风格；组织默认关闭。
+  // 不额外限制 if 条件的换行方式。
   'antfu/if-newline': 'off',
-  // 禁止从当前包的 dist 目录导入；组织默认关闭以兼容构建产物调试。
+  // 允许消费方在需要时导入已构建产物。
   'antfu/no-import-dist': 'off',
-  // 禁止顶层 await；组织默认允许 ESM 配置和脚本使用它。
+  // 允许 ESM 配置和脚本使用顶层 await。
   'antfu/no-top-level-await': 'off',
-  // 要求顶层函数声明风格一致；组织默认关闭。
+  // 不额外限制顶层函数的声明风格。
   'antfu/top-level-function': 'off',
   // CLI、脚本和构建配置需要正常输出日志，因此默认不禁止 console。
   'no-console': 'off',
@@ -55,7 +55,7 @@ export const rules = {
   'no-empty-function': 'off',
   // TypeScript parser / 类型规则负责 TS 文件的变量检查，避免核心规则重复报错。
   'no-undef': 'off',
-  // 禁止容易掩盖控制流问题的语法，以及当前项目不使用的 TS 特殊语法。
+  // 禁止容易掩盖控制流或引入不透明运行时语义的语法。
   'no-restricted-syntax': [
     'error',
     // 调试语句不应进入提交代码。
@@ -77,13 +77,13 @@ export const rules = {
 
 /** 传给 `@antfu/eslint-config` 的通用规则片段。 */
 export const ruleOverrides = {
-  rules: rules,
+  rules,
 } satisfies TypedFlatConfigItem
 
 /**
  * JavaScript 基础配置工厂。
  *
- * 规则对象保留为可合并的静态值，工厂负责把 linter 选项和组织默认规则
+ * 规则对象保留为可合并的静态值，工厂负责把 linter 选项和本包默认规则
  * 组合成 Flat Config。这样消费方仍可通过 `rules` 覆盖单条规则，而不用
  * 复制整份 JavaScript 配置。
  */
@@ -99,7 +99,7 @@ export async function javascript(
         ...linterOptions,
       },
       rules: {
-        // 先应用组织默认规则，再让消费方覆盖具体规则。
+        // 先应用本包默认规则，再让消费方覆盖具体规则。
         ...rules,
         ...additionalRules,
       },

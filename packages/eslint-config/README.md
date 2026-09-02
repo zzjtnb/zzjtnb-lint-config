@@ -12,13 +12,12 @@
 
 ## Scope
 
-This package is a thin organization wrapper around [`@antfu/eslint-config`](https://github.com/antfu/eslint-config):
+This package is an opinionated, thin wrapper around [`@antfu/eslint-config`](https://github.com/antfu/eslint-config):
 
 - parsers, plugins, recommended rules and sorting are owned by antfu;
-- this package adds only organization defaults, a few organization rules and reusable async factories;
+- this package adds a small, documented set of defaults and reusable async factories;
 - it does not directly install `eslint-plugin-jsonc`, `eslint-plugin-n`, `eslint-plugin-pnpm`, `eslint-plugin-vue` or `yaml-eslint-parser`;
-- it does not remove or override sorting already supplied by antfu;
-- it only adds an organization rule where antfu has no equivalent, such as cspell array sorting.
+- it does not remove, replace or duplicate sorting supplied by antfu.
 
 ## Requirements
 
@@ -50,7 +49,7 @@ import { zzjtnb } from '@zzjtnb/eslint-config'
 export default zzjtnb()
 ```
 
-The default config enables TypeScript, Vue, JSON / JSONC, YAML, TOML, Node, pnpm and antfu sorting. CSS / SCSS are not handled by ESLint; use `@zzjtnb/stylelint-config`. UnoCSS and Markdown lint remain opt-in.
+The default config enables TypeScript, Vue, JSON / JSONC, YAML, TOML, Markdown, Node, pnpm, antfu sorting and antfu stylistic rules. UnoCSS and external formatter integrations remain opt-in.
 
 ## `stylistic` options
 
@@ -97,6 +96,8 @@ References:
 
 `stylistic: false` disables the whole formatting integration. `stylistic: { semi: true }` enables it and overrides only `semi`.
 
+This package defaults to `stylistic: true`. Consumers using a dedicated formatter should pass `stylistic: false` at their integration boundary.
+
 ## Public exports and ownership
 
 The public API has three groups:
@@ -109,7 +110,7 @@ The public API has three groups:
 | `javascript()`, `ignores()`, `jsonc()`, `node()`, `perfectionist()`, `pnpm()`, `typescript()`, `yaml()` | Compose individual configuration factories |
 | `ESLintConfigOptions`, `ESLintStylisticOptions` | Typed consumer options |
 
-The factories return `Promise<Linter.Config[]>` and can be exported directly from `eslint.config.ts`. Parsers, plugins, recommended rules and sorting are owned by `@antfu/eslint-config`; this package adds only organization defaults and a small number of rules not covered upstream.
+The factories return `Promise<Linter.Config[]>` and can be exported directly from `eslint.config.ts`. Parsers, plugins, recommended rules and sorting are owned by `@antfu/eslint-config`; this package adds only its documented rule overrides.
 
 ### Sorting ownership
 
@@ -119,13 +120,13 @@ This package does not duplicate:
 - package.json, tsconfig.json and pnpm workspace YAML sorting;
 - perfectionist object, interface and module sorting.
 
-Those rules follow antfu unchanged. A package-specific sort rule is added only when antfu has no equivalent, such as sorting cspell `words` and `ignorePaths` arrays.
+Those rules follow antfu unchanged. This package does not add a second sorting implementation.
 
 ### Optional integrations and dependencies
 
 The package directly depends only on `@antfu/eslint-config`; it does not install parsers or `eslint-plugin-*` packages already managed by antfu. UnoCSS and formatters follow antfu's optional dependency model: install their upstream optional dependencies only when enabling them.
 
-CSS / SCSS support is provided through antfu's optional `formatters` integration, but it is disabled by default because the project uses `@zzjtnb/stylelint-config`. Markdown lint is also disabled by default because the project uses `markdownlint-cli2`.
+Antfu's Markdown integration follows its enabled upstream default. Optional external formatter integrations remain disabled until explicitly configured.
 
 ## Options
 
@@ -133,7 +134,7 @@ The package accepts `@antfu/eslint-config` options and adds these fields:
 
 | Field | Default | Purpose |
 | --- | --- | --- |
-| `defaultIgnores` | Package defaults | Replace the shared ignore list with an array, or disable it with `false` |
+| `defaultIgnores` | `[]` | Add shared ignore patterns, or pass `false` to replace all defaults including antfu's |
 | `pnpmWorkspace` | `true` | Enable the parser, rules and sorting for `pnpm-workspace.yaml` |
 | `rules` | `{}` | Add or override shared package rules |
 | `ignores` | `[]` | Append consumer paths after the selected default ignores |
@@ -196,25 +197,26 @@ export const unoConfig = uno()
 | TypeScript | enabled | antfu `typescript()` |
 | Vue | enabled | antfu `vue()` + package conventions |
 | Node | enabled | antfu `node()` |
-| JSON / JSONC | enabled | antfu `jsonc()` + cspell supplement |
+| JSON / JSONC | enabled | antfu `jsonc()` |
 | YAML | enabled | antfu `yaml()` |
 | TOML | enabled | antfu main factory |
 | pnpm | enabled | antfu `pnpm()` |
 | perfectionist | enabled | antfu main factory |
+| Stylistic | enabled | antfu; consumers with a dedicated formatter disable it when calling `zzjtnb()` |
 | UnoCSS | disabled | optional upstream integration |
-| Markdown | disabled | use markdownlint-cli2 |
-| External formatters | disabled | use Stylelint for CSS / SCSS; antfu fallback is opt-in |
+| Markdown | enabled | antfu `markdown()` |
+| External formatters | disabled | optional antfu integration |
 
-### CSS / SCSS and Markdown fallback
+### External formatter and Markdown ownership
 
-When a consumer does not use the project's Stylelint or Markdownlint setup, enable antfu's built-in integrations explicitly:
+Enable antfu's optional formatter integration explicitly when it is the intended owner. Consumers using a dedicated Markdown linter can disable antfu's Markdown integration at their boundary:
 
 ```ts
 export default zzjtnb({
   // Requires antfu's optional eslint-plugin-format peer.
   formatters: { css: true },
-  // Enables antfu's Markdown rules instead of markdownlint-cli2.
-  markdown: true,
+  // A dedicated Markdown linter owns Markdown files.
+  markdown: false,
 })
 ```
 
@@ -228,19 +230,11 @@ export default zzjtnb({
 - `yaml: true` for the pnpm-workspace.yaml parser;
 - `sort: true` for workspace YAML sorting by default.
 
-`pnpmWorkspace: false` disables only the workspace YAML part and keeps pnpm package.json checks. By default this package disables antfu's `pnpm/yaml-enforce-settings`, so it does not auto-write `shellEmulator: true` or `trustPolicy: no-downgrade`; catalog checks and YAML sorting remain enabled. Enable that behavior only when explicitly needed with `pnpm({ enforceSettings: true })`.
+`pnpmWorkspace: false` disables only the workspace YAML part and keeps pnpm package.json checks. All enabled pnpm rules, including upstream workspace policy rules, remain unchanged from antfu.
 
 ### Default ignores
 
-The package additionally ignores generated outputs, test fixtures, native projects and local agent directories, including:
-
-- `dist-*`, `*-dist`, `.output` and `output`;
-- `.github`, `.agent`, `.codex`, `.cursor`, `.claude` and `.agents`;
-- `fixtures`, snapshots and VitePress cache;
-- `releases`, `src-tauri` and `twa/project`;
-- shell scripts and font assets.
-
-Use `defaultIgnores: false` to disable these package defaults, or pass an array to replace them. `ignores` is then appended.
+The package does not guess consumer-specific paths. Antfu's default ignores and `.gitignore` support remain active. Add repository-specific outputs through `ignores`, or supply reusable shared patterns through `defaultIgnores`. Pass `defaultIgnores: false` only when replacing the complete ignore list.
 
 ## VS Code
 

@@ -12,13 +12,12 @@
 
 ## 定位
 
-本包不是另一套 ESLint 生态，而是对 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 的薄封装：
+本包不是另一套 ESLint 生态，而是对 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 的带明确偏好的薄封装：
 
 - parser、插件、推荐规则和排序规则由 antfu 负责；
-- 本包只提供组织级默认值、少量组织约定和可复用的异步配置工厂；
+- 本包只提供少量、有文档说明的默认值和可复用异步配置工厂；
 - 不直接安装 `eslint-plugin-jsonc`、`eslint-plugin-n`、`eslint-plugin-pnpm`、`eslint-plugin-vue` 或 `yaml-eslint-parser`；
-- 不删除或覆盖 antfu 已经提供的排序配置；
-- antfu 没有覆盖的组织约定才由本包补充，例如 cspell 词表数组排序。
+- 不删除、替换或重复实现 antfu 已提供的排序配置。
 
 ## 环境要求
 
@@ -50,7 +49,7 @@ import { zzjtnb } from '@zzjtnb/eslint-config'
 export default zzjtnb()
 ```
 
-默认配置启用 TypeScript、Vue、JSON / JSONC、YAML、TOML、Node、pnpm 和 antfu 的排序规则。CSS / SCSS 不由 ESLint 处理，请使用 `@zzjtnb/stylelint-config`；UnoCSS 和 Markdown lint 默认保持可选。
+默认配置启用 TypeScript、Vue、JSON / JSONC、YAML、TOML、Markdown、Node、pnpm、antfu 排序和 antfu stylistic 规则。UnoCSS 和外部 formatter 集成默认保持可选。
 
 ## `stylistic` 到底有哪些选项
 
@@ -97,6 +96,8 @@ const styleOptions = {
 
 `stylistic: false` 和 `stylistic: { semi: true }` 不是等价写法：前者关闭整组格式规则，后者开启整组格式规则并覆盖一个字段。
 
+本包默认使用 `stylistic: true`。使用独立 formatter 的消费方，应在引入处传入 `stylistic: false`。
+
 ## 公共导出与规则归属
 
 本包的公共 API 分为三类：
@@ -109,7 +110,7 @@ const styleOptions = {
 | `javascript()`、`ignores()`、`jsonc()`、`node()`、`perfectionist()`、`pnpm()`、`typescript()`、`yaml()` | 按需组合单项配置工厂 |
 | `ESLintConfigOptions`、`ESLintStylisticOptions` | 为消费方提供 TypeScript 类型提示 |
 
-这些工厂返回 `Promise<Linter.Config[]>`，可以直接作为 `eslint.config.ts` 的默认导出。parser、插件、推荐规则和排序规则由 `@antfu/eslint-config` 负责；本包只补充组织级默认值和上游没有覆盖的少量约定。
+这些工厂返回 `Promise<Linter.Config[]>`，可以直接作为 `eslint.config.ts` 的默认导出。parser、插件、推荐规则和排序规则由 `@antfu/eslint-config` 负责；本包只追加文档中公开说明的规则覆盖。
 
 ### 排序规则的唯一来源
 
@@ -119,13 +120,13 @@ const styleOptions = {
 - package.json、tsconfig.json 和 pnpm workspace YAML 排序；
 - perfectionist 的对象、接口和模块排序。
 
-它们统一跟随 antfu。只有 antfu 没有对应规则时，本包才补充组织约定，例如 cspell 的 `words` 和 `ignorePaths` 数组排序。
+它们统一跟随 antfu，本包不再提供第二套排序实现。
 
 ### 可选集成和依赖
 
 本包只直接依赖 `@antfu/eslint-config`，不会把上游已经管理的 parser 或 `eslint-plugin-*` 再安装一遍。UnoCSS 和 formatter 遵循 antfu 的可选依赖方式：只有在消费方启用时，才按上游文档安装对应依赖。
 
-本包提供 CSS / SCSS 的 antfu `formatters` 能力，但默认关闭，因为项目使用 `@zzjtnb/stylelint-config`。Markdown lint 也默认关闭，因为项目使用 `markdownlint-cli2`。
+antfu 的 Markdown 集成跟随上游默认值保持启用。可选外部 formatter 集成仅在消费方显式配置后启用。
 
 ## 选项
 
@@ -133,7 +134,7 @@ const styleOptions = {
 
 | 字段 | 默认值 | 作用 |
 | --- | --- | --- |
-| `defaultIgnores` | 本包默认忽略项 | 传数组替换共享忽略项，传 `false` 完全关闭本包默认忽略项 |
+| `defaultIgnores` | `[]` | 添加可复用忽略项；传 `false` 时替换包括 antfu 在内的全部默认项 |
 | `pnpmWorkspace` | `true` | 是否启用 `pnpm-workspace.yaml` 的 parser、规则和排序 |
 | `rules` | `{}` | 追加或覆盖本包的通用规则 |
 | `ignores` | `[]` | 在选定默认忽略项后追加消费方路径 |
@@ -196,25 +197,26 @@ export const unoConfig = uno()
 | TypeScript | 启用 | antfu `typescript()` |
 | Vue | 启用 | antfu `vue()` + 本包 Vue 约定 |
 | Node | 启用 | antfu `node()` |
-| JSON / JSONC | 启用 | antfu `jsonc()` + cspell 补充规则 |
+| JSON / JSONC | 启用 | antfu `jsonc()` |
 | YAML | 启用 | antfu `yaml()` |
 | TOML | 启用 | antfu 主工厂 |
 | pnpm | 启用 | antfu `pnpm()` |
 | perfectionist | 启用 | antfu 主工厂 |
+| Stylistic | 启用 | antfu；使用独立 formatter 的消费方在调用 `zzjtnb()` 时关闭 |
 | UnoCSS | 关闭 | 上游可选集成 |
-| Markdown | 关闭 | 交给 markdownlint-cli2 |
-| 外部 formatter | 关闭 | CSS / SCSS 默认交给 Stylelint，antfu fallback 可选 |
+| Markdown | 启用 | antfu `markdown()` |
+| 外部 formatter | 关闭 | antfu 可选集成 |
 
-### CSS / SCSS 与 Markdown 的备用能力
+### 外部 formatter 与 Markdown 职责
 
-如果消费方没有使用项目的 Stylelint 或 Markdownlint 配置，可以显式启用 antfu 自带的能力：
+需要由 antfu 负责外部格式化时，可显式启用 formatter 集成。使用独立 Markdown linter 的消费方，可在引入处关闭 antfu Markdown：
 
 ```ts
 export default zzjtnb({
   // 需要安装 antfu 的可选 peer：eslint-plugin-format。
   formatters: { css: true },
-  // 启用 antfu 的 Markdown 规则，替代 markdownlint-cli2。
-  markdown: true,
+  // Markdown 文件由独立 Markdown linter 负责。
+  markdown: false,
 })
 ```
 
@@ -228,19 +230,11 @@ export default zzjtnb({
 - `yaml: true`：解析 pnpm-workspace.yaml；
 - `sort: true`：默认启用 workspace YAML 排序。
 
-设置 `pnpmWorkspace: false` 只关闭 workspace YAML 这一段，仍保留 package.json 的 pnpm 检查。默认会关闭上游的 `pnpm/yaml-enforce-settings`，因此不会自动写入 `shellEmulator: true` 或 `trustPolicy: no-downgrade`；catalog 校验和 YAML 排序仍然保留。只有明确需要时，才使用 `pnpm({ enforceSettings: true })` 开启这项行为。
+设置 `pnpmWorkspace: false` 只关闭 workspace YAML 这一段，仍保留 package.json 的 pnpm 检查。已启用的 pnpm 规则，包括上游 workspace 策略规则，均保持 antfu 默认行为。
 
 ### 默认忽略项
 
-本包额外忽略构建产物、测试夹具、原生工程和本地 Agent 目录，例如：
-
-- `dist-*`、`*-dist`、`.output`、`output`；
-- `.github`、`.agent`、`.codex`、`.cursor`、`.claude`、`.agents`；
-- `fixtures`、快照、VitePress 缓存；
-- `releases`、`src-tauri`、`twa/project`；
-- Shell 脚本和字体资源。
-
-传入 `defaultIgnores: false` 可关闭这组本包默认项；传入数组可替换它们。`ignores` 会在最终结果中继续追加。
+本包不猜测消费方的特有路径。antfu 的默认忽略项和 `.gitignore` 支持保持启用。仓库特有产物通过 `ignores` 追加；需要可复用的共享忽略项时，可通过 `defaultIgnores` 传入。只有需要替换全部忽略项时才传入 `defaultIgnores: false`。
 
 ## VS Code
 

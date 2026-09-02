@@ -1,6 +1,6 @@
 import type { Config } from 'stylelint'
 
-import { customFunctions, utilityAtRules } from './constants.js'
+import { utilityAtRules } from './constants.js'
 import { stylelintScssAtRuleOptions } from './language.js'
 
 /**
@@ -10,20 +10,18 @@ import { stylelintScssAtRuleOptions } from './language.js'
  * 直接说明关闭或放宽的原因，避免消费方只能看到一个无法解释的规则映射。
  */
 export const stylelintRules: NonNullable<Config['rules']> = {
-  // 工具类框架和 SCSS 会扩展 at-rule 集合，避免核心规则误报合法项目语法。
+  // 工具类框架和 SCSS 会扩展 at-rule 集合，避免核心规则误报合法语法。
   'at-rule-no-unknown': [true, {
     ignoreAtRules: utilityAtRules,
   }],
 
   // 当前 Stylelint 规则不再维护该废弃规则的兼容性检查，避免共享配置制造重复告警。
   'at-rule-no-deprecated': null,
-  // 项目允许省略通用字体族，具体回退字体由产品字体栈统一决定。
+  // 不强制通用字体族，由消费方的字体栈决定回退策略。
   'font-family-no-missing-generic-family-keyword': null,
-  // UnoCSS、Tailwind 和 Vue 的函数式值由框架编译器解释，不作为未知 CSS 函数报错。
-  'function-no-unknown': [true, {
-    ignoreFunctions: customFunctions,
-  }],
-  // 项目保留现有 import 写法，不强制改写为 `url` 或字符串形式。
+  // 函数可由 CSS、SCSS 或消费方工具链扩展，不做全局未知函数限制。
+  'function-no-unknown': null,
+  // 不强制消费方改写现有 import 记法。
   'import-notation': null,
   // 允许项目继续使用兼容性更好的媒体查询范围写法。
   'media-feature-range-notation': null,
@@ -38,7 +36,7 @@ export const stylelintRules: NonNullable<Config['rules']> = {
   // 允许现代 CSS 和预处理器语法中的声明位置，不做跨语法的强制重排。
   'no-invalid-position-declaration': null,
 
-  // 只保留项目要求的 at-rule / 声明 / 嵌套层级顺序；属性顺序由 recess preset 提供。
+  // 统一 at-rule / 声明 / 嵌套层级顺序；属性顺序由 recess preset 提供。
   'order/order': [
     [
       'dollar-variables',
@@ -58,11 +56,11 @@ export const stylelintRules: NonNullable<Config['rules']> = {
     ignore: ['after-comment', 'first-nested'],
   }],
 
-  // Vue / SCSS 选择器允许项目约定的 BEM、状态和工具类前缀，同时保持可读命名。
+  // 允许常见的 BEM、状态和工具类前缀，同时保持可读命名。
   'selector-class-pattern': '^-?(?:(?:o|c|u|t|s|is|has|_|js|qa)-)?[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:__[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)?(?:--[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)?(?:[.+])?$',
   // 不强制把 `:not()` 改写为新的 Selectors 4 形式，兼容现有浏览器支持范围。
   'selector-not-notation': null,
-  // Vue 和 CSS Modules 的伪类由框架/解析器提供，补充项目实际使用的名称。
+  // Vue 和 CSS Modules 的伪类由框架/解析器提供，在标准 CSS 规则中显式声明。
   'selector-pseudo-class-no-unknown': [true, {
     ignorePseudoClasses: ['deep', 'global'],
   }],
@@ -84,8 +82,6 @@ export const stylelintScssRules: NonNullable<Config['rules']> = {
   // SCSS 插件不读取 Stylelint 语言模型，因此复用统一的 at-rule 例外列表。
   'scss/at-rule-no-unknown': [true, stylelintScssAtRuleOptions],
 
-  // SCSS 运算符允许按项目现有格式换行，避免和计算表达式语义混在一起。
+  // 不限制 SCSS 运算符后的换行，避免干预计算表达式的可读排版。
   'scss/operator-no-newline-after': null,
-  // SCSS 运算符空格由格式化器和现有代码约定处理，不在共享配置中强制改写。
-  'scss/operator-no-unspaced': null,
 }

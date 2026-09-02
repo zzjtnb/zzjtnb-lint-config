@@ -1,4 +1,7 @@
-import { stylelintIgnoreFiles } from '@zzjtnb/stylelint-config'
+import {
+  createStylelintIgnoreFiles,
+  stylelintIgnoreFiles,
+} from '@zzjtnb/stylelint-config'
 
 export default {
   extends: [
@@ -6,6 +9,7 @@ export default {
   ],
   ignoreFiles: [
     ...stylelintIgnoreFiles,
+    ...createStylelintIgnoreFiles({ globs: ['**/backup/**'] }),
     'packages/*/README*.md',
   ],
 }

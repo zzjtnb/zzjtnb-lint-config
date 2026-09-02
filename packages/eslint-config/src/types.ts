@@ -25,7 +25,7 @@ export type ESLintConfigOptions = Omit<
   OptionsConfig & Omit<TypedFlatConfigItem, 'files' | 'ignores'>,
   'ignores'
 > & {
-  /** 是否保留本包的默认忽略项；传 `false` 可完全接管忽略列表。 */
+  /** 共享忽略项；传 `false` 可完全接管包括 antfu 在内的默认列表。 */
   defaultIgnores?: string[] | false
   /** 是否启用 pnpm-workspace.yaml 的 parser 和排序规则。 */
   pnpmWorkspace?: boolean

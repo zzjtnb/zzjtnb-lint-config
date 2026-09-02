@@ -16,7 +16,6 @@ import eslintDefaultConfig, {
 } from '@zzjtnb/eslint-config'
 import stylelintConfig, {
   createStylelintIgnoreFiles,
-  stylelintDefaultIgnoreGlobs,
   stylelintExecutionOptions,
   stylelintIgnoreFiles,
   stylelintLanguageOptions,
@@ -48,36 +47,21 @@ async function main() {
   assert.ok(eslintConfigNames.includes('antfu/yaml/setup'), 'eslint config should enable YAML support')
   assert.ok(eslintConfigNames.includes('antfu/toml/setup'), 'eslint config should enable TOML support')
   assert.equal(defaultFormatters, false)
-  assert.equal(defaultMarkdown, false)
+  assert.equal(defaultMarkdown, true)
   assert.equal(defaultStylistic, true)
+  assert.equal(eslintConfigNames.includes('antfu/stylistic/rules'), true)
+  assert.equal(eslintConfigNames.includes('antfu/perfectionist/setup'), true)
+  assert.equal(eslintConfigNames.includes('antfu/markdown/setup'), true)
+  const externalFormatterConfigNames = (await zzjtnb({ stylistic: false }))
+    .map(config => config.name)
+    .filter(Boolean)
+  assert.equal(externalFormatterConfigNames.includes('antfu/stylistic/rules'), false)
+  assert.equal(externalFormatterConfigNames.includes('antfu/perfectionist/setup'), true)
 
-  const sharedIgnoreGlobs = [
-    '**/dist-*',
-    '**/*-dist',
-    '**/.husky',
-    '**/.nitro',
-    '**/.output',
-    '**/Dockerfile',
-    '**/output',
-    '**/.github',
-    '**/lefthook.yml',
-    '**/.agent/**',
-    '**/.codex/**',
-    '**/.cursor/**',
-    '**/.claude/**',
-    '**/.agents/**',
-    '**/fixtures/**',
-    '**/*.snap',
-    '**/.vitepress/cache/**',
-    '**/*.sh',
-    '**/*.ttf',
-    '**/*.woff',
-    '**/releases/**',
-    '**/src-tauri/**',
-    '**/stats.html',
-    '**/twa/project/**',
-  ]
-  assert.deepEqual(defaultIgnores, sharedIgnoreGlobs)
+  assert.deepEqual(defaultIgnores, [])
+  const antfuIgnores = eslintFlatConfig.find(config => config.name === 'antfu/ignores')?.ignores ?? []
+  assert.equal(antfuIgnores.includes('**/*.?([cm])ts'), false)
+  assert.equal(antfuIgnores.includes('**/*.?([cm])tsx'), false)
   assert.deepEqual(defaultLinterOptions, {
     reportUnusedDisableDirectives: 'warn',
     reportUnusedInlineConfigs: 'warn',
@@ -86,6 +70,7 @@ async function main() {
   assert.equal(ruleOverrides.rules, rules)
   const strictRules = await zzjtnb({
     defaultIgnores: false,
+    ignores: ['generated/**'],
     pnpm: false,
     pnpmWorkspace: false,
     rules: { 'no-console': 'error' },
@@ -98,6 +83,11 @@ async function main() {
     strictRules.some(config => config.rules?.['pnpm/yaml-enforce-settings']),
     false,
     'consumer should be able to disable pnpm workspace rules',
+  )
+  assert.deepEqual(
+    strictRules.find(config => config.name === 'antfu/ignores')?.ignores,
+    ['generated/**'],
+    'defaultIgnores=false should let consumers replace all default ignores',
   )
   const upstreamPnpmConfig = eslintFlatConfig.find(config => config.name === 'antfu/pnpm/pnpm-workspace-yaml')
   assert.deepEqual(
@@ -114,8 +104,13 @@ async function main() {
   const stylelintScssOverride = stylelintConfig.overrides.find(override => override.files.includes('*.scss'))
   assert.ok(
     Array.isArray(stylelintScssOverride?.extends)
-    && stylelintScssOverride.extends.some(path => path.endsWith('/stylelint-config-standard-scss/index.js')),
-    'stylelint SCSS override should include the official standard SCSS rules',
+    && stylelintScssOverride.extends.some(path => path.endsWith('/stylelint-config-recommended-scss/index.js')),
+    'stylelint SCSS override should include the recommended SCSS rules',
+  )
+  assert.ok(
+    Array.isArray(stylelintScssOverride?.extends)
+    && stylelintScssOverride.extends.some(path => path.endsWith('/stylelint-config-recommended-vue/scss/index.js')),
+    'stylelint SCSS override should include the Vue SCSS container rules',
   )
   assert.ok(
     (() => {
@@ -151,7 +146,6 @@ async function main() {
     createStylelintIgnoreFiles({ cwd: '/workspace/project', globs: ['generated/**'] }),
     ['/workspace/project/generated/**'],
   )
-  assert.ok(stylelintDefaultIgnoreGlobs.includes('**/backup/**'))
   const stylelintIgnoreGlobs = [
     '**/node_modules/**',
     '**/dist/**',
@@ -161,11 +155,6 @@ async function main() {
     '**/.vercel/**',
     '**/.wrangler/**',
     '**/coverage/**',
-    '**/backup/**',
-    '**/releases/**',
-    '**/src-tauri/**',
-    '**/stats.html',
-    '**/twa/project/**',
   ]
   assert.deepEqual(stylelintIgnoreFiles, stylelintIgnoreGlobs.map(glob => `${cwd}/${glob}`))
 

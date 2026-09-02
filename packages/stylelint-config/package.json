@@ -1,7 +1,7 @@
 {
   "name": "@zzjtnb/stylelint-config",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Shareable Stylelint 17 config for CSS, SCSS, Vue SFC, UnoCSS, Tailwind-style workflows and uni-app.",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",
@@ -59,18 +59,18 @@
   "peerDependencies": {
     "stylelint": "^17.12.0"
   },
-  "devDependencies": {
-    "@zzjtnb/eslint-config": "workspace:*",
-    "eslint": "catalog:"
-  },
   "dependencies": {
     "postcss": "catalog:",
     "postcss-html": "catalog:",
     "postcss-scss": "catalog:",
     "stylelint-config-recess-order": "catalog:",
+    "stylelint-config-recommended-scss": "catalog:",
     "stylelint-config-recommended-vue": "catalog:",
     "stylelint-config-standard": "catalog:",
-    "stylelint-config-standard-scss": "catalog:",
     "stylelint-order": "catalog:"
+  },
+  "devDependencies": {
+    "@zzjtnb/eslint-config": "workspace:*",
+    "eslint": "catalog:"
   }
 }

@@ -3,7 +3,7 @@ import type { Variant } from 'unocss'
  * UnoCSS 配置
  * - 本文件是项目原子化 CSS 的唯一入口，不绑定某一个组件库。
  * - presetWind4 提供 Tailwind v4 兼容语法、reset、theme 变量和常用工具类。
- * - 项目侧只补 Wind4 66.7.0 对当前源码不匹配或输出不合法的 Tailwind v4 语法。
+ * - 项目侧只补当前 Wind4 对现有源码不匹配或输出不合法的 Tailwind v4 语法。
  * - 主题 token 统一映射到 CSS 变量；变量值、暗色主题和业务语义色在样式文件中维护。
  *
  * UnoCSS 官方文档：https://unocss.dev/
@@ -47,7 +47,7 @@ function generateSafeList() {
 }
 
 // Tailwind v4 支持 `w-(--sidebar-width)`，等价于 `w-[var(--sidebar-width)]`。
-// 项目源码和组件依赖中都可能使用这类圆括号变量简写；Wind4 66.7.0 尚未覆盖这些匹配。
+// 项目源码和组件依赖中都可能使用这类圆括号变量简写；当前 Wind4 尚未覆盖这些匹配。
 // 这里集中补齐实际用到的工具前缀，避免在业务组件或第三方组件里改写为冗长的 `w-[var(...)]`。
 const cssVariableUtilityProperties = {
   'bg': 'background-color',
@@ -80,7 +80,7 @@ function quoteAttributeValue(value: string): string {
 }
 
 // Tailwind 的 `data-[size=large]` 语义是 `&[data-size="large"]`。
-// Wind4 66.7.0 会输出未加引号的属性值；字符串值通常还能被浏览器接受，但数字值如 `[data-spacing=0]`
+// 当前 Wind4 会输出未加引号的属性值；字符串值通常还能被浏览器接受，但数字值如 `[data-spacing=0]`
 // 会被 Lightning CSS 严格解析为非法选择器。这里统一把 arbitrary data 属性值序列化为合法 CSS 字符串。
 // order: -1 用于早于内置 data variant 执行；multiPass 保证 `data-[a=b]:data-[c=d]:...` 这类链式变体都能被处理。
 const dataAttributeVariant: Variant = {
@@ -195,7 +195,7 @@ export default defineConfig({
 
   // 输出到标准 CSS layer；allLayers 让 UnoCSS 按 resolved layers 主动声明完整默认层级顺序。
   // 项目样式只挂到这些既有 layer 上，避免在样式入口手写 fonts/properties/theme 等内部层名造成版本漂移。
-  // 已验证当前 UnoCSS 66.7.0 实际声明顺序：fonts → imports → properties → theme → base → preflights → icons → typography → shortcuts → default。
+  // 已验证当前 UnoCSS 版本的实际声明顺序：fonts → imports → properties → theme → base → preflights → icons → typography → shortcuts → default。
   // 验证方式：使用 createGenerator(config).generate(..., { preflights: true }) 查看输出 CSS 中的 @layer 声明。
   outputToCssLayers: {
     allLayers: true,

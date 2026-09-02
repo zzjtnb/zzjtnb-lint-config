@@ -19,7 +19,7 @@ import { stylelintOverrides } from './overrides.js'
 import { stylelintRules, stylelintScssRules } from './rules.js'
 
 /**
- * Stylelint 官方共享配置入口。
+ * Stylelint 共享配置入口。
  *
  * 发布包必须导出普通配置对象，而不是 ESLint 那种异步工厂；这样用户可以直接在
  * `stylelint.config.ts` 中写 `extends: ['@zzjtnb/stylelint-config']`。
@@ -49,7 +49,6 @@ function zzjtnb(): Config {
 
 export {
   createStylelintIgnoreFiles,
-  zzjtnb,
   stylelintDefaultIgnoreGlobs,
   stylelintExecutionOptions,
   stylelintExtends,
@@ -61,6 +60,7 @@ export {
   stylelintScssAtRuleOptions,
   stylelintScssRules,
   stylelintVueExtends,
+  zzjtnb,
 }
 
 export default stylelintConfig

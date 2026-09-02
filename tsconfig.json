@@ -2,12 +2,9 @@
   "compilerOptions": {
     "target": "esnext",
     "lib": ["esnext", "dom"],
-    "useDefineForClassFields": true,
-
     "module": "esnext",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["./src/*"],
       "@zzjtnb/eslint-config": ["./packages/eslint-config/src/index.ts"],
       "@zzjtnb/stylelint-config": ["./packages/stylelint-config/src/index.ts"]
     },
@@ -22,8 +19,6 @@
     "strict": true,
     "noEmit": true,
 
-    // 调试和兼容性相关配置
-    "sourceMap": true,
     // 模块和兼容性相关配置
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -35,12 +30,8 @@
   },
 
   "include": [
-    "types/**/*.d.ts",
-    "mock/**/*.ts",
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "vite.config.ts",
     "eslint.config.ts",
+    "stylelint.config.ts",
     "uno.config.ts",
     "packages/eslint-config/src/**/*.ts",
     "packages/stylelint-config/src/**/*.ts",

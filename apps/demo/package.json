@@ -9,10 +9,10 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "eslint": "catalog:",
     "@zzjtnb/eslint-config": "workspace:*",
-    "stylelint": "catalog:",
     "@zzjtnb/stylelint-config": "workspace:*",
+    "eslint": "catalog:",
+    "stylelint": "catalog:",
     "typescript": "catalog:"
   }
 }

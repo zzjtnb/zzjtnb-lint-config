@@ -8,30 +8,30 @@ import antfu from '@antfu/eslint-config'
 
 import {
   defaultFormatters,
+  defaultLinterOptions,
   defaultMarkdown,
   defaultStylistic,
-  defaultLinterOptions,
-  organizationOverrides,
   ignores,
   javascript,
   resolveIgnores,
+  vueRuleConfig,
 } from './configs/index.js'
 
 export {
   defaultFormatters,
   defaultIgnores,
+  defaultLinterOptions,
   defaultMarkdown,
   defaultStylistic,
-  defaultLinterOptions,
-  organizationOverrides,
-  ruleOverrides,
-  rules,
   ignores,
   javascript,
   jsonc,
   node,
+  organizationOverrides,
   perfectionist,
   pnpm,
+  ruleOverrides,
+  rules,
   typescript,
   yaml,
 } from './configs/index.js'
@@ -42,10 +42,9 @@ export type {
 } from './types.js'
 
 /**
- * 创建基于 antfu 的组织级 ESLint Flat Config。
+ * 创建基于 antfu 的 ESLint Flat Config。
  *
- * antfu 负责插件注册和基础规则，本包只追加组织级差异，不重复维护
- * Vue、TypeScript、JSONC、YAML、Node 和 perfectionist 的基础实现。
+ * antfu 负责插件注册和各语言的推荐规则，本包仅追加明确公开的规则约定。
  */
 export async function zzjtnb(
   options: ESLintConfigOptions = {},
@@ -72,33 +71,33 @@ export async function zzjtnb(
   } = options
 
   const baseIgnores = await ignores()
+  const pnpm = pnpmEnabled === false
+    ? false
+    : {
+        json: jsonc !== false,
+        sort: pnpmWorkspace,
+        yaml: yaml !== false && pnpmWorkspace,
+        ...(pnpmEnabled === true ? {} : pnpmEnabled),
+      }
 
   return antfu(
     {
       ...antfuOptions,
       formatters,
       ignores: resolveIgnores(ignoreOverrides, defaultIgnores ?? baseIgnores),
-      jsonc: jsonc === true ? false : jsonc,
+      jsonc,
       markdown,
-      node: false,
-      pnpm: pnpmEnabled === true ? false : pnpmEnabled,
+      node: nodeEnabled,
+      pnpm,
       stylistic,
       toml,
-      typescript: typescript === true ? false : typescript,
+      typescript,
       unocss,
-      vue: vue === true ? false : vue,
-      yaml: yaml === true ? false : yaml,
+      vue,
+      yaml,
     },
     ...(await javascript(rules, linterOptions)),
-    ...(await organizationOverrides({
-      jsonc: jsonc === true,
-      node: nodeEnabled === true,
-      pnpm: pnpmEnabled === true,
-      pnpmWorkspace,
-      typescript: typescript === true,
-      vue: vue === true,
-      yaml: yaml === true,
-    })),
+    ...(vue === false ? [] : [vueRuleConfig]),
     ...configs,
   ).toConfigs()
 }

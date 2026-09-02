@@ -13,15 +13,10 @@ export const stylelintDefaultIgnoreGlobs = [
   '**/.vercel/**',
   '**/.wrangler/**',
   '**/coverage/**',
-  '**/backup/**',
-  '**/releases/**',
-  '**/src-tauri/**',
-  '**/stats.html',
-  '**/twa/project/**',
 ]
 
 /**
- * 项目中允许出现的 CSS / SCSS / UnoCSS / Tailwind at-rule。
+ * 共享配置支持的 CSS / SCSS / UnoCSS / Tailwind at-rule。
  *
  * 核心 Stylelint 规则和 SCSS 插件规则读取配置的方式不同，因此这份列表会同时
  * 提供给 `languageOptions.syntax.atRules` 和 `scss/at-rule-no-unknown`，避免两处漂移。
@@ -60,10 +55,4 @@ export const utilityAtRules = [
   'utility',
   'utilities',
   'variants',
-]
-
-/** `function-no-unknown` 需要额外认识的框架函数。 */
-export const customFunctions = [
-  'theme',
-  'v-bind',
 ]
