@@ -1,301 +1,240 @@
 # @zzjtnb/stylelint-config
 
 <p align="center">
-  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/v/%40zzjtnb%2Fstylelint-config?color=a1b858&label=npm" alt="npm version"></a>
-  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/dm/%40zzjtnb%2Fstylelint-config?color=50a8d8" alt="npm downloads"></a>
+  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/v/%40zzjtnb%2Fstylelint-config?color=a1b858&label=npm" alt="npm 版本"></a>
+  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/dm/%40zzjtnb%2Fstylelint-config?color=50a8d8&label=下载量" alt="npm 下载量"></a>
   <a href="https://github.com/zzjtnb/zzjtnb-lint-config"><img src="https://img.shields.io/github/stars/zzjtnb/zzjtnb-lint-config?style=social" alt="GitHub stars"></a>
 </p>
 
-<p align="center">
-  <strong><a href="./README.md">English</a> | 简体中文</strong>
-</p>
+<p align="center"><strong>面向现代 CSS、SCSS、Vue SFC、UnoCSS 和 Tailwind 风格工作流的 Stylelint 配置</strong></p>
 
-<p align="center">
-  <strong>面向现代 CSS、SCSS、Vue SFC、UnoCSS 和 Tailwind 风格工作流的 Stylelint 配置</strong>
-</p>
+<p align="center"><strong>简体中文</strong> | <a href="./README.md">English</a></p>
 
-## 功能特点
+## 包的职责
 
-- 面向 Stylelint 17 构建
-- ESM 优先的包入口
-- 内置 TypeScript 声明，提供编辑器自动补全
-- 推荐级 CSS / SCSS 错误检测规则
-- 支持 Vue SFC 的 `<style>` 块
-- 支持 HTML 内联样式
-- 通过 `stylelint-config-recess-order` 保留项目现有 CSS 属性顺序，并由支持自动修复的 `stylelint-order` 执行
-- 支持 UnoCSS 和 Tailwind 风格的 at-rules / 函数
-- 支持 `@use`、`@mixin`、`@include` 等 SCSS 指令
-- 支持 uni-app 等项目常用的 `rpx` 单位
-- 内置生成目录、依赖目录和本地目录忽略规则
+`@zzjtnb/stylelint-config` 是一个带明确默认值的 Stylelint 共享配置，工厂入口风格与 `@zzjtnb/eslint-config` 一致。
 
-## 环境要求
+- `zzjtnb()` 创建完整的 Stylelint `Config` 对象。
+- 共享默认值、规则和按语法划分的 override 在包入口统一组合。
+- Stylelint、CLI 和 PostCSS 生态依赖遵循各自的依赖边界。
+- 配置直接使用 Stylelint 原生字段名：`extends`、`plugins`、`ignoreFiles`、`rules`、`overrides`、`languageOptions`、`cache` 和 `fix`。
+
+Stylelint 配置是对象，不是 ESLint 的 Flat Config 数组。因此工厂返回 `Config` 对象，同时保留 `zzjtnb()` 的默认导出结果，以兼容 Stylelint 原生的 `extends` 解析。
+
+## 环境要求与安装
 
 | 包 | 版本 |
 | --- | --- |
-| Node.js | `^22.12.0 \|\| >=24.0.0` |
+| Node.js | `^20.19.0 \|\| ^22.13.0 \|\| >=24` |
 | Stylelint | `^17.12.0` |
 
-本包以 ESM 为主。默认推荐使用 `stylelint.config.ts` 获得类型化配置；如果项目无法加载 TypeScript 配置文件，已设置 `"type": "module"` 时可使用 `stylelint.config.js`，否则使用 `stylelint.config.mjs`。
-
-## 安装
+本包为 ESM-only。优先使用 `stylelint.config.ts`；如果项目不能加载 TypeScript 配置，ESM 项目使用 `stylelint.config.js`，其他项目使用 `stylelint.config.mjs`。
 
 ```bash
 pnpm add -D stylelint @zzjtnb/stylelint-config
 ```
 
-本配置会内置 PostCSS，并包含以下共享预设和语法解析器：
-
-- `stylelint-config-recommended-scss`
-- `stylelint-config-recommended-vue`
-- `stylelint-config-standard`
-- `stylelint-config-recess-order`
-- `stylelint-order`
-- `stylelint-scss`
-- `postcss-html`
-- `postcss-scss`
-
-`stylelint` 是本包的 peer dependency，仍需要由项目安装；PostCSS、parser、SCSS 规则和排序规则由本包的运行依赖自动安装，项目不需要重复声明。
-
-## 基础用法
-
-创建 `stylelint.config.ts`：
+## 最小配置
 
 ```ts
-import zzjtnb from '@zzjtnb/stylelint-config'
-
-export default zzjtnb
-```
-
-默认导入得到完整的 Stylelint 配置对象，不能调用。如果希望和 ESLint 包一样使用工厂式写法，则使用命名导出：
-
-```ts
+// stylelint.config.ts
 import { zzjtnb } from '@zzjtnb/stylelint-config'
 
 export default zzjtnb()
 ```
 
-命名导出 `zzjtnb()` 与 ESLint 包保持一致。默认导出仍然是普通 Stylelint 配置对象，因此仍支持 Stylelint 标准共享配置写法：
+如果项目不需要本地工厂调用，也可以使用 Stylelint 原生共享配置写法：
 
 ```ts
+// stylelint.config.ts
 export default {
   extends: ['@zzjtnb/stylelint-config'],
 }
 ```
 
-`stylelintExecutionOptions`、`stylelintLanguageOptions`、`stylelintReportOptions`、`stylelintRules`、`stylelintIgnoreFiles`、`stylelintOverrides` 等命名导出只用于需要追加项目本地配置时做显式组合。
+需要添加本地规则、忽略项或 override 时使用工厂写法；共享默认值已经足够时使用原生写法。
 
-需要在不同工作目录运行 Stylelint 时，可以使用 `createStylelintIgnoreFiles` 生成指定根目录的忽略项；需要完全自定义忽略目录时，使用 `stylelintDefaultIgnoreGlobs` 作为起点，而不是复制整份共享配置。
+## 完整配置
 
-在 `package.json` 中添加脚本：
+下面是一份完整且可以直接复制的配置文件。它追加仓库特有的忽略文件，覆盖两条共享规则，并添加一个按语法划分的 override；共享 preset 和 parser 配置不会因此被替换。
+
+```ts
+// stylelint.config.ts
+import { zzjtnb } from '@zzjtnb/stylelint-config'
+
+export default zzjtnb({
+  // 追加到共享绝对忽略路径之后。
+  ignoreFiles: [
+    '**/generated/**',
+    'packages/*/README*.md',
+  ],
+
+  // 消费方提供同名规则时覆盖共享配置中的值。
+  rules: {
+    'selector-class-pattern': null,
+    'no-empty-source': 'error',
+  },
+
+  // 追加在包内 HTML、Vue 和 SCSS override 之后。
+  overrides: [
+    {
+      files: ['apps/legacy/**/*.vue'],
+      rules: {
+        'scss/operator-no-newline-after': null,
+      },
+    },
+  ],
+})
+```
+
+需要把本地可复用配置拆成独立片段时，可以在第一个参数之后传入完整的 Stylelint `Config` 配置片段：
+
+```ts
+// stylelint.config.ts
+import { zzjtnb } from '@zzjtnb/stylelint-config'
+
+export default zzjtnb(
+  { rules: { 'no-empty-source': 'error' } },
+  {
+    ignoreFiles: ['**/vendor/**'],
+    rules: {
+      'color-no-invalid-hex': true,
+    },
+  },
+)
+```
+
+## 配置行为
+
+第一个参数是 Stylelint 原生的 `Partial<Config>`，后续参数是完整的 Stylelint `Config` 配置片段。工厂从共享默认值开始，依次处理第一个参数和每一个后续片段。
+
+| 配置字段 | 合并行为 |
+| --- | --- |
+| `rules` | 按规则名浅层合并；后续配置中的同名规则替换前面的值 |
+| `extends` | 按配置顺序追加每个配置中的值 |
+| `plugins` | 按配置顺序追加每个配置中的值 |
+| `ignoreFiles` | 按配置顺序追加每个配置中的值 |
+| `overrides` | 按配置顺序追加 override 对象 |
+| 其他字段，包括 `languageOptions` | 后续配置替换前面的值 |
+
+合并不是深度合并。例如，传入自定义 `languageOptions` 会替换完整的共享 `languageOptions` 对象，而不是只合并其中一个嵌套的 syntax 属性；规则只按最外层规则名合并。
+
+## 默认配置
+
+### Preset 与 plugin
+
+默认配置使用以下 preset：
+
+- `stylelint-config-standard`：共享 CSS 规则；
+- `stylelint-config-recess-order`：属性顺序；
+- `stylelint-config-recommended-vue/scss`：Vue 和 SCSS 作用域；
+- `stylelint-config-recommended-scss`：SCSS 作用域。
+
+`stylelint-order` plugin 由本包注册。本包会把自身依赖解析为绝对路径，避免 Stylelint 在 pnpm 消费方解析上下文中找不到该 plugin。消费方不需要额外安装这些实现依赖。
+
+### 语法作用域
+
+| 文件作用域 | Parser / 扩展 | 规则 |
+| --- | --- | --- |
+| `*.html`、`*.htm` | `postcss-html` | 共享 CSS 规则 |
+| `*.vue` | `postcss-html`、Vue SCSS preset | 共享 CSS 规则和 `scss/*` 规则 |
+| `*.scss` | `postcss-scss`、SCSS preset、Vue SCSS preset | 共享 CSS 规则和 `scss/*` 规则 |
+
+SCSS plugin 规则只在 `.scss` 和 `.vue` override 中注册，因此普通 CSS 文件不会因缺少 SCSS plugin 而出现 `Unknown rule` 错误。
+
+### at-rule 与单位
+
+共享 syntax 模型允许 `@apply`、`@layer`、`@theme`、`@screen`、`@custom-variant` 和 `@container-queries` 等工具类框架指令，并注册 `rpx` 为 CSS 长度单位。
+
+核心 `at-rule-no-unknown` 和 SCSS 的 `scss/at-rule-no-unknown` 使用同一份 at-rule 例外列表，因此 CSS 与 SCSS 遵循一致的框架语法策略。
+
+### 默认规则
+
+本包保留 standard 和 recess-order preset，同时显式放宽与仓库 CSS、Vue、SCSS 或工具类框架约定冲突的规则。例如未知工具类 at-rule 和函数、通用字体族要求、选择器特殊性顺序、空源文件、部分选择器限制以及部分声明位置检查。
+
+完整规则映射就是已发布包中的 `rules` 对象。需要调整时，通过 `rules` 字段按规则名覆盖，不需要复制整份共享规则。
+
+### 执行与报告
+
+以下 Stylelint 配置字段使用这些默认值：
+
+| 字段 | 默认值 | 含义 |
+| --- | --- | --- |
+| `allowEmptyInput` | `true` | glob 没有匹配到文件时不会使本次运行失败 |
+| `cache` | `false` | 除非消费方显式开启，否则 Stylelint 不使用缓存 |
+| `fix` | `false` | 除非消费方显式开启，否则 Stylelint 不写回修复结果 |
+| `reportDescriptionlessDisables` | `'warning'` | 对没有描述的 `stylelint-disable` 注释发出 warning |
+| `reportInvalidScopeDisables` | `'warning'` | 对规则作用域无效的 disable 注释发出 warning |
+| `reportNeedlessDisables` | `'warning'` | 对已经不再需要的 disable 注释发出 warning |
+| `reportUnscopedDisables` | `'warning'` | 对没有指定规则的 disable 注释发出 warning |
+
+缓存和文件写回由消费方的 CLI 参数或本地配置控制，共享配置不会隐式开启这两项行为。
+
+### 默认忽略
+
+默认 `ignoreFiles` 根据消费方项目的 `process.cwd()` 生成绝对路径，包含：
+
+- `node_modules`、`dist`、`build`、`.nuxt`、`.turbo`、`.vercel`、`.wrangler` 和 `coverage`；
+- JavaScript、TypeScript、JSON 和 Markdown 等非样式文件，这些文件应交给对应的 linter 检查。
+
+使用共享配置时，路径以消费方工作目录为根，避免忽略规则错误地相对于包目录解析。仓库特有路径通过工厂的 `ignoreFiles` 字段追加。
+
+## CLI 脚本
+
+Stylelint 配置没有 ESLint Flat Config 的 `files` 白名单，因此 CLI 应使用样式文件 glob，而不是 `stylelint .`：
 
 ```json
 {
   "scripts": {
-    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --fix --cache --cache-location node_modules/.cache/.stylelintcache"
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --cache --cache-location node_modules/.cache/.stylelintcache",
+    "format:stylelint": "pnpm run lint:stylelint -- --fix"
   }
 }
 ```
 
-## 公共导出与职责归属
+`--cache`、`--cache-location` 和 `--fix` 都是 Stylelint CLI 选项；CLI 参数只对当前运行生效，并会覆盖共享配置中的对应默认值。
 
-| 导出 | 用途 |
-| --- | --- |
-| 默认导出 | 完整的 Stylelint 共享配置对象 |
-| 命名导出 `zzjtnb()` | 返回完整的 Stylelint 配置对象 |
-| `stylelintRules` | 供本地组合或检查的共享规则映射 |
-| `stylelintScssRules` | 只在 SCSS 和 Vue SFC override 中启用的 SCSS 插件规则 |
-| `stylelintOverrides` | Vue / HTML / SCSS 的 parser 和预设覆盖配置 |
-| `stylelintLanguageOptions` | Stylelint 17 语法扩展，例如 utility at-rules 和 `rpx` |
-| `stylelintExecutionOptions` | 明确的 `allowEmptyInput`、`cache`、`fix` 默认值 |
-| `stylelintIgnoreFiles` / `createStylelintIgnoreFiles()` | 共享忽略项和自定义项目根目录生成器 |
+## 公共导出
 
-默认导出是普通 Stylelint 配置对象，命名导出 `zzjtnb()` 返回同一个配置对象，方便与 ESLint 包统一使用工厂式入口。使用 Stylelint 标准共享配置解析时，常规项目仍应在 `extends` 中保留包名。
+| 导出 | 类型 | 用途 |
+| --- | --- | --- |
+| `zzjtnb` | 函数 | 创建 Stylelint `Config` 对象 |
+| `default` | 运行时值 | `zzjtnb()` 的结果，供 Stylelint 原生加载和 `extends` 使用 |
+| `Config` | 类型 | 从 `stylelint` 直接重新导出的原生 `Config` 类型 |
 
-职责边界如下：
+`Config` 就是 Stylelint 的原生类型；本包不再用自定义的 `Options` 或 `StylelintConfig` 别名包装它。
 
-- Stylelint 本体和 CLI 由消费项目通过 peer dependency 提供；
-- PostCSS 和自定义语法 parser 是本包的运行依赖；
-- CSS、SCSS、Vue 和排序预设由本包统一携带；
-- CSS / SCSS 由 Stylelint 处理，不交给 ESLint；Markdown 也不属于本包职责。
+## VS Code
 
-## 配置内容
-
-### 基础预设
-
-该配置按以下范围和顺序应用预设：
-
-1. `stylelint-config-standard` 提供通用 CSS 风格规则。
-2. `stylelint-config-recess-order` 通过 `stylelint-order` 提供属性排序。
-3. `.scss` 文件使用 `stylelint-config-recommended-scss` 和 `stylelint-config-recommended-vue/scss`。
-4. `.vue` 文件使用 `stylelint-config-recommended-vue/scss`。Vue preset 负责 Vue 容器及其中可能出现的 SCSS style block，本包的 `stylelintScssRules` 会在同一个 override 作用域追加。
-
-范围很重要：通用 CSS 规则和属性排序全局生效，SCSS 和 Vue preset 只在对应的 override 中生效。这会避免普通 CSS 文件因为没有加载 SCSS 插件而出现 `Unknown rule`。当前 `stylelint-order` 排序规则支持 `stylelint --fix`，`stylelint-config-recess-order` 则避免把现有代码强制改成字母排序；HTML 解析由 Vue/HTML override 处理，独立 `.scss` 文件使用本包提供的 `postcss-scss` parser 对象。
-
-### UnoCSS 和 Tailwind 支持
-
-配置允许常见工具类工作流指令和函数，包括：
-
-- `@apply`
-- `@screen`
-- `@theme`
-- `@layer`
-- `@variants`
-- `@responsive`
-- `@custom-variant`
-- `@container-queries`
-- `theme()`
-
-### SCSS 支持
-
-配置支持常见 SCSS 语法：
-
-- `@use`
-- `@forward`
-- `@mixin`
-- `@include`
-- `@function`
-- `@extend`
-- `@if`、`@for`、`@each`、`@while`
-
-### Vue 支持
-
-配置支持 Vue SFC 样式和 Vue 特有选择器 / 函数：
-
-- `:deep()` / `::v-deep`
-- `:global()`
-- `:slotted()` / `::v-slotted`
-- `v-bind()`
-
-### 内置执行选项
-
-本配置显式设置 `allowEmptyInput: true`、`cache: false`、`fix: false`。这样没有样式文件的 monorepo 子包不会报错，同时缓存和写回文件这类执行策略不会被共享配置隐式开启。
-
-执行行为选择一个清晰可见的位置即可。package scripts 可以声明 `--fix --cache --cache-location node_modules/.cache/.stylelintcache`；单独或以 Node API 使用 Stylelint 时，也可以在本地配置里覆盖 `fix` 和 `cache`。
-
-### Stylelint 17 language options
-
-本配置通过 `languageOptions.syntax.atRules` 注册 utility-first 框架指令，并通过 `languageOptions.syntax.units.length` 将 `rpx` 注册为自定义长度单位。对于仍需要规则级忽略项的 SCSS 插件兼容场景，会复用同一份 at-rule 列表。
-
-`referenceFiles`、`processors` 等 Stylelint experimental 字段不会默认启用；如果项目有明确场景，请在本地配置里单独开启。
-
-### disable 注释维护
-
-本配置会以 warning 级别报告缺少说明、作用域无效、已经不必要、没有限定具体规则的 `stylelint-disable` 注释。这样可以帮助长期项目清理永久豁免，同时不会默认把这些维护性检查升级成阻塞错误。
-
-### 默认忽略规则
-
-默认忽略路径基于 `process.cwd()` 解析，因此会从使用者项目根目录生效：
-
-- `node_modules`
-- `dist`
-- `build`
-- `.nuxt`
-- `.turbo`
-- `.vercel`
-- `.wrangler`
-- `coverage`
-
-如果你需要追加本地忽略项，可以导入共享片段并用展开语法显式组合。
-
-和 ESLint 不同，不要把文件 glob 替换成 `stylelint .`。Stylelint 配置文件没有类似 ESLint `files` 的白名单能力，因此 CLI 输入仍应限制在可能包含样式的文件上。如果脚本使用 `stylelint "**/*.{css,scss,vue,html}"` 这类全仓库宽 glob，请保留 `--config stylelint.config.ts`。这会强制 Stylelint 使用消费方根配置，避免在共享忽略规则生效前加载无关嵌套目录中的 `.stylelintrc`。
-
-## 自定义配置
-
-简单零配置场景可以继续使用 `extends`：
-
-```ts
-export default {
-  extends: [
-    '@zzjtnb/stylelint-config',
-  ],
-}
-```
-
-需要透明地追加本地配置时，保留 `extends` 里的包入口，只覆盖需要调整的部分：
-
-```ts
-import {
-  createStylelintIgnoreFiles,
-  stylelintDefaultIgnoreGlobs,
-} from '@zzjtnb/stylelint-config'
-
-export default {
-  extends: [
-    '@zzjtnb/stylelint-config',
-  ],
-
-  // 执行参数可以放在 package scripts，也可以按调用方式放在配置里。
-  // 单独或以 Node API 使用 Stylelint 时，配置级 fix/cache 会更方便。
-  fix: true,
-  cache: true,
-
-  rules: {
-    // 示例：不限制 hex 颜色长度
-    'color-hex-length': null,
-
-    // 示例：调整规则严重程度
-    'declaration-block-no-duplicate-properties': [true, { severity: 'warning' }],
-  },
-  ignoreFiles: [
-    ...createStylelintIgnoreFiles({
-      globs: [...stylelintDefaultIgnoreGlobs, 'generated/**'],
-    }),
-  ],
-}
-```
-
-在脚本工作目录不是项目根目录的场景：
-
-```js
-import { createStylelintIgnoreFiles } from '@zzjtnb/stylelint-config'
-
-export default {
-  extends: ['@zzjtnb/stylelint-config'],
-  ignoreFiles: createStylelintIgnoreFiles({ cwd: '/workspace/project' }),
-}
-```
-
-如果你希望属性分组之间保留明显空行：
-
-```ts
-export default {
-  extends: [
-    '@zzjtnb/stylelint-config',
-  ],
-  rules: {
-    'declaration-empty-line-before': 'always',
-    'at-rule-empty-line-before': 'always',
-  },
-}
-```
-
-## VS Code 推荐设置
-
-推荐 `.vscode/settings.json`：
+下面的设置与本仓库最新 `.vscode/settings.json` 中和 Stylelint 相关的配置一致：
 
 ```json
 {
   "css.validate": false,
   "scss.validate": false,
+  "less.validate": false,
+  "stylelint.packageManager": "pnpm",
   "stylelint.validate": ["css", "scss", "vue", "html"],
   "editor.codeActionsOnSave": {
-    "source.fixAll.stylelint": "always"
+    "source.fixAll.stylelint": "explicit",
+    "source.organizeImports": "never"
   }
 }
 ```
 
 ## 注意事项
 
-- Stylelint 配置文件没有类似 ESLint `files` 的白名单能力。建议通过 CLI glob 和编辑器 `stylelint.validate` 控制检查文件类型。
-- 本地同名 `rules` 会替换共享配置中的规则，不会与 `extends` 中的规则深度合并。
-- 如果需要本地 `ignoreFiles`，推荐导入 `stylelintIgnoreFiles` 并通过 `...stylelintIgnoreFiles` 追加，保持共享忽略列表清晰可见。
-- `allowEmptyInput` 在共享配置中默认开启；`fix` 和 `cache` 默认关闭，可以通过 `--fix --cache --cache-location node_modules/.cache/.stylelintcache` 这类脚本参数开启，也可以在更符合调用方式时通过本地配置开启。
+- TypeScript 或 JavaScript 配置文件使用 `zzjtnb()`；只需要原生共享配置加载时使用 `extends: ['@zzjtnb/stylelint-config']`。
+- 同名规则会替换共享规则；单条规则内部的选项不会深度合并。
+- 自定义 `languageOptions` 会替换完整的共享语言模型，包括 `rpx` 单位和 at-rule 例外列表。
+- Stylelint 负责 CSS、SCSS、Vue 和 HTML 样式；JavaScript、TypeScript 和 Markdown 应交给对应的 linter。
 
 ## 官方参考
 
 - [Stylelint 配置](https://stylelint.io/user-guide/configure/)
 - [Stylelint CLI](https://stylelint.io/user-guide/cli/)
 - [Stylelint 规则](https://stylelint.io/user-guide/rules/)
+- [Stylelint 共享配置](https://stylelint.io/user-guide/configure/)
 
 ## 许可证
 

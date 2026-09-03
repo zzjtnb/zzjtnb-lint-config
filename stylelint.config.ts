@@ -1,15 +1,8 @@
-import {
-  createStylelintIgnoreFiles,
-  stylelintIgnoreFiles,
-} from '@zzjtnb/stylelint-config'
+import { zzjtnb } from '@zzjtnb/stylelint-config'
 
-export default {
-  extends: [
-    '@zzjtnb/stylelint-config',
-  ],
+export default zzjtnb({
   ignoreFiles: [
-    ...stylelintIgnoreFiles,
-    ...createStylelintIgnoreFiles({ globs: ['**/backup/**'] }),
+    '**/backup/**',
     'packages/*/README*.md',
   ],
-}
+})

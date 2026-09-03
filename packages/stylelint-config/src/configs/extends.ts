@@ -7,26 +7,24 @@ import { fileURLToPath } from 'node:url'
  * `stylelint-config-standard`，pnpm 的严格依赖边界会要求每个消费项目重复安装这些
  * 实现包。`import.meta.resolve` 会沿当前共享包的依赖边界解析，转换成绝对路径后，
  * Stylelint 就能稳定加载共享包自己声明的依赖。
- *
- * @param {string} locator
  */
-function resolveStylelintConfig(locator: string): string {
+export function resolveConfig(locator: string): string {
   return fileURLToPath(import.meta.resolve(locator))
 }
 
 /** 官方 CSS 基础规则和 recess 属性顺序规则。 */
-export const stylelintExtends = [
-  resolveStylelintConfig('stylelint-config-standard'),
-  resolveStylelintConfig('stylelint-config-recess-order'),
+export const baseExtends = [
+  resolveConfig('stylelint-config-standard'),
+  resolveConfig('stylelint-config-recess-order'),
 ]
 
 /** SCSS 文件使用官方 recommended 规则。 */
-export const stylelintScssExtends = [
-  resolveStylelintConfig('stylelint-config-recommended-scss'),
+export const scssExtends = [
+  resolveConfig('stylelint-config-recommended-scss'),
 ]
 
 /** Vue SFC 使用的官方 Vue + SCSS 容器规则。 */
-export const stylelintVueExtends = [
+export const vueExtends = [
   // `/scss` 变体同时处理 Vue 容器和其中可能出现的 SCSS style block。
-  resolveStylelintConfig('stylelint-config-recommended-vue/scss'),
+  resolveConfig('stylelint-config-recommended-vue/scss'),
 ]

@@ -6,40 +6,12 @@ import type {
 
 import antfu from '@antfu/eslint-config'
 
-import {
-  defaultFormatters,
-  defaultLinterOptions,
-  defaultMarkdown,
-  defaultStylistic,
-  ignores,
-  javascript,
-  resolveIgnores,
-  vueRuleConfig,
-} from './configs/index.js'
+import { ignores } from './configs/ignores.js'
+import { javascript } from './configs/javascript.js'
+import { pnpm } from './configs/pnpm.js'
+import { vueRuleConfig } from './configs/vue.js'
 
-export {
-  defaultFormatters,
-  defaultIgnores,
-  defaultLinterOptions,
-  defaultMarkdown,
-  defaultStylistic,
-  ignores,
-  javascript,
-  jsonc,
-  node,
-  organizationOverrides,
-  perfectionist,
-  pnpm,
-  ruleOverrides,
-  rules,
-  typescript,
-  yaml,
-} from './configs/index.js'
-export type {
-  ESLintConfigOptions,
-  ESLintStylisticOptions,
-  ESLintUserConfig,
-} from './types.js'
+export type * from './types.js'
 
 /**
  * 创建基于 antfu 的 ESLint Flat Config。
@@ -52,82 +24,28 @@ export async function zzjtnb(
 ): Promise<Linter.Config[]> {
   const {
     defaultIgnores,
-    ignores: ignoreOverrides = [],
-    jsonc = true,
-    markdown = defaultMarkdown,
-    node: nodeEnabled = true,
-    pnpm: pnpmEnabled = true,
-    pnpmWorkspace = true,
-    rules = {},
-    stylistic = defaultStylistic,
-    toml = true,
-    typescript = true,
-    unocss = false,
-    vue = true,
-    yaml = true,
-    formatters = defaultFormatters,
-    linterOptions = defaultLinterOptions,
+    ignores: ignoreOverrides,
+    linterOptions,
+    pnpm: pnpmOptions = true,
+    rules,
+    vue: vueOptions = true,
     ...antfuOptions
   } = options
 
-  const baseIgnores = await ignores()
-  const pnpm = pnpmEnabled === false
-    ? false
-    : {
-        json: jsonc !== false,
-        sort: pnpmWorkspace,
-        yaml: yaml !== false && pnpmWorkspace,
-        ...(pnpmEnabled === true ? {} : pnpmEnabled),
-      }
-
   return antfu(
     {
+      // 维持 antfu 的 options → configs 使用方式；本包只在这一层补充默认 TypeScript、
+      // Vue 以及明确公开的忽略项策略，其他上游选项原样传递。
+      typescript: true,
+      vue: vueOptions,
       ...antfuOptions,
-      formatters,
-      ignores: resolveIgnores(ignoreOverrides, defaultIgnores ?? baseIgnores),
-      jsonc,
-      markdown,
-      node: nodeEnabled,
-      pnpm,
-      stylistic,
-      toml,
-      typescript,
-      unocss,
-      vue,
-      yaml,
+      ignores: ignores(ignoreOverrides, defaultIgnores),
+      pnpm: pnpmOptions,
     },
-    ...(await javascript(rules, linterOptions)),
-    ...(vue === false ? [] : [vueRuleConfig]),
+    javascript(rules, linterOptions),
+    ...pnpm(pnpmOptions),
+    // Vue 开启（包括对象形式）时追加本包公开的 Vue 规则。
+    ...(vueOptions === false ? [] : [vueRuleConfig]),
     ...configs,
   ).toConfigs()
 }
-
-/** 纯 JavaScript / TypeScript 配置，默认关闭 Vue 和 UnoCSS。 */
-export async function base(
-  options: ESLintConfigOptions = {},
-  ...configs: ESLintUserConfig[]
-): Promise<Linter.Config[]> {
-  return zzjtnb({ vue: false, unocss: false, ...options }, ...configs)
-}
-
-/** Vue 项目配置；其余默认集成保持不变。 */
-export async function vue(
-  options: ESLintConfigOptions = {},
-  ...configs: ESLintUserConfig[]
-): Promise<Linter.Config[]> {
-  return zzjtnb({ vue: true, ...options }, ...configs)
-}
-
-/** 显式启用 UnoCSS；消费方必须自行安装可选 peer。 */
-export async function uno(
-  options: ESLintConfigOptions = {},
-  ...configs: ESLintUserConfig[]
-): Promise<Linter.Config[]> {
-  return zzjtnb({ unocss: true, ...options }, ...configs)
-}
-
-/**
- * 默认导出与命名导出 `zzjtnb` 指向同一个配置工厂，避免消费者
- * 因为默认导入和命名导入的选择不同而遇到入口不一致的问题。
- */
-export default zzjtnb

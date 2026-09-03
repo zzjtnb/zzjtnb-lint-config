@@ -12,21 +12,20 @@
 ## 工作区结构
 
 ```text
-apps/
-  demo/                 # 配置消费示例
-  docs/                 # 仓库维护文档
 packages/
   eslint-config/        # @zzjtnb/eslint-config 发布包
   stylelint-config/     # @zzjtnb/stylelint-config 发布包
 tests/
   integration/          # 配置加载集成测试
+scripts/
+  release.js            # 交互式 npm 发布流程
 ```
 
 ## 约定
 
 - 使用 `pnpm` 管理依赖和 workspace。
 - 根目录脚本只负责委托 Turborepo，具体任务放在 workspace 包内。
-- lint 脚本默认允许自动修复，并尽量启用工具自身缓存。
+- `lint` 只检查，不修改文件；`format` 才执行自动修复，并尽量启用工具自身缓存。
 - Markdownlint 检查根 README、仓库维护文档和发布包 README，确保 npm 展示文档也保持可维护。
 
 ## 常用命令
@@ -35,8 +34,11 @@ tests/
 # 安装依赖。
 pnpm install
 
-# 执行全部 lint，允许自动修复。
+# 执行全部 lint，不修改文件。
 pnpm lint
+
+# 执行全部格式修复。
+pnpm format
 
 # 只执行 Markdownlint。
 pnpm lint:markdownlint

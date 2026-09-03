@@ -1,30 +1,28 @@
 import type { Linter } from 'eslint'
 
-import { interopDefault } from '../util.js'
+import type { ESLintPnpmOptions } from '../types.js'
 
 /**
- * pnpm 配置工厂。
+ * pnpm 工作区策略覆盖。
  *
- * pnpm 的 package.json 规则需要 JSONC parser，pnpm-workspace.yaml 规则需要
- * YAML parser；两者都由 antfu 负责动态加载。本包只转发开关，不直接安装
- * eslint-plugin-pnpm 或 yaml-eslint-parser。
+ * pnpm 的 parser、规则、排序和全部选项均由 antfu 处理；本包只关闭会被 fix
+ * 自动写入 `pnpm-workspace.yaml` 的工作区策略规则。
  */
-export async function pnpm(
-  options: {
-    // 是否启用 pnpm-workspace.yaml 的 YAML parser、规则和排序。
-    workspace?: boolean
-  } = {},
-): Promise<Linter.Config[]> {
-  // workspace=false 时仍保留 package.json 的 catalog 校验，只关闭
-  // pnpm-workspace.yaml 的 parser、规则和排序。
-  const upstreamPnpm = await interopDefault(
-    import('@antfu/eslint-config'),
-    'pnpm',
-  )
+export function pnpm(
+  options: boolean | ESLintPnpmOptions | undefined = true,
+): Linter.Config[] {
+  // yaml=false 时 antfu 不会注册 pnpm YAML 插件，不能引用它的规则。
+  if (options === false || (typeof options === 'object' && options.yaml === false)) {
+    return []
+  }
 
-  return upstreamPnpm({
-    json: true,
-    sort: options.workspace ?? true,
-    yaml: options.workspace ?? true,
-  })
+  return [
+    {
+      files: ['pnpm-workspace.yaml', '**/pnpm-workspace.yaml'],
+      rules: {
+        // 禁止 ESLint fix 自动添加 pnpm 工作区策略。
+        'pnpm/yaml-enforce-settings': 'off',
+      },
+    },
+  ]
 }

@@ -17,12 +17,10 @@ const disableReportSettings: [true, { severity: 'warning' }] = [
  * - needless：禁用已经不再需要的规则；
  * - unscoped：避免使用没有限定具体规则的全局禁用。
  */
-export const stylelintReportOptions = {
-  reportDescriptionlessDisables: disableReportSettings,
-  reportInvalidScopeDisables: disableReportSettings,
-  reportNeedlessDisables: disableReportSettings,
-  reportUnscopedDisables: disableReportSettings,
-}
+export const reportDescriptionlessDisables = disableReportSettings
+export const reportInvalidScopeDisables = disableReportSettings
+export const reportNeedlessDisables = disableReportSettings
+export const reportUnscopedDisables = disableReportSettings
 
 /**
  * 共享配置只开启不会写回文件的执行容错。
@@ -31,8 +29,6 @@ export const stylelintReportOptions = {
  * - `cache`：缓存目录由消费方脚本显式决定；
  * - `fix`：写回文件由消费方的 `--fix` 或本地配置显式决定。
  */
-export const stylelintExecutionOptions = {
-  allowEmptyInput: true,
-  cache: false,
-  fix: false,
-}
+export const allowEmptyInput = true
+export const cache = false
+export const fix = false

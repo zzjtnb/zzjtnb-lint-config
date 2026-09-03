@@ -3,8 +3,8 @@ import type { Config } from 'stylelint'
 import postcssHtml from 'postcss-html'
 import postcssScss from 'postcss-scss'
 
-import { stylelintScssExtends, stylelintVueExtends } from './extends.js'
-import { stylelintScssRules } from './rules.js'
+import { scssExtends, vueExtends } from './extends.js'
+import { scssRules } from './rules.js'
 
 /**
  * 按文件类型选择 parser 和 SCSS preset。
@@ -14,7 +14,7 @@ import { stylelintScssRules } from './rules.js'
  * - SCSS 使用 `postcss-scss` 和 recommended SCSS / Vue SCSS preset；
  * - 普通 CSS 不加载 SCSS parser，避免把 SCSS 语义扩散到所有文件。
  */
-export const stylelintOverrides: NonNullable<Config['overrides']> = [
+export const overrides: NonNullable<Config['overrides']> = [
   {
     files: ['*.html', '**/*.html', '*.htm', '**/*.htm'],
     customSyntax: postcssHtml,
@@ -22,13 +22,13 @@ export const stylelintOverrides: NonNullable<Config['overrides']> = [
   {
     files: ['*.vue', '**/*.vue'],
     customSyntax: postcssHtml,
-    extends: stylelintVueExtends,
-    rules: stylelintScssRules,
+    extends: vueExtends,
+    rules: scssRules,
   },
   {
     files: ['*.scss', '**/*.scss'],
     customSyntax: postcssScss,
-    extends: [...stylelintScssExtends, ...stylelintVueExtends],
-    rules: stylelintScssRules,
+    extends: [...scssExtends, ...vueExtends],
+    rules: scssRules,
   },
 ]

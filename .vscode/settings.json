@@ -6,14 +6,13 @@
   "files.associations": {
     "*.tpl": "html"
   },
-  "js/ts.tsdk.path": "./node_modules/typescript/lib",
   "npm.packageManager": "pnpm",
-  // 指定项目本地安装的TypeScript版本路径，让VSCode使用项目的TS而非内置版本
-  // "typescript.tsdk": "./node_modules/typescript/lib",
-  // 自动使用工作区的TypeScript版本，不再弹出选择提示
-  // "typescript.enablePromptUseWorkspaceTsdk": false,
-  // 启用项目级诊断功能，使编辑器能提供与命令行pnpm type-check相同的类型检查
-  // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  // 使用仓库根目录安装的 TypeScript，避免编辑器与 vue-tsc 使用不同版本
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+  "js/ts.tsserver.maxMemory.tsserver.maxTsServerMemory": 8192,
+  // 与 pnpm lint 使用同一份 Oxlint 配置
+  "oxc.configPath": "./oxlint.config.ts",
   // Disable the default formatter, use eslint instead
   "svg.preview.background": "black",
   "html.autoClosingTags": false,
@@ -21,8 +20,8 @@
   "editor.formatOnSave": false, // 关闭全局保存格式化，避免和 ESLint/Stylelint 冲突
   // Auto fix
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "always",
-    "source.fixAll.stylelint": "always",
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit",
     "source.organizeImports": "never"
   },
   // 关闭内置校验,仅用 stylelint 检查
@@ -31,12 +30,7 @@
   "less.validate": false,
   "stylelint.packageManager": "pnpm",
   // 指定要验证的文件
-  "stylelint.validate": [
-    "css",
-    "scss",
-    "vue",
-    "html"
-  ],
+  "stylelint.validate": ["css", "scss", "vue", "html"],
   // Silent the stylistic rules in you IDE, but still auto fix them
   "eslint.rules.customizations": [
     {
@@ -117,7 +111,7 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[json]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
   "[jsonc]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
@@ -131,6 +125,23 @@
   "[vue]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // ========================== 文件监视器优化（彻底消除卡顿核心） ==========================
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.pnpm-store/**": true,
+    "**/.tmp/**": true,
+    "**/.turbo/**": true,
+    "**/.nitro/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true,
+    "**/target/**": true,
+    "**/backup/**": true,
+    "**/.cache/**": true,
+    "**/.stylelintcache": true,
+    "**/.eslintcache": true
+  },
   // ========================== 搜索忽略 ==========================
   "search.exclude": {
     "**/.git": true,
@@ -139,10 +150,17 @@
     "**/.vscode": true,
     "**/node_modules": true,
     "**/.pnpm": true,
+    "**/.pnpm-store": true,
     "**/.yarn": true,
     "**/yarn.lock": true,
     "**/package-lock.json": true,
-    "**/pnpm-lock.yaml": true
+    "**/pnpm-lock.yaml": true,
+    "**/.turbo/**": true,
+    "**/.nitro/**": true,
+    "**/.tmp/**": true,
+    "**/target/**": true,
+    "**/coverage/**": true,
+    "**/backup/**": true
   },
   // ========== 文件嵌套 ==========
   "explorer.fileNesting.enabled": true,
@@ -166,15 +184,12 @@
     "pubspec.yaml": ".metadata, .packages, all_lint_rules.yaml, analysis_options.yaml, build.yaml, pubspec.lock, pubspec_overrides.yaml",
     "README.md": "README.zh-CN.md, CHANGELOG.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md",
     "LICENSE": "LICENSE.*",
-    "eslint.config.js": ".eslint*, eslint.config.cjs, eslint.config.mjs, eslint.config.ts",
+    "eslint.config.js": ".eslint*, eslint.config.cjs, eslint.config.mjs, eslint.config.ts, tsconfig.eslint.json",
     "stylelint.config.js": ".stylelint*, stylelint.config.cjs, stylelint.config.mjs, stylelint.config.ts",
     "tsconfig.json": "tsconfig.*.json, jsconfig.json, jsconfig.*.json",
     "pnpm-workspace.yaml": "pnpm-lock.yaml, pnpmfile.*, .npmrc",
     "turbo.json": "turbo.*",
     "unocss.config.js": "uno.config.*, unocss.config.cjs, unocss.config.mjs, unocss.config.ts, uno.css, uno.generated.*"
   },
-  "cSpell.words": [
-    "lucide",
-    "zzjtnb"
-  ]
+  "cSpell.words": ["lucide", "zzjtnb"]
 }

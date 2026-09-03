@@ -1,7 +1,7 @@
 import type { Config } from 'stylelint'
 
 import { utilityAtRules } from './constants.js'
-import { stylelintScssAtRuleOptions } from './language.js'
+import { ignoreAtRules } from './language.js'
 
 /**
  * 共享 CSS / SCSS 规则。
@@ -9,7 +9,7 @@ import { stylelintScssAtRuleOptions } from './language.js'
  * 规则按“语法兼容 → 框架函数 → 结构顺序 → 选择器”分组，单个规则旁边
  * 直接说明关闭或放宽的原因，避免消费方只能看到一个无法解释的规则映射。
  */
-export const stylelintRules: NonNullable<Config['rules']> = {
+export const rules: NonNullable<Config['rules']> = {
   // 工具类框架和 SCSS 会扩展 at-rule 集合，避免核心规则误报合法语法。
   'at-rule-no-unknown': [true, {
     ignoreAtRules: utilityAtRules,
@@ -68,7 +68,6 @@ export const stylelintRules: NonNullable<Config['rules']> = {
   'selector-pseudo-element-no-unknown': [true, {
     ignorePseudoElements: ['v-deep', 'v-global', 'v-slotted'],
   }],
-
 }
 
 /**
@@ -78,9 +77,9 @@ export const stylelintRules: NonNullable<Config['rules']> = {
  * 因为插件尚未加载而报告 Unknown rule。因此这些规则必须和对应的 SCSS preset
  * 放在同一个 override 作用域内，而不是依赖全局插件兜底。
  */
-export const stylelintScssRules: NonNullable<Config['rules']> = {
+export const scssRules: NonNullable<Config['rules']> = {
   // SCSS 插件不读取 Stylelint 语言模型，因此复用统一的 at-rule 例外列表。
-  'scss/at-rule-no-unknown': [true, stylelintScssAtRuleOptions],
+  'scss/at-rule-no-unknown': [true, ignoreAtRules],
 
   // 不限制 SCSS 运算符后的换行，避免干预计算表达式的可读排版。
   'scss/operator-no-newline-after': null,
