@@ -1,0 +1,31 @@
+import type { Plugin } from 'vite'
+
+const FORM_FIELD_SLOT_MIGRATION_WARNING
+  = '[Form] BREAKING CHANGE: Named field slot control bindings moved to `slotProps.componentProps`. Replace `v-bind="slotProps"` with `v-bind="slotProps.componentProps"`.'
+
+function viteFormFieldSlotMigrationWarningPlugin(): Plugin {
+  return {
+    apply: 'serve',
+    configResolved(config) {
+      config.logger.warn(FORM_FIELD_SLOT_MIGRATION_WARNING)
+    },
+    name: 'vite:form-field-slot-migration-warning',
+    transformIndexHtml() {
+      return [
+        {
+          attrs: {
+            'data-form-field-slot-migration-warning': '',
+          },
+          children: `console.warn(${JSON.stringify(FORM_FIELD_SLOT_MIGRATION_WARNING)});`,
+          injectTo: 'body',
+          tag: 'script',
+        },
+      ]
+    },
+  }
+}
+
+export {
+  FORM_FIELD_SLOT_MIGRATION_WARNING,
+  viteFormFieldSlotMigrationWarningPlugin,
+}

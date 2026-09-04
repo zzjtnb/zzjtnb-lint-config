@@ -1,72 +1,103 @@
 # zzjtnb-lint-config
 
-面向现代前端项目的 lint 配置工作区，集中维护 ESLint、Stylelint 和 Markdownlint 相关配置。
+[![@zzjtnb/eslint-config 版本](https://npmx.dev/api/registry/badge/version/@zzjtnb/eslint-config?name=true&style=shieldsio&labelColor=080f12&color=1fa669)](https://npmx.dev/package/@zzjtnb/eslint-config) [![@zzjtnb/stylelint-config 版本](https://npmx.dev/api/registry/badge/version/@zzjtnb/stylelint-config?name=true&style=shieldsio&labelColor=080f12&color=1fa669)](https://npmx.dev/package/@zzjtnb/stylelint-config) [![@zzjtnb/markdownlint-config 版本](https://npmx.dev/api/registry/badge/version/@zzjtnb/markdownlint-config?name=true&style=shieldsio&labelColor=080f12&color=1fa669)](https://npmx.dev/package/@zzjtnb/markdownlint-config) [![许可证](https://img.shields.io/github/license/zzjtnb/zzjtnb-lint-config?labelColor=080f12&color=1fa669)](./LICENSE)
 
-## 发布包
+面向现代前端项目的 ESLint,Stylelint 与 Markdownlint 共享配置.一次安装,让 TypeScript,Vue,样式和文档共用同一套代码规范.
 
-| 包名 | 说明 |
-| --- | --- |
-| [`@zzjtnb/eslint-config`](./packages/eslint-config/README.md) | 基于 `@antfu/eslint-config` 的 ESLint 10 Flat Config 共享配置。 |
-| [`@zzjtnb/stylelint-config`](./packages/stylelint-config/README.md) | 面向 CSS、SCSS、Vue SFC、UnoCSS、Tailwind 风格工作流和 uni-app 的 Stylelint 17 共享配置。 |
+完整文档:<https://lint.docs.zzjtnb.com/>
 
-## 工作区结构
+## 包
 
-```text
-packages/
-  eslint-config/        # @zzjtnb/eslint-config 发布包
-  stylelint-config/     # @zzjtnb/stylelint-config 发布包
-tests/
-  integration/          # 配置加载集成测试
-scripts/
-  release.js            # 交互式 npm 发布流程
-```
+| 包 | 用途 | 工具版本 |
+| --- | --- | --- |
+| [`@zzjtnb/eslint-config`](./packages/eslint-config/README.md) | 基于 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 的 Flat Config,覆盖 TypeScript,Vue,JSON,YAML,TOML,Markdown 与 pnpm 工作区 | ESLint 10 |
+| [`@zzjtnb/stylelint-config`](./packages/stylelint-config/README.md) | CSS,SCSS,Vue SFC,HTML,兼容 UnoCSS,Tailwind 风格指令与 uni-app 的 `rpx` | Stylelint 17 |
+| [`@zzjtnb/markdownlint-config`](./packages/markdownlint-config/README.md) | 带逐条规则说明的 JSONC,支持原生 `extends` 与项目自定义规则 | markdownlint-cli2 |
 
-## 约定
+`eslint`,`stylelint` 和 `markdownlint-cli2` 由你的项目安装;解析器,预设和插件由配置包自身管理,不需要重复安装.
 
-- 使用 `pnpm` 管理依赖和 workspace。
-- 根目录脚本只负责委托 Turborepo，具体任务放在 workspace 包内。
-- `lint` 只检查，不修改文件；`format` 才执行自动修复，并尽量启用工具自身缓存。
-- Markdownlint 检查根 README、仓库维护文档和发布包 README，确保 npm 展示文档也保持可维护。
+## 快速开始
 
-## 常用命令
+### ESLint
 
 ```bash
-# 安装依赖。
-pnpm install
-
-# 执行全部 lint，不修改文件。
-pnpm lint
-
-# 执行全部格式修复。
-pnpm format
-
-# 只执行 Markdownlint。
-pnpm lint:markdownlint
-
-# 执行类型检查。
-pnpm typecheck
-
-# 执行构建检查。
-pnpm build
-
-# 执行测试。
-pnpm test
-
-# 执行发布前检查。
-pnpm release:check
-
-# 交互式发布：登录检查、版本检查、完整校验、打包和逐包发布。
-# 发布成功后立即结束，不等待 npm registry 同步；脚本会输出页面和检查命令。
-# npm 启用 2FA 时，发布命令会在当前终端中提示输入 OTP。
-pnpm release
-
-# 预览发布包内容。
-pnpm release:pack
+pnpm add -D eslint @zzjtnb/eslint-config
 ```
 
-## 仓库地址
+```ts
+// eslint.config.ts
+import { zzjtnb } from '@zzjtnb/eslint-config'
 
-<https://github.com/zzjtnb/zzjtnb-lint-config>
+export default zzjtnb()
+```
+
+### Stylelint
+
+```bash
+pnpm add -D stylelint @zzjtnb/stylelint-config
+```
+
+```ts
+// stylelint.config.ts
+import { zzjtnb } from '@zzjtnb/stylelint-config'
+
+export default zzjtnb()
+```
+
+### Markdownlint
+
+```bash
+pnpm add -D markdownlint-cli2 @zzjtnb/markdownlint-config
+```
+
+```jsonc
+// .markdownlint-cli2.jsonc
+{
+  "gitignore": true,
+  "ignores": ["**/node_modules/**", "**/dist/**"],
+  "config": {
+    "extends": "@zzjtnb/markdownlint-config"
+  }
+}
+```
+
+选项,规则覆盖,忽略项和脚本写法见各包的 README 与[快速开始](https://lint.docs.zzjtnb.com/quick-start).
+
+## Playground 工作台
+
+Playground 是独立的 Vite 应用,提供真实引擎检查,自动修复,配置草稿,规则查询与分享.当前检查能力依赖本地 Node.js 开发服务,本地启动后访问 <http://localhost:3001/>.启动方式与使用限制见 [工作台 README](./playground/README.md).
+
+## 文档
+
+完整文档见 <https://lint.docs.zzjtnb.com/>，包含[快速开始](https://lint.docs.zzjtnb.com/quick-start)、ESLint、Stylelint、Markdownlint 规则指南及依赖版本管理。
+
+## 本地开发
+
+环境要求以根 `package.json` 的 `engines` 与 `packageManager` 为准.
+
+```bash
+pnpm install
+```
+
+| 命令 | 作用 |
+| --- | --- |
+| `pnpm lint` | 检查 ESLint,Stylelint 与 Markdown,不修改文件 |
+| `pnpm format` | 同上并自动修复,会写回文件 |
+| `pnpm typecheck` | 类型检查 |
+| `pnpm test` | 运行全部测试 |
+| `pnpm build` | 构建各 workspace 中定义了构建脚本的包 |
+
+开发服务统一从 3000 开始分配(文档站为 3000,Playground 为 3001),端口被占用时会直接报错,不会改用其他端口;端口分别由各自的 Vite 配置维护.
+
+仓库只有上表三个包对外发布,其余 workspace 仅供工程内部使用,不属于公开 API.
+
+## 发布
+
+```bash
+pnpm release
+```
+
+脚本的菜单,版本处理,检查范围与恢复步骤见[当前发布流程](./apps/handbook/当前发布流程.md),手动发布见[原始发布流程](./apps/handbook/原始发布流程.md),常见问题见[发布常见问题](./apps/handbook/发布常见问题.md).脚本不会自动 commit,tag 或 push.
 
 ## 许可证
 

@@ -1,0 +1,39 @@
+{
+  "name": "@zzjtnb/playground",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --open",
+    "dev:inspector": "pnpm exec config-inspector --config eslint.config.ts",
+    "build": "vite build",
+    "build:inspector": "pnpm exec config-inspector build --stats --config eslint.config.ts --out-dir ./.eslint-config-inspector",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "prelint:eslint": "pnpm --filter @zzjtnb/eslint-config build",
+    "prelint:stylelint": "pnpm --filter @zzjtnb/stylelint-config build",
+    "lint:eslint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --cache --cache-location node_modules/.cache/.stylelintcache",
+    "lint": "pnpm run lint:eslint && pnpm run lint:stylelint",
+    "format:eslint": "pnpm run lint:eslint --fix",
+    "format:stylelint": "pnpm run lint:stylelint --fix",
+    "format": "pnpm run format:eslint && pnpm run format:stylelint"
+  },
+  "dependencies": {
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint/config-inspector": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "@zzjtnb/eslint-config": "workspace:*",
+    "@zzjtnb/stylelint-config": "workspace:*",
+    "@zzjtnb/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "markdownlint-cli2": "catalog:",
+    "sass-embedded": "catalog:",
+    "stylelint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

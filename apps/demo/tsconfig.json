@@ -1,14 +1,23 @@
 {
+  // TypeScript 的检查配置；这里只做类型检查（noEmit），不生成 JavaScript 文件。
   "compilerOptions": {
+    // 目标语法和模块格式都使用最新标准。
     "target": "ESNext",
     "module": "ESNext",
+    // bundler 模式：按 Vite 等打包工具的方式解析 import。
     "moduleResolution": "bundler",
+    // uno.config.ts 和测试会用到 Node.js 的 fs、url 等内置模块，需要它们的类型。
+    "types": ["node"],
+    // 开启全部严格检查，能在编码阶段发现更多问题。
     "strict": true,
     "noEmit": true,
     "isolatedModules": true,
     "skipLibCheck": true
   },
+  // 检查范围：UnoCSS 配置、全部源码和测试。.vue 文件由 ESLint 与 Stylelint 检查，不在这里。
   "include": [
-    "src/**/*.ts"
+    "uno.config.ts",
+    "src/**/*.ts",
+    "tests/**/*.ts"
   ]
 }

@@ -6,22 +6,46 @@
     "**/tsconfig*.json",
     "**/tsdown.config.ts",
     "**/eslint.config.ts",
-    "**/stylelint.config.ts"
+    "**/stylelint.config.ts",
+    "**/vitest.config.ts"
   ],
-  "globalEnv": ["NODE_ENV"],
-  // "ui": "tui",
+  "globalEnv": [
+    "NODE_ENV"
+  ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        "dist.zip"
+      ]
+    },
+    "preview": {
+      "dependsOn": [
+        "^build"
+      ],
+      "cache": false,
+      "persistent": true
+    },
+    "dev": {
+      "dependsOn": [],
+      "outputs": [],
+      "cache": false,
+      "persistent": true
     },
     "//#lint:eslint": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false,
       "outputs": []
     },
     "//#lint:stylelint": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false,
       "outputs": []
     },
@@ -34,12 +58,17 @@
       "outputs": []
     },
     "lint:eslint": {
-      "dependsOn": ["build", "^build"],
+      "dependsOn": [
+        "build",
+        "^build"
+      ],
       "cache": false,
       "outputs": []
     },
     "lint:stylelint": {
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "cache": false,
       "outputs": []
     },
@@ -47,13 +76,11 @@
       "cache": false,
       "outputs": []
     },
-    "test": {
-      "dependsOn": ["^build"],
-      "outputs": []
-    },
     "typecheck": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.json"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tsconfig.json"
+      ],
       "outputs": []
     },
     "version:patch": {

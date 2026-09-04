@@ -3,7 +3,7 @@ import type { OptionsConfig } from '@antfu/eslint-config'
 
 type AntfuConfigInput = Parameters<typeof antfu>[1]
 
-/** 传给 `zzjtnb` 的后续 Flat Config 片段。 */
+/** 传给 `zzjtnb` 的后续 antfu 配置输入，保留对象、数组、异步结果和 composer 能力。 */
 export type ESLintUserConfig = NonNullable<AntfuConfigInput>
 
 /**
@@ -34,7 +34,7 @@ export type ESLintPnpmOptions = Exclude<
  * 本包私有 API。`files` 仅属于后续配置片段，不能出现在全局选项对象中。
  */
 export type ESLintConfigOptions = Omit<NonNullable<Parameters<typeof antfu>[0]>, 'ignores'> & {
-  /** 在 antfu 默认忽略项之后追加本包的通用生成物路径；传 `false` 时由消费方完全接管。 */
+  /** 替换本包追加的通用忽略列表；false 同时接管该入口中的上游列表，不关闭独立的 gitignore 集成。 */
   defaultIgnores?: readonly string[] | false
   /** 与 antfu 保持一致的忽略项输入。 */
   ignores?: OptionsConfig['ignores']

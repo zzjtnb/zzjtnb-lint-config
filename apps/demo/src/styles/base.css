@@ -1,0 +1,12 @@
+/* 项目基础样式：Wind4 已提供 reset，这里只补示例需要的全局默认值。 */
+body {
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+/* `--font-serif` 由 uno.config.ts 的 safelist 触发生成，字体栈统一在 theme.font 中声明。 */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+}

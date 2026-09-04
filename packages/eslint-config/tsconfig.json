@@ -1,13 +1,7 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // 继承仓库严格检查；JavaScript 与声明产物统一由 tsdown 生成，tsc 不写入 dist。
   "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "declaration": true,
-    "declarationMap": false,
-    "noEmit": false,
-    "outDir": "dist",
-    "sourceMap": false
-  },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "tsdown.config.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

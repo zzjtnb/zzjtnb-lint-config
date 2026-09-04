@@ -1,10 +1,6 @@
 # @zzjtnb/stylelint-config
 
-<p align="center">
-  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/v/%40zzjtnb%2Fstylelint-config?color=a1b858&label=npm" alt="npm version"></a>
-  <a href="https://npmjs.com/package/@zzjtnb/stylelint-config"><img src="https://img.shields.io/npm/dm/%40zzjtnb%2Fstylelint-config?color=50a8d8&label=downloads" alt="npm downloads"></a>
-  <a href="https://github.com/zzjtnb/zzjtnb-lint-config"><img src="https://img.shields.io/github/stars/zzjtnb/zzjtnb-lint-config?style=social" alt="GitHub stars"></a>
-</p>
+[![@zzjtnb/stylelint-config 版本](https://npmx.dev/api/registry/badge/version/@zzjtnb/stylelint-config?name=true&style=shieldsio&labelColor=080f12&color=1fa669)](https://npmx.dev/package/@zzjtnb/stylelint-config) [![许可证](https://npmx.dev/api/registry/badge/license/@zzjtnb/stylelint-config?style=shieldsio&labelColor=080f12&color=1fa669)](https://npmx.dev/package/@zzjtnb/stylelint-config) [![月下载量](https://npmx.dev/api/registry/badge/downloads-month/@zzjtnb/stylelint-config?style=shieldsio&labelColor=080f12&color=1fa669)](https://npmx.dev/package/@zzjtnb/stylelint-config) [![GitHub stars](https://img.shields.io/github/stars/zzjtnb/zzjtnb-lint-config?style=social)](https://github.com/zzjtnb/zzjtnb-lint-config)
 
 <p align="center"><strong>Stylelint config for modern CSS, SCSS, Vue SFC, UnoCSS and Tailwind-style workflows</strong></p>
 
@@ -52,7 +48,7 @@ export default {
 }
 ```
 
-Use the factory form when adding local rules, ignores or overrides. Use the native form when the package defaults are sufficient.
+Both forms support local `rules`, `ignoreFiles`, and `overrides`. The factory appends lists and applies rules in this package's defined order; native `extends` uses Stylelint's inheritance semantics. Do not assume identical override precedence.
 
 ## Complete configuration
 
@@ -66,13 +62,13 @@ export default zzjtnb({
   // These paths are appended to the shared absolute ignore paths.
   ignoreFiles: [
     '**/generated/**',
-    'packages/*/README*.md',
+    '**/public/vendor/**',
   ],
 
   // A same-named consumer rule replaces the shared value.
   rules: {
     'selector-class-pattern': null,
-    'no-empty-source': 'error',
+    'no-empty-source': true,
   },
 
   // This override is appended after the package's HTML, Vue and SCSS overrides.
@@ -80,7 +76,7 @@ export default zzjtnb({
     {
       files: ['apps/legacy/**/*.vue'],
       rules: {
-        'scss/operator-no-newline-after': null,
+        'no-empty-source': null,
       },
     },
   ],
@@ -94,7 +90,7 @@ A complete Stylelint config fragment can be passed after the first argument. Thi
 import { zzjtnb } from '@zzjtnb/stylelint-config'
 
 export default zzjtnb(
-  { rules: { 'no-empty-source': 'error' } },
+  { rules: { 'no-empty-source': true } },
   {
     ignoreFiles: ['**/vendor/**'],
     rules: {
@@ -127,32 +123,37 @@ The default configuration extends:
 
 - `stylelint-config-standard` for the shared CSS rules;
 - `stylelint-config-recess-order` for property ordering;
-- `stylelint-config-recommended-vue/scss` in the Vue and SCSS scopes;
+- `stylelint-config-recommended-vue/scss` in the Vue scope;
 - `stylelint-config-recommended-scss` in the SCSS scope.
 
-The `stylelint-order` plugin is registered by the package. The package resolves its own dependency to an absolute path so Stylelint does not have to find the plugin from the consuming project's pnpm resolution context. Consumers do not need to add these implementation packages separately.
+The recess-order preset registers `stylelint-order`; the SCSS and Vue presets register `stylelint-scss` in their file scopes. The package declares the required dependencies and resolves preset entries from its own dependency context, without registering the same plugins again. Consumers do not need to install these implementation dependencies separately.
 
 ### Syntax scopes
 
 | File scope | Parser / extensions | Rules |
 | --- | --- | --- |
-| `*.html`, `*.htm` | `postcss-html` | Shared CSS rules |
+| `*.css` | Stylelint default CSS syntax | Shared CSS rules and CSS-specific adjustments |
+| `*.html`, `*.htm` | `postcss-html` | Shared CSS rules and CSS-specific adjustments |
 | `*.vue` | `postcss-html`, Vue SCSS preset | Shared CSS rules plus `scss/*` rules |
-| `*.scss` | `postcss-scss`, SCSS preset and Vue SCSS preset | Shared CSS rules plus `scss/*` rules |
+| `*.scss` | `postcss-scss`, SCSS preset | Shared CSS rules plus `scss/*` rules |
+
+Top-level `rules` take precedence over presets inherited inside file overrides. CSS / HTML-only rules stay in their own file scopes, so they do not re-enable rules disabled by the SCSS preset. Factory `rules` apply after shared file-scoped defaults, followed by that argument's `overrides`; subsequent arguments follow the same order.
 
 SCSS plugin rules are registered only inside the `.scss` and `.vue` overrides. Ordinary CSS files therefore do not receive `Unknown rule` errors for SCSS rules.
 
+Vue scoped styles can use `:deep()`, `:global()`, and `:slotted()` without repeating their exceptions in each project. Other unknown pseudo-classes are still reported.
+
 ### At-rules and units
 
-The shared syntax model permits utility-first directives such as `@apply`, `@layer`, `@theme`, `@screen`, `@custom-variant` and `@container-queries`. It also registers `rpx` as a CSS length unit.
+The shared configuration supports utility-first directives such as `@apply`, `@layer`, `@theme`, `@screen`, `@custom-variant`, and `@container-queries`, and registers `rpx` as a CSS length unit. Stylelint already recognizes `@apply` and `@layer`, so the package does not register them again. CSS / HTML additionally exempt utility-style `@apply` parameters from prelude validation.
 
-The same at-rule exception list is used by the core `at-rule-no-unknown` rule and the SCSS `scss/at-rule-no-unknown` rule, so CSS and SCSS use the same framework syntax policy.
+CSS registers utility directives through `languageOptions.syntax.atRules`; the SCSS plugin receives the same names as exceptions. Built-in Sass directives are handled by the official SCSS preset rather than registered as CSS extensions.
 
 ### Default rules
 
 The package keeps the standard and recess-order presets, then explicitly relaxes rules that conflict with the repository's CSS, Vue, SCSS or utility-first conventions. Examples include unknown utility at-rules and functions, generic font-family requirements, descending specificity, empty source files, selected selector restrictions and some declaration-position checks.
 
-The full rule map is the published `rules` object. Use the `rules` field to replace a rule by name rather than copying the complete shared map.
+The effective rules include both inherited presets and file-scoped adjustments. Use `pnpm exec stylelint --config stylelint.config.ts --print-config <file>` to inspect the final configuration for a specific file. Use the `rules` field to replace a rule by name rather than copying the complete shared map.
 
 ### Execution and reporting
 
@@ -163,21 +164,23 @@ The following Stylelint config fields default to the shown values:
 | `allowEmptyInput` | `true` | A glob that matches no files does not fail the run |
 | `cache` | `false` | Stylelint does not use its cache unless the consumer enables it |
 | `fix` | `false` | Stylelint does not write fixes unless the consumer enables it |
-| `reportDescriptionlessDisables` | `'warning'` | Warn about `stylelint-disable` comments without a description |
-| `reportInvalidScopeDisables` | `'warning'` | Warn about disable comments whose rule scope is invalid |
-| `reportNeedlessDisables` | `'warning'` | Warn about disable comments that are no longer needed |
-| `reportUnscopedDisables` | `'warning'` | Warn about disable comments that do not name a rule |
+| `reportDescriptionlessDisables` | `[true, { severity: 'warning' }]` | Warn about `stylelint-disable` comments without a description |
+| `reportInvalidScopeDisables` | `[true, { severity: 'warning' }]` | Warn about disable comments whose rule scope is invalid |
+| `reportNeedlessDisables` | `[true, { severity: 'warning' }]` | Warn about disable comments that are no longer needed |
+| `reportUnscopedDisables` | `[true, { severity: 'warning' }]` | Warn about disable comments that do not name a rule |
 
-Caching and file writes are controlled by the consumer's CLI flags or local config. The shareable config does not enable either behavior implicitly.
+Caching and file writes are controlled by the consumer's CLI flags or local config. The shareable config does not enable either behavior implicitly. `allowEmptyInput: true` permits zero matches; it does not establish that the target file was checked. Set `allowEmptyInput: false` when zero matches must fail.
 
 ### Default ignores
 
-The default `ignoreFiles` list is generated from the consuming project's `process.cwd()` and includes:
+The shared default `ignoreFiles` list includes:
 
 - `node_modules`, `dist`, `build`, `.nuxt`, `.turbo`, `.vercel`, `.wrangler` and `coverage`;
 - JavaScript, TypeScript, JSON and Markdown files, which should be checked by their respective linters.
 
-The paths are absolute so a shared config does not accidentally resolve its ignore globs relative to the package directory. Add repository-specific paths through the factory's `ignoreFiles` field; the values are appended to the shared list.
+Each factory call generates paths from its current working directory; the default object used by native `extends` is generated at module load. Paths are absolute so a shared config does not accidentally resolve its ignore globs relative to the package directory. Add repository-specific paths through the factory's `ignoreFiles` field; the values are appended to the shared list. Tauri defaults exclude `src-tauri/target` and `src-tauri/gen`, including generated schemas and Android / Apple projects, without excluding unrelated `target` or `gen` directories; handwritten resources such as `src-tauri/resources` remain checked. Append custom output directories through `ignoreFiles`.
+
+The factory always appends `ignoreFiles`; an empty array does not remove shared ignores. To take over the list completely, override `ignoreFiles` on the returned object and retain necessary dependency and generated-output exclusions yourself.
 
 ## CLI scripts
 
@@ -186,8 +189,8 @@ Use a style-bearing glob rather than `stylelint .`, because Stylelint config fil
 ```json
 {
   "scripts": {
-    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --cache --cache-location node_modules/.cache/.stylelintcache",
-    "format:stylelint": "pnpm run lint:stylelint -- --fix"
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html,htm}\" --config stylelint.config.ts --cache --cache-location node_modules/.cache/.stylelintcache",
+    "format:stylelint": "pnpm run lint:stylelint --fix"
   }
 }
 ```
@@ -206,7 +209,7 @@ Use a style-bearing glob rather than `stylelint .`, because Stylelint config fil
 
 ## VS Code
 
-The following settings match the Stylelint-related entries in this repository's latest `.vscode/settings.json`:
+Merge this example into the consuming project's `.vscode/settings.json`, preserving save actions for other languages. Let Stylelint own style diagnostics and fixes, and disable duplicate built-in CSS / SCSS / Less validation:
 
 ```json
 {
@@ -224,7 +227,7 @@ The following settings match the Stylelint-related entries in this repository's 
 
 ## Notes
 
-- Use `zzjtnb()` when the configuration file is written in TypeScript or JavaScript; use `extends: ['@zzjtnb/stylelint-config']` when native Stylelint shareable-config loading is sufficient.
+- TypeScript and JavaScript configurations can call `zzjtnb()` or export a native object containing `extends`; choose based on the required merge semantics.
 - A same-named rule replaces the shared rule; options inside one rule are not deep-merged.
 - A custom `languageOptions` object replaces the complete shared language model, including the `rpx` unit and at-rule exceptions.
 - Stylelint owns CSS, SCSS, Vue and HTML styles. JavaScript, TypeScript and Markdown should be handled by their respective linters.
@@ -234,8 +237,7 @@ The following settings match the Stylelint-related entries in this repository's 
 - [Stylelint configuration](https://stylelint.io/user-guide/configure/)
 - [Stylelint CLI](https://stylelint.io/user-guide/cli/)
 - [Stylelint rules](https://stylelint.io/user-guide/rules/)
-- [Stylelint shared configs](https://stylelint.io/user-guide/configure/)
 
 ## License
 
-[MIT](https://github.com/zzjtnb/zzjtnb-lint-config/blob/master/LICENSE) © 2022-PRESENT [争逐](https://zzjtnb.com)
+[MIT](https://github.com/zzjtnb/zzjtnb-lint-config/blob/main/LICENSE) © 2022-PRESENT [争逐](https://zzjtnb.com)

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"]
+    },
+    // CLI 消费公开配置的 dist，需要先构建依赖包；不需要先打包工作台页面。
+    "lint:eslint": {
+      "dependsOn": ["^build"]
+    },
+    "lint:stylelint": {
+      "dependsOn": ["^build"]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": [".vitepress/dist/**"]
+    },
+    "lint:eslint": {
+      "dependsOn": ["^build"]
+    },
+    "lint:stylelint": {
+      "dependsOn": ["^build"]
+    }
+  }
+}

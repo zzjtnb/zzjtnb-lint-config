@@ -12,6 +12,8 @@ node_modules
 .env.test.local
 .env.production.local
 
+.cache
+
 # Testing
 coverage
 .stylelintcache
@@ -25,6 +27,7 @@ coverage
 
 # Build Outputs
 .next/
+.eslint-config-inspector/
 out/
 build
 dist
@@ -38,5 +41,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+.codegraph/
 
 backup

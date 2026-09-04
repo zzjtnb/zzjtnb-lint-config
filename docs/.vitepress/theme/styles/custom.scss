@@ -1,0 +1,97 @@
+// 结构选择器随 VitePress 默认主题升级回归，布局与交互仍由官方主题负责。
+.VPHome {
+  background: radial-gradient(ellipse at 80% 0, var(--vp-c-brand-soft), transparent 48%);
+
+  .VPHero .name {
+    letter-spacing: -0.045em;
+    overflow-wrap: anywhere;
+  }
+
+  .VPHero .text {
+    letter-spacing: -0.025em;
+  }
+
+  .VPHero .tagline {
+    max-width: 38em;
+  }
+
+  .VPFeature {
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 20px;
+    background: var(--vp-c-bg-elv);
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+
+    .icon {
+      color: var(--vp-c-brand-1);
+      background: var(--vp-c-brand-soft);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    .title {
+      font-size: 19px;
+      line-height: 1.5;
+    }
+
+    .link-text {
+      margin-top: 20px;
+      color: var(--vp-c-brand-1);
+    }
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--vp-c-brand-1);
+      box-shadow: var(--site-card-shadow);
+      transform: translateY(-3px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--vp-c-brand-1);
+      outline-offset: 4px;
+    }
+  }
+}
+
+@supports (backdrop-filter: blur(12px)) {
+  .VPNavBar:not(.top):not(.screen-open) {
+    background-color: var(--site-nav-glass);
+    backdrop-filter: blur(12px);
+
+    .content-body {
+      background-color: transparent;
+    }
+  }
+}
+
+// 徽章保持行内排列和固有尺寸，不改变正文图片的块级布局。
+.vp-doc a > img:is([src^='https://npmx.dev/api/registry/badge/'], [src^='https://img.shields.io/']) {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+}
+
+// 不覆盖正文尺寸及代码滚动；长内容继续由官方容器处理。
+.vp-doc a:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 3px;
+}
+
+@media (max-width: 639px) {
+  .VPHome .VPHero .name {
+    font-size: 34px;
+    line-height: 1.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .VPHome .VPFeature {
+    transition: none;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+    }
+  }
+}

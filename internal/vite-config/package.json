@@ -1,0 +1,60 @@
+{
+  "name": "@zzjtnb/vite-config",
+  "type": "module",
+  "version": "5.7.0",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/zzjtnb/zzjtnb-lint-config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzjtnb/zzjtnb-lint-config.git",
+    "directory": "internal/vite-config"
+  },
+  "bugs": "https://github.com/zzjtnb/zzjtnb-lint-config/issues",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "stub": "pnpm exec tsdown",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@intlify/unplugin-vue-i18n": "catalog:",
+    "@jspm/generator": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@zzjtnb/node-utils": "workspace:*",
+    "@zzjtnb/styles": "workspace:*",
+    "archiver": "catalog:",
+    "cheerio": "catalog:",
+    "get-port": "catalog:",
+    "html-minifier-terser": "catalog:",
+    "nitropack": "catalog:",
+    "vite-plugin-pwa": "catalog:",
+    "vite-plugin-vue-devtools": "catalog:"
+  },
+  "devDependencies": {
+    "@pnpm/workspace.read-manifest": "catalog:",
+    "@types/archiver": "catalog:",
+    "@types/html-minifier-terser": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "@vitejs/plugin-vue-jsx": "catalog:",
+    "dayjs": "catalog:",
+    "rollup-plugin-visualizer": "catalog:",
+    "sass-embedded": "catalog:",
+    "typescript": "catalog:",
+    "unplugin-dts": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-compression": "catalog:",
+    "vite-plugin-lazy-import": "catalog:",
+    "vitest": "catalog:"
+  }
+}

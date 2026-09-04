@@ -1,15 +1,21 @@
+// 这是一个 SCSS 写法示例，用来演示 Stylelint 对 SCSS 与 UnoCSS 指令的检查。
+// 它是独立的样式文件，示例没有把它挂到页面上，可以把它理解成“这类文件会被检查成什么样”。
 @use 'sass:math';
 
-.demo-card {
+.greeting {
+  // @apply 把若干工具类合并进当前选择器，由 UnoCSS 的 transformerDirectives 处理。
   @apply rounded-lg px-4 py-2 text-center;
 
+  // 用 Sass 的 math.div 做除法，避免旧的 `/` 除法写法。
   width: math.div(320px, 2);
-  color: theme('colors.gray.900');
+  // theme() 读取 uno.config.ts 里声明的主题颜色。
+  color: theme('colors.foreground');
 }
 
+// @container 是容器查询：容器宽度达到 400px 时才应用里面的样式。
 @container-queries {
   @container (min-width: 400px) {
-    .demo-card {
+    .greeting {
       padding: 2rem;
     }
   }

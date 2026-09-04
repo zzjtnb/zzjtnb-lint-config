@@ -1,0 +1,34 @@
+{
+  "name": "@zzjtnb/commitlint-config",
+  "type": "module",
+  "version": "5.7.0",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/zzjtnb/zzjtnb-lint-config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzjtnb/zzjtnb-lint-config.git",
+    "directory": "internal/lint-configs/commitlint-config"
+  },
+  "bugs": "https://github.com/zzjtnb/zzjtnb-lint-config/issues",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "main": "./index.js",
+  "module": "./index.js",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@zzjtnb/node-utils": "workspace:*",
+    "commitlint-plugin-function-rules": "catalog:",
+    "cz-git": "catalog:",
+    "czg": "catalog:"
+  }
+}

@@ -1,12 +1,62 @@
 {
   "recommendations": [
+    // Vue 3 语言支持
     "Vue.volar",
-    "tauri-apps.tauri-vscode",
-    "rust-lang.rust-analyzer",
+    // ESLint 静态检查
     "dbaeumer.vscode-eslint",
+    // Oxc 扩展：Oxlint 静态检查与 Oxfmt 格式化
     "oxc.oxc-vscode",
-    "streetsidesoftware.code-spell-checker",
+    // Stylelint 样式检查
     "stylelint.vscode-stylelint",
-    "vadimcn.vscode-lldb"
+    // Markdown 检查与格式化，读取项目的 .markdownlint-cli2.jsonc。
+    "DavidAnson.vscode-markdownlint",
+    // 支持 dotenv 文件语法
+    "mikestead.dotenv",
+    // YAML 语法、补全与结构校验
+    "redhat.vscode-yaml",
+    // 拼写检查
+    "streetsidesoftware.code-spell-checker",
+    // Tailwind CSS 类名补全
+    "bradlc.vscode-tailwindcss",
+    // Iconify 图标预览与补全
+    "antfu.iconify",
+    // 国际化键名提示与翻译管理
+    "Lokalise.i18n-ally",
+    // CSS 变量提示
+    "vunguyentuan.vscode-css-variables",
+    // 在 package.json 中显示 pnpm catalog 依赖版本
+    "antfu.pnpm-catalog-lens",
+    // Vitest 测试发现与运行
+    "vitest.explorer",
+    // shadcn-vue 组件辅助
+    "Selemondev.shadcn-vue",
+    // Tauri 配置与开发支持
+    "tauri-apps.tauri-vscode",
+    // Rust 语言分析与补全
+    "rust-lang.rust-analyzer",
+    // 将 Lua 文件或选中代码发送到 DCS World 执行
+    "omltcat.dcs-lua-runner",
+    // Draw.io 绘图工具
+    "hediet.vscode-drawio",
+    // TOML 文件语法支持
+    "tamasfe.even-better-toml",
+    // YAML 语法、补全与结构校验
+    "redhat.vscode-yaml",
+    // 修复 checksum 错误
+    "RimuruChan.vscode-fix-checksums-next",
+    // 在编辑器内显示和操作 iOS、Android 模拟器
+    "redth.mobile-canvas",
+    // Prettier 代码格式化
+    "esbenp.prettier-vscode",
+    // 将 CSS 样式转换为 UnoCSS 工具类
+    "simonhe.to-unocss",
+    // 根据运行时数据生成或更新 TypeScript 类型
+    "rikurouvila.typehole",
+    // HBuilderX 语言服务
+    "dcloud-ide.hbuilderx-language-services"
+  ],
+  "unwantedRecommendations": [
+    // Vue 3 项目使用 Vue.volar，避免同时启用 Vetur
+    "octref.vetur"
   ]
 }

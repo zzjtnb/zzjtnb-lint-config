@@ -1,25 +1,95 @@
+# 批量更新时始终排除 TypeScript，包括 pnpm up -L；版本升级需单独处理。
+# CI/Cloudflare 环境下禁用 minimumReleaseAge 缓冲（默认 1440 分钟/1天），避免锁文件中刚发布的依赖拦截构建。
+minimumReleaseAge: 0
+
+update:
+  ignoreDeps:
+    - typescript
+    - '@typescript/native'
+
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'tests/*'
+  - apps/*
+  - packages/*
+  - internal/*
+  - internal/packages/*
+  - internal/packages/@core/*/*
+  - internal/lint-configs/*
+  - playground
+  - docs
+
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
 
 catalog:
-  '@antfu/eslint-config': ^9.5.1
-  '@iconify/utils': ^3.1.4
-  '@types/node': ^26.4.1
-  '@unocss/preset-wind4': ^66.9.2
-  eslint: ^10.9.1
-  markdownlint-cli2: ^0.23.2
-  postcss: ^8.5.27
+  '@antfu/eslint-config': ^10.0.0
+  '@changesets/git': ^4.0.1
+  '@commitlint/cli': ^21.2.4
+  '@commitlint/config-conventional': ^21.2.4
+  '@eslint-community/eslint-plugin-eslint-comments': ^4.8.1
+  '@eslint/config-inspector': ^3.5.0
+  '@iconify/utils': ^3.1.7
+  '@intlify/unplugin-vue-i18n': ^11.2.7
+  '@jspm/generator': ^2.17.0
+  '@manypkg/get-packages': ^3.1.0
+  '@pnpm/workspace.read-manifest': ^1000.3.1
+  '@shadcn/lint': ^0.2.3
+  '@tailwindcss/vite': ^4.3.3
+  '@types/archiver': ^8.0.0
+  '@types/html-minifier-terser': ^7.0.2
+  '@types/node': ^26.6.5
+  '@typescript/native': npm:typescript@7.0.2
+  '@unocss/preset-wind4': ^66.11.0
+  '@vitejs/plugin-vue': ^6.0.10
+  '@vitejs/plugin-vue-jsx': ^5.1.6
+  archiver: ^8.0.0
+  chalk: ^6.0.1
+  cheerio: ^1.2.0
+  commitlint-plugin-function-rules: ^5.0.1
+  consola: ^3.4.2
+  cz-git: ^1.14.0
+  czg: ^1.14.0
+  dayjs: ^1.11.23
+  eslint: ^10.13.0
+  eslint-plugin-better-tailwindcss: ^4.10.0
+  eslint-plugin-command: ^4.0.0
+  execa: ^10.2.1
+  get-port: ^7.2.0
+  gray-matter: ^4.0.3
+  happy-dom: ^21.0.4
+  html-minifier-terser: ^7.2.0
+  markdownlint-cli2: ^0.24.0
+  nitropack: ^2.13.5
+  ora: ^9.4.1
+  oxfmt: ^0.74.0
+  oxlint: ^1.89.0
+  pkg-types: ^2.4.0
+  postcss: ^8.5.31
   postcss-html: ^2.0.0
   postcss-scss: ^4.0.9
-  stylelint: ^17.14.1
-  stylelint-config-recess-order: ^7.8.0
+  rimraf: ^6.1.3
+  rollup-plugin-visualizer: ^7.1.1
+  sass-embedded: ^1.106.1
+  stylelint: ^17.16.0
+  stylelint-config-recess-order: ^7.8.2
   stylelint-config-recommended-scss: ^17.0.1
   stylelint-config-recommended-vue: ^2.0.0
   stylelint-config-standard: ^40.0.0
-  stylelint-order: ^8.1.1
-  tsdown: ^0.22.14
-  turbo: ^2.10.12
-  typescript: ^6.0.3
-  unocss: ^66.9.2
+  stylelint-order: ^8.1.2
+  tsdown: ^0.23.2
+  turbo: ^2.11.10
+  # TS7 提供 tsc；TS6 兼容包为 typescript-eslint 等消费者提供编译器 API。
+  typescript: npm:@typescript/typescript6@6.0.2
+  unocss: ^66.11.0
+  unplugin-dts: ^1.1.2
+  vite: ^8.3.5
+  vite-plugin-compression: ^0.5.1
+  vite-plugin-lazy-import: ^1.0.7
+  vite-plugin-pwa: ^2.0.0
+  vite-plugin-vue-devtools: ^8.2.1
+  vitepress: ^2.0.0-alpha.20
+  vitepress-plugin-group-icons: ^1.8.1
+  vitest: ^5.0.5
+  vue: ^3.5.44
+  vue-router: ^5.4.0
+  vue-tsc: ^3.3.13

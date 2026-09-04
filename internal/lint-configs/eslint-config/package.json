@@ -1,0 +1,29 @@
+{
+  "name": "@zzjtnb/internal-eslint-config",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/zzjtnb/zzjtnb-lint-config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzjtnb/zzjtnb-lint-config.git",
+    "directory": "internal/lint-configs/eslint-config"
+  },
+  "bugs": "https://github.com/zzjtnb/zzjtnb-lint-config/issues",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "stub": "pnpm exec tsdown"
+  },
+  "dependencies": {
+    "@zzjtnb/eslint-config": "workspace:*"
+  }
+}

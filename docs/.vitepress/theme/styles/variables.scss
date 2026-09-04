@@ -1,0 +1,40 @@
+:root {
+  --vp-c-brand-1: #175cd3;
+  --vp-c-brand-2: #1554bd;
+  --vp-c-brand-3: #175cd3;
+  --vp-c-brand-soft: rgb(23 92 211 / 10%);
+  --vp-c-bg: #fbfcff;
+  --vp-c-bg-alt: #f2f5fb;
+  --vp-c-bg-soft: #f1f5fc;
+  --vp-c-bg-elv: #fff;
+  --vp-c-divider: #dce4f0;
+  --vp-c-gutter: #e8edf5;
+  --vp-button-brand-bg: var(--vp-c-brand-3);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-text: #fff;
+  --vp-button-brand-hover-text: #fff;
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(115deg, #175cd3 20%, #087e8b);
+  --vp-home-hero-image-background-image: radial-gradient(ellipse, rgb(52 143 249 / 22%), rgb(8 126 139 / 8%) 55%, transparent 72%);
+  --vp-home-hero-image-filter: blur(36px);
+  --site-nav-glass: rgb(251 252 255 / 88%);
+  --site-card-shadow: 0 12px 36px rgb(25 51 94 / 7%);
+}
+
+.dark {
+  --vp-c-brand-1: #8cbcff;
+  --vp-c-brand-2: #a8ccff;
+  --vp-c-brand-3: #175cd3;
+  --vp-c-brand-soft: rgb(140 188 255 / 13%);
+  --vp-c-bg: #101722;
+  --vp-c-bg-alt: #0c121c;
+  --vp-c-bg-soft: #172130;
+  --vp-c-bg-elv: #1d2939;
+  --vp-c-divider: #2b394d;
+  --vp-c-gutter: #202d40;
+  --vp-button-brand-hover-bg: #1554bd;
+  --vp-home-hero-name-background: linear-gradient(115deg, #8cbcff 20%, #70dfdb);
+  --vp-home-hero-image-background-image: radial-gradient(ellipse, rgb(52 143 249 / 24%), rgb(38 180 186 / 9%) 55%, transparent 72%);
+  --site-nav-glass: rgb(16 23 34 / 90%);
+  --site-card-shadow: 0 12px 36px rgb(0 0 0 / 18%);
+}

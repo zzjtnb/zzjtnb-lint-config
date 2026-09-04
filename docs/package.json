@@ -1,0 +1,36 @@
+{
+  "name": "@zzjtnb/docs",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "lint:eslint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --cache --cache-location node_modules/.cache/.stylelintcache",
+    "lint:markdownlint": "markdownlint-cli2 \"**/*.md\"",
+    "lint": "pnpm run lint:eslint && pnpm run lint:stylelint && pnpm run lint:markdownlint",
+    "format:eslint": "pnpm run lint:eslint --fix",
+    "format:stylelint": "pnpm run lint:stylelint --fix",
+    "format:markdownlint": "pnpm run lint:markdownlint --fix",
+    "format": "pnpm run format:eslint && pnpm run format:stylelint && pnpm run format:markdownlint"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@zzjtnb/eslint-config": "workspace:*",
+    "@zzjtnb/markdownlint-config": "workspace:*",
+    "@zzjtnb/stylelint-config": "workspace:*",
+    "eslint": "catalog:",
+    "gray-matter": "catalog:",
+    "markdownlint-cli2": "catalog:",
+    "sass-embedded": "catalog:",
+    "stylelint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitepress": "catalog:",
+    "vitepress-plugin-group-icons": "catalog:",
+    "vue": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

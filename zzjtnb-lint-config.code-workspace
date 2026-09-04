@@ -1,0 +1,84 @@
+{
+  "folders": [
+    {
+      "name": "zzjtnb-lint-config",
+      "path": "."
+    },
+    {
+      "name": "@zzjtnb/docs",
+      "path": "docs"
+    },
+    {
+      "name": "@zzjtnb/lint-demo",
+      "path": "apps/demo"
+    },
+    {
+      "name": "@zzjtnb/handbook",
+      "path": "apps/handbook"
+    },
+    {
+      "name": "@zzjtnb/commitlint-config",
+      "path": "internal/lint-configs/commitlint-config"
+    },
+    {
+      "name": "@zzjtnb/internal-eslint-config",
+      "path": "internal/lint-configs/eslint-config"
+    },
+    {
+      "name": "@zzjtnb/oxfmt-config",
+      "path": "internal/lint-configs/oxfmt-config"
+    },
+    {
+      "name": "@zzjtnb/oxlint-config",
+      "path": "internal/lint-configs/oxlint-config"
+    },
+    {
+      "name": "@zzjtnb/internal-stylelint-config",
+      "path": "internal/lint-configs/stylelint-config"
+    },
+    {
+      "name": "@zzjtnb/node-utils",
+      "path": "internal/node-utils"
+    },
+    {
+      "name": "@zzjtnb/tsconfig",
+      "path": "internal/tsconfig"
+    },
+    {
+      "name": "@zzjtnb/vite-config",
+      "path": "internal/vite-config"
+    },
+    {
+      "name": "@zzjtnb-core/design",
+      "path": "internal/packages/@core/base/design"
+    },
+    {
+      "name": "@zzjtnb-core/typings",
+      "path": "internal/packages/@core/base/typings"
+    },
+    {
+      "name": "@zzjtnb/eslint-config",
+      "path": "packages/eslint-config"
+    },
+    {
+      "name": "@zzjtnb/markdownlint-config",
+      "path": "packages/markdownlint-config"
+    },
+    {
+      "name": "@zzjtnb/stylelint-config",
+      "path": "packages/stylelint-config"
+    },
+    {
+      "name": "@zzjtnb/styles",
+      "path": "internal/packages/styles"
+    },
+    {
+      "name": "@zzjtnb/types",
+      "path": "internal/packages/types"
+    },
+    {
+      "name": "@zzjtnb/playground",
+      "path": "playground"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@zzjtnb-core/design",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/zzjtnb/zzjtnb-lint-config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzjtnb/zzjtnb-lint-config.git",
+    "directory": "internal/packages/@core/base/design"
+  },
+  "bugs": "https://github.com/zzjtnb/zzjtnb-lint-config/issues",
+  "exports": {
+    "./bem": {
+      "development": "./src/scss-bem/bem.scss",
+      "production": "./src/scss-bem/bem.scss",
+      "default": "./src/scss-bem/bem.scss"
+    }
+  },
+  "files": [
+    "src"
+  ]
+}

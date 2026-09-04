@@ -1,109 +1,99 @@
 {
-  // 关于 tasks.json 格式文档，请参阅：https://go.microsoft.com/fwlink/?LinkId=733558
+  // tasks.json 格式说明文档：https://go.microsoft.com/fwlink/?LinkId=733558
   "version": "2.0.0",
+  "options": {
+    "cwd": "${workspaceFolder}"
+  },
   "tasks": [
     {
-      "label": "typecheck:vendor",
+      "label": "类型检查：ESLint 配置",
+      "detail": "持续检查 packages/eslint-config 的 TypeScript 类型，文件修改后自动重新检查。",
       "type": "process",
       "command": "pnpm",
-      "args": [
-        "--filter",
-        "@jszn/web-vendor",
-        "exec",
-        "vue-tsc",
-        "--noEmit",
-        "--skipLibCheck",
-        "--watch",
-        "--pretty",
-        "false"
-      ],
+      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/eslint-config"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$tsc-watch",
+        "owner": "typescript-eslint-config",
+        "fileLocation": ["relative", "${workspaceFolder}/packages/eslint-config"]
+      }
+    },
+    {
+      "label": "类型检查：Stylelint 配置",
+      "detail": "持续检查 packages/stylelint-config 的 TypeScript 类型，文件修改后自动重新检查。",
+      "type": "process",
+      "command": "pnpm",
+      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/stylelint-config"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$tsc-watch",
+        "owner": "typescript-stylelint-config",
+        "fileLocation": ["relative", "${workspaceFolder}/packages/stylelint-config"]
+      }
+    },
+    {
+      "label": "类型检查：Demo 示例",
+      "detail": "持续检查 apps/demo 示例代码的 TypeScript 类型，不执行 ESLint 或 Stylelint 规则检查。",
+      "type": "process",
+      "command": "pnpm",
+      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/demo"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$tsc-watch",
+        "owner": "typescript-demo",
+        "fileLocation": ["relative", "${workspaceFolder}/apps/demo"]
+      }
+    },
+    {
+      "label": "类型检查：根配置与集成测试",
+      "detail": "按根 tsconfig.json 持续检查根配置、Vitest 运行器、两个配置包源码和集成测试的类型，不运行测试。",
+      "type": "process",
+      "command": "pnpm",
+      "args": ["run", "typecheck:root", "--watch", "--pretty", "false"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "isBackground": true,
       "problemMatcher": {
-        "owner": "vue-tsc-vendor",
-        "fileLocation": ["relative", "${workspaceFolder}/apps/web-vendor"],
-        "pattern": {
-          "regexp": "^(.*)\\((\\d+),(\\d+)\\): error (TS\\d+): (.*)$",
-          "file": 1,
-          "line": 2,
-          "column": 3,
-          "code": 4,
-          "message": 5
-        }
+        "base": "$tsc-watch",
+        "owner": "typescript-integration",
+        "fileLocation": ["relative", "${workspaceFolder}"]
       }
     },
     {
-      "label": "typecheck:dealer",
+      "label": "类型检查：Playground",
+      "detail": "调用 playground 的 typecheck 脚本，用 vue-tsc 持续检查 TypeScript 和 Vue 组件类型。",
       "type": "process",
       "command": "pnpm",
-      "args": [
-        "--filter",
-        "@jszn/web-dealer",
-        "exec",
-        "vue-tsc",
-        "--noEmit",
-        "--skipLibCheck",
-        "--watch",
-        "--pretty",
-        "false"
-      ],
+      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/playground"
       },
       "isBackground": true,
       "problemMatcher": {
-        "owner": "vue-tsc-dealer",
-        "fileLocation": ["relative", "${workspaceFolder}/apps/web-dealer"],
-        "pattern": {
-          "regexp": "^(.*)\\((\\d+),(\\d+)\\): error (TS\\d+): (.*)$",
-          "file": 1,
-          "line": 2,
-          "column": 3,
-          "code": 4,
-          "message": 5
-        }
+        "base": "$tsc-watch",
+        "owner": "typescript-playground",
+        "fileLocation": ["relative", "${workspaceFolder}/playground"]
       }
     },
     {
-      "label": "typecheck:playground",
-      "type": "process",
-      "command": "pnpm",
-      "args": [
-        "--filter",
-        "@jszn/playground",
-        "exec",
-        "vue-tsc",
-        "--noEmit",
-        "--skipLibCheck",
-        "--watch",
-        "--pretty",
-        "false"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "vue-tsc-playground",
-        "fileLocation": ["relative", "${workspaceFolder}/playground"],
-        "pattern": {
-          "regexp": "^(.*)\\((\\d+),(\\d+)\\): error (TS\\d+): (.*)$",
-          "file": 1,
-          "line": 2,
-          "column": 3,
-          "code": 4,
-          "message": 5
-        }
-      }
-    },
-    {
-      "label": "typecheck:all",
+      "label": "类型检查：全部工作区",
+      "detail": "打开工作区时并行启动上述全部类型检查监听任务，诊断显示在 VS Code 的问题面板中。",
       "dependsOn": [
-        "typecheck:vendor",
-        "typecheck:dealer",
-        "typecheck:playground"
+        "类型检查：ESLint 配置",
+        "类型检查：Stylelint 配置",
+        "类型检查：Demo 示例",
+        "类型检查：根配置与集成测试",
+        "类型检查：Playground"
       ],
       "dependsOrder": "parallel",
       "problemMatcher": [],
@@ -112,22 +102,21 @@
       }
     },
     {
-      "label": "ui:dev",
-      "type": "shell",
-      // `dev` keeps running in the background
-      // ideally you should also configure a `problemMatcher`
-      // see https://code.visualstudio.com/docs/editor/tasks#_can-a-background-task-be-used-as-a-prelaunchtask
-      "isBackground": true,
-      // change this to your `beforeDevCommand`:
+      "label": "启动开发服务",
+      "detail": "运行根目录 dev 脚本，通过 Turbo 启动工作区开发服务，包括文档站和 Playground；任务会持续运行。",
+      "type": "process",
       "command": "pnpm",
-      "args": ["dev"]
+      "args": ["run", "dev"],
+      "problemMatcher": []
     },
     {
-      "label": "ui:build",
-      "type": "shell",
-      // change this to your `beforeBuildCommand`:
+      "label": "构建全部项目",
+      "detail": "运行根目录 build 脚本，通过 Turbo 按依赖顺序构建工作区项目，包括配置包、文档站和 Playground。",
+      "type": "process",
       "command": "pnpm",
-      "args": ["build"]
+      "args": ["run", "build"],
+      "group": "build",
+      "problemMatcher": []
     }
   ]
 }

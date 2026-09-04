@@ -22,18 +22,6 @@ const defaultLinterOptions = {
  * 规则不再重复声明。
  */
 const defaultRules = {
-  // 不额外限制链式调用的换行方式。
-  'antfu/consistent-chaining': 'off',
-  // 不额外限制列表的换行方式。
-  'antfu/consistent-list-newline': 'off',
-  // 不强制控制流语句使用大括号。
-  'antfu/curly': 'off',
-  // 不额外限制 if 条件的换行方式。
-  'antfu/if-newline': 'off',
-  // 不额外限制顶层函数的声明风格。
-  'antfu/top-level-function': 'off',
-  // 不禁止从 dist 目录导入模块。
-  'antfu/no-import-dist': 'off',
   // 不禁止使用顶层 await。
   'antfu/no-top-level-await': 'off',
   // 不限制 console 的使用。
@@ -63,25 +51,24 @@ const defaultRules = {
 } satisfies TypedFlatConfigItem['rules']
 
 /**
- * JavaScript 基础配置工厂。
+ * 创建 JavaScript 基础规则与 linter 报告选项。
  *
- * 只生成一个 Flat Config 片段。antfu 的语言配置仍由主工厂负责；这里仅放置
- * 本包公开的 JavaScript 规则约定，并让消费方传入的值最后覆盖默认值。
+ * 规则通过 antfu 的 JavaScript 覆盖入口应用，声明文件与后续语言集成的豁免仍由上游处理。
+ *
+ * @param linterOptions 消费方对 ESLint 报告行为的覆盖。
+ * @returns 包含共享基础规则与报告选项的 Flat Config 片段。
  */
 export function javascript(
-  additionalRules: TypedFlatConfigItem['rules'] = {},
   linterOptions: NonNullable<Linter.Config['linterOptions']> = {},
-): Linter.Config {
+) {
   return {
-    // 合并消费方选项；消费方只覆盖需要改变的 linter 行为即可。
     linterOptions: {
       ...defaultLinterOptions,
       ...linterOptions,
     },
     rules: {
-      // 先应用本包默认规则，再让消费方覆盖具体规则。
-      ...defaultRules,
-      ...additionalRules,
+      // 默认规则含数组选项，每次调用隔离，避免消费方修改结果后污染其他配置。
+      ...structuredClone(defaultRules),
     },
-  }
+  } satisfies TypedFlatConfigItem
 }

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // 工作台不使用后台应用的路由与认证全局类型，只继承通用 Web 配置。
+  "extends": "@zzjtnb/tsconfig/web.json",
+  "compilerOptions": {
+    // 类型检查对准共享配置源码，不依赖可能过期的 dist，也不隐式触发打包。
+    "paths": {
+      "@zzjtnb/eslint-config": ["../packages/eslint-config/src/index.ts"],
+      "@zzjtnb/stylelint-config": ["../packages/stylelint-config/src/index.ts"]
+    },
+    // 页面与浏览器测试使用 Vite 类型；配置、运行器与 HTTP 测试还需要 Node.js 类型。
+    "types": ["vite/client", "node"],
+    // 允许源码在导入时显式携带 .ts 扩展名，满足原生 ESM 与 Bundler 规范。
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": true,
+    // CLI2 未单独发布声明，读取一层官方 JSDoc 以获取 Markdownlint 的真实类型。
+    "maxNodeModuleJsDepth": 1
+  },
+  // 同一入口覆盖页面、Node.js 运行器、工具配置与测试；不额外维护未被调用的 Node 配置。
+  "include": [
+    "eslint.config.ts",
+    "stylelint.config.ts",
+    "vite.config.ts",
+    "src",
+    "plugins",
+    "types.ts",
+    "tests"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

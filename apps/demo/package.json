@@ -3,16 +3,27 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "pnpm run lint:eslint && pnpm run lint:stylelint",
-    "lint:eslint": "eslint . --fix --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --fix --cache --cache-location node_modules/.cache/.stylelintcache",
+    "lint:eslint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --cache --cache-location node_modules/.cache/.stylelintcache",
+    "lint:markdownlint": "markdownlint-cli2 \"**/*.md\"",
+    "lint": "pnpm run lint:eslint && pnpm run lint:stylelint && pnpm run lint:markdownlint",
+    "format:eslint": "pnpm run lint:eslint --fix",
+    "format:stylelint": "pnpm run lint:stylelint --fix",
+    "format:markdownlint": "pnpm run lint:markdownlint --fix",
+    "format": "pnpm run format:eslint && pnpm run format:stylelint && pnpm run format:markdownlint",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@iconify/utils": "catalog:",
+    "@types/node": "catalog:",
+    "@unocss/preset-wind4": "catalog:",
     "@zzjtnb/eslint-config": "workspace:*",
+    "@zzjtnb/markdownlint-config": "workspace:*",
     "@zzjtnb/stylelint-config": "workspace:*",
     "eslint": "catalog:",
+    "markdownlint-cli2": "catalog:",
     "stylelint": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "unocss": "catalog:"
   }
 }

@@ -15,6 +15,8 @@
     "types": ["node"],
     "allowJs": true,
     "checkJs": true,
+    // CLI2 转发模块未发布独立声明，读取一层官方 JSDoc 以复用 Markdownlint 类型。
+    "maxNodeModuleJsDepth": 1,
     // 严格性和类型检查相关配置
     "strict": true,
     "noEmit": true,
@@ -32,10 +34,12 @@
   "include": [
     "eslint.config.ts",
     "stylelint.config.ts",
-    "uno.config.ts",
+    "vitest.config.ts",
     "packages/eslint-config/src/**/*.ts",
     "packages/stylelint-config/src/**/*.ts",
-    "tests/integration/load-configs.js"
+    "tests/integration/**/*.ts",
+    "tests/fixtures/eslint/**/*.ts",
+    "tests/fixtures/markdownlint/no-todo.js"
   ],
   "exclude": ["node_modules", "dist", "coverage"]
 }

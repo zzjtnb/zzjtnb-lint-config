@@ -1,7 +1,7 @@
 {
   "name": "@zzjtnb/stylelint-config",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Shareable Stylelint 17 config for CSS, SCSS, Vue SFC, UnoCSS, Tailwind-style workflows and uni-app.",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",
@@ -45,9 +45,9 @@
   },
   "scripts": {
     "build": "pnpm exec tsdown",
-    "lint": "pnpm run lint:eslint",
     "lint:eslint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "format": "eslint . --fix --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "lint": "pnpm run lint:eslint",
+    "format": "pnpm run lint:eslint --fix",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "version:patch": "pnpm version patch --no-git-tag-version --no-git-checks",
     "version:minor": "pnpm version minor --no-git-tag-version --no-git-checks",

@@ -1,0 +1,10 @@
+{
+  // 读取项目的 Git 忽略配置。
+  "gitignore": true,
+  // markdownlint-cli2 不会自动忽略依赖目录，需要显式排除。
+  "ignores": ["**/node_modules/**"],
+  "config": {
+    // 继承共享规则，下面可以继续覆盖同名规则。
+    "extends": "@zzjtnb/markdownlint-config"
+  }
+}

@@ -2,26 +2,26 @@
   // "http.proxy": "http://127.0.0.1:10808",
   // "http.proxyStrictSSL": false,
   // "http.proxySupport": "on",
-  // 文件关联：将 .tpl 文件识别为 HTML
-  "files.associations": {
-    "*.tpl": "html"
-  },
+  // 集成终端设置
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.persistentSessionReviveProcess": "never",
+  "terminal.integrated.tabs.enabled": true,
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.stickyScroll.enabled": true,
   "npm.packageManager": "pnpm",
   // 使用仓库根目录安装的 TypeScript，避免编辑器与 vue-tsc 使用不同版本
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
-  "js/ts.tsserver.maxMemory.tsserver.maxTsServerMemory": 8192,
-  // 与 pnpm lint 使用同一份 Oxlint 配置
-  "oxc.configPath": "./oxlint.config.ts",
-  // Disable the default formatter, use eslint instead
-  "svg.preview.background": "black",
+  "svg.preview.background": "transparent",
   "html.autoClosingTags": false,
   "prettier.enable": false,
   "editor.formatOnSave": false, // 关闭全局保存格式化，避免和 ESLint/Stylelint 冲突
-  // Auto fix
+  // 保存时自动修复 ESLint、Stylelint 和 Markdownlint 问题
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.fixAll.stylelint": "explicit",
+    // Markdown 在显式保存和自动保存时均修复，规则读取项目的 CLI2 配置。
+    "source.fixAll.markdownlint": "always",
     "source.organizeImports": "never"
   },
   // 关闭内置校验,仅用 stylelint 检查
@@ -30,8 +30,13 @@
   "less.validate": false,
   "stylelint.packageManager": "pnpm",
   // 指定要验证的文件
-  "stylelint.validate": ["css", "scss", "vue", "html"],
-  // Silent the stylistic rules in you IDE, but still auto fix them
+  "stylelint.validate": [
+    "css",
+    "scss",
+    "vue",
+    "html"
+  ],
+  // 隐藏编辑器中的样式规则诊断，仍允许自动修复
   "eslint.rules.customizations": [
     {
       "rule": "style/*",
@@ -84,7 +89,7 @@
       "fixable": true
     }
   ],
-  // Enable eslint for all supported languages
+  // 为以下受支持的语言启用 ESLint 检查
   "eslint.validate": [
     "javascript",
     "typescript",
@@ -95,6 +100,14 @@
     "yaml",
     "toml"
   ],
+  // Markdown 的规则来自项目配置，不在编辑器设置中重复维护。
+  "[markdown]": {
+    // 手动格式化和粘贴格式化使用 Markdownlint。
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    // 保存已由 fixAll 处理，关闭重复的保存格式化路径。
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": true
+  },
   "[html]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
@@ -125,71 +138,17 @@
   "[vue]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
-  // ========================== 文件监视器优化（彻底消除卡顿核心） ==========================
-  "files.watcherExclude": {
-    "**/.git/objects/**": true,
-    "**/.git/subtree-cache/**": true,
-    "**/node_modules/**": true,
-    "**/.pnpm-store/**": true,
-    "**/.tmp/**": true,
-    "**/.turbo/**": true,
-    "**/.nitro/**": true,
-    "**/dist/**": true,
-    "**/coverage/**": true,
-    "**/target/**": true,
-    "**/backup/**": true,
-    "**/.cache/**": true,
-    "**/.stylelintcache": true,
-    "**/.eslintcache": true
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.ejs": "html",
+    "*.art": "html",
+    "*.tpl": "html",
+    "**/tsconfig.json": "jsonc",
+    "*.json": "jsonc",
+    "package.json": "json"
   },
-  // ========================== 搜索忽略 ==========================
-  "search.exclude": {
-    "**/.git": true,
-    "**/*.svg": true,
-    "**/dist/**": true,
-    "**/.vscode": true,
-    "**/node_modules": true,
-    "**/.pnpm": true,
-    "**/.pnpm-store": true,
-    "**/.yarn": true,
-    "**/yarn.lock": true,
-    "**/package-lock.json": true,
-    "**/pnpm-lock.yaml": true,
-    "**/.turbo/**": true,
-    "**/.nitro/**": true,
-    "**/.tmp/**": true,
-    "**/target/**": true,
-    "**/coverage/**": true,
-    "**/backup/**": true
-  },
-  // ========== 文件嵌套 ==========
-  "explorer.fileNesting.enabled": true,
-  "explorer.fileNesting.expand": false,
-  "explorer.fileNesting.patterns": {
-    "*.dart": "${capture}.g.dart",
-    "*.css": "$(capture).css.map, $(capture).*.css",
-    "*.js": "$(capture).js.map, $(capture).*.js, $(capture)_*.js",
-    "*.ts": "$(capture).js, $(capture).d.ts.map, $(capture).*.ts, $(capture)_*.js, $(capture)_*.ts",
-    "*.mjs": "$(capture).mjs.map, $(capture).*.mjs, $(capture)_*.mjs",
-    "*.cjs": "$(capture).cjs.map, $(capture).*.cjs, $(capture)_*.cjs",
-    "*.vue": "$(capture).*.ts, $(capture).*.js, $(capture).story.vue",
-    ".env": "*.env, .env.*, .envrc, env.d.ts",
-    ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*",
-    "dockerfile": ".dockerignore, docker-compose.*, dockerfile*",
-    "shims.d.ts": "*.d.ts",
-    "vite.config.*": "*.env, .babelrc*, .env.*, babel.config.*, env.d.ts, jsconfig.*,  playwright.config.*, postcss.config.*, vitest.config.*, webpack.config.* ",
-    "vue.config.*": "*.env, .babelrc*, .env.*, babel.config.*, env.d.ts, jsconfig.*,  playwright.config.*, postcss.config.*, tailwind.config.*, vitest.config.*, webpack.config.*",
-    "nuxt.config.*": "*.env, .babelrc*, .env.*, env.d.ts, jsconfig.*, playwright.config.*, postcss.config.*, tailwind.config.*, vitest.config.*",
-    "package.json": ".browserslist*, .commitlint*, .cz-config.js, .editorconfig, .eslint*, .github*, .nodemon*, .npm*, .nvmrc, .pm2*, .pnpm*, .prettier*, .vscode*, .yamllint*, .yarnrc*, gulp*, lint-staged*,package-lock.json, pm2.*, pnpm*, prettier*, stylelint*, eslint*, typedoc*, webpack*, workspace.json, yarn*,package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .editorconfig, .markdownlint-cli2.*, components.json",
-    "pubspec.yaml": ".metadata, .packages, all_lint_rules.yaml, analysis_options.yaml, build.yaml, pubspec.lock, pubspec_overrides.yaml",
-    "README.md": "README.zh-CN.md, CHANGELOG.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md",
-    "LICENSE": "LICENSE.*",
-    "eslint.config.js": ".eslint*, eslint.config.cjs, eslint.config.mjs, eslint.config.ts, tsconfig.eslint.json",
-    "stylelint.config.js": ".stylelint*, stylelint.config.cjs, stylelint.config.mjs, stylelint.config.ts",
-    "tsconfig.json": "tsconfig.*.json, jsconfig.json, jsconfig.*.json",
-    "pnpm-workspace.yaml": "pnpm-lock.yaml, pnpmfile.*, .npmrc",
-    "turbo.json": "turbo.*",
-    "unocss.config.js": "uno.config.*, unocss.config.cjs, unocss.config.mjs, unocss.config.ts, uno.css, uno.generated.*"
-  },
-  "cSpell.words": ["lucide", "zzjtnb"]
+  "cSpell.words": [
+    "lucide",
+    "zzjtnb"
+  ]
 }

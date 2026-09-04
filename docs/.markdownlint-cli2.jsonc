@@ -1,0 +1,7 @@
+{
+  "gitignore": true,
+  "ignores": ["**/node_modules/**", "**/.vitepress/dist/**", "**/.vitepress/cache/**"],
+  "config": {
+    "extends": "@zzjtnb/markdownlint-config"
+  }
+}

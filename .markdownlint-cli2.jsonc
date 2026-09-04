@@ -28,25 +28,8 @@
     "**/stats.html",
     "**/twa/project/**"
   ],
-  // markdownlint 规则配置
+  // 规则统一由共享包维护；本文件只保留仓库的执行范围。
   "config": {
-    // 启用所有默认规则
-    "default": true,
-    "MD001": false,
-    // MD003/header-style : Header style : https://github.com/DavidAnson/markdownlint/blob/main/doc/md003.md
-    "MD003": { "style": "atx" }, // 使用 ATX 样式的标题(即 # 标记),而不是 Setext 样式(下划线)
-    // MD013/line-length : Line length : https://github.com/DavidAnson/markdownlint/blob/main/doc/md013.md
-    "MD013": false, // 禁用行长度限制(AI 模型描述等内容可能很长)
-    // MD024/no-duplicate-heading : Multiple headings with the same content
-    "MD024": {
-      "siblings_only": true // 仅检查同级标题,允许不同模型下有相同的子标题
-    },
-    // MD033/no-inline-html : Inline HTML : https://github.com/DavidAnson/markdownlint/blob/main/doc/md033.md
-    "MD033": false,
-    // MD041/first-line-heading : First line in file should be a top level heading :https://github.com/DavidAnson/markdownlint/blob/main/doc/md044.md
-    "MD041": false, // 禁用首行必须是一级标题的规则(某些文档可能不需要标题)
-    // MD059/descriptive-link-text : Link text should be descriptive
-    "MD059": false, // 禁用链接文本描述性检查(模型描述中可能包含 [here] 等通用链接文本)
-    "MD060": false
+    "extends": "./packages/markdownlint-config/index.jsonc"
   }
 }
