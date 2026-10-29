@@ -9,6 +9,29 @@ import { closePrompt, openPrompt } from './prompt.js'
 import { printPublishedInfo, publishPackages, releaseCheck, releasePack } from './publish.js'
 import { ensureLogin, readReleaseState } from './registry.js'
 
+/** 确认并写入版本，再用当前文件复核；中止或不一致时不进入产物检查。 */
+async function prepareRelease(packageNames) {
+  let state = await readReleaseState(packageNames)
+  if (!state)
+    return undefined
+  const plan = await confirmVersionPlan(state)
+  if (!plan)
+    return undefined
+  if (!(await applyVersionPlan(state, plan)))
+    return undefined
+  state = await readReleaseState(packageNames)
+  if (!state)
+    return undefined
+  // 以写入后的文件为准复核，避免命令成功但包版本与已确认计划不一致。
+  const mismatched = state.filter(item => item.local !== plan.get(item.name))
+  if (mismatched.length) {
+    console.error(`版本写入结果与计划不一致：${mismatched.map(item => `${item.name} 本地 ${item.local} / 计划 ${plan.get(item.name)}`).join('；')}`)
+    return undefined
+  }
+
+  return state
+}
+
 /**
  * `pnpm release` 入口：登录 → 选择范围 → 确认版本计划并写入 → 检查 → 预览 → 发布。
  * @returns {Promise<number>} 进程退出状态；0 为全部完成，1 为中止或失败。
@@ -34,30 +57,18 @@ async function main() {
       return 1
 
     const packageNames = await choosePublishPackages()
-    let state = await readReleaseState(packageNames)
+    const state = await prepareRelease(packageNames)
     if (!state)
       return 1
-    const plan = await confirmVersionPlan(state)
-    if (!plan)
-      return 1
-    if (!(await applyVersionPlan(state, plan)))
-      return 1
-    state = await readReleaseState(packageNames)
-    if (!state)
-      return 1
-    // 以写入后的文件为准复核，避免命令成功但包版本与已确认计划不一致。
-    const mismatched = state.filter(item => item.local !== plan.get(item.name))
-    if (mismatched.length) {
-      console.error(`版本写入结果与计划不一致：${mismatched.map(item => `${item.name} 本地 ${item.local} / 计划 ${plan.get(item.name)}`).join('；')}`)
-      return 1
-    }
 
-    if (!(await releaseCheck(packageNames)))
-      return 1
-    if (!(await releasePack(packageNames)))
-      return 1
-    if (!(await publishPackages(state)))
-      return 1
+    for (const step of [
+      () => releaseCheck(packageNames),
+      () => releasePack(packageNames),
+      () => publishPackages(state),
+    ]) {
+      if (!(await step()))
+        return 1
+    }
 
     printPublishedInfo(packageNames)
     console.log('\n全部发布命令已完成。')

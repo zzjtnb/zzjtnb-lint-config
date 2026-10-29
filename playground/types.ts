@@ -1,99 +1,111 @@
 export type PlaygroundMode = 'eslint' | 'stylelint' | 'markdownlint'
-export type WorkspaceView = 'code' | 'config' | 'rules'
 
-export interface Example {
-  // 仅使用工作台允许的虚拟文件名，不对应服务端真实文件写入。
-  filename: string
-  // 文件类型的可读说明。
-  label: string
-  // 可编辑的初始示例。
-  code: string
-}
-
-export interface PlaygroundConfig {
-  // 配置包的工具名称。
+export interface RuleSource {
+  /** 声明该规则的配置项名称。 */
   name: string
-  // 对外发布的完整包名。
-  packageName: string
-  // 工具负责的检查范围。
-  summary: string
-  // 配置文件的约定名称。
-  configFile: string
-  // 用于配置编辑器的语言标识。
-  language: string
-  // 可直接复制的消费方配置。
-  config: string
-  // 消费方安装命令，不由页面自动执行。
-  install: string
-  // 消费项目在根目录执行的检查命令。
-  command: string
-  // 对应的正式使用文档。
-  docs: string
-  // 允许在本地运行器中检查的示例与文件类型。
-  examples: Example[]
+  /** 配置项在原始配置序列中的位置，从 1 开始。 */
+  index: number
+  /** 声明中的文件匹配模式；空数组表示没有局部 files 限制。 */
+  files: unknown[]
+  /** 此配置项声明的规则值，不等于最终合并值。 */
+  value: string
 }
 
 export interface RuleItem {
-  // 引擎实际配置中的规则标识。
+  /** 引擎和插件提供的规则标识。 */
   name: string
-  // 插件名称或规则分类。
+  /** 核心引擎或插件命名空间。 */
   category: string
-  // 引擎提供的规则说明。
+  /** 引擎提供的说明；没有元数据时为空字符串，不伪造描述。 */
   description: string
-  // 当前生效规则对应的文件名。
+  /** 当前快照对应的虚拟文件。 */
   files: string
-  // 引擎实际解析的严重级别。
+  /** 当前文件最终规则级别；未出现在配置中时为 off，configured 为 false。 */
   status: 'error' | 'off' | 'warn'
-  // 规则实际配置的 JSON 表示。
+  /** 当前文件是否实际配置该规则。 */
+  configured: boolean
+  /** 最终配置值的 JSON；未配置时为 null。 */
   value: string
-  // 引擎提供的官方文档链接；未知时不生成猜测地址。
+  /** 官方文档链接，未知时不提供。 */
   url?: string
+  /** 是否提供自动修复；只有真实规则元数据声明时为 true。 */
+  fixable?: boolean
+  /** 是否被推荐预设标记为推荐；未知时不提供。 */
+  recommended?: boolean
+  /** 是否废弃，来自规则元数据。 */
+  deprecated?: boolean
+  /** 上游声明的参数 schema；缺失时不伪造参数表单。 */
+  schema?: unknown
+  /** 上游明确给出的默认参数。 */
+  defaultOptions?: unknown
+  /** 原始配置中的规则声明，按覆盖顺序排列，不冒充当前文件的匹配结果。 */
+  sources: RuleSource[]
+}
+
+export interface ConfigItem {
+  /** 配置项名称，未命名时使用明确的位置标签。 */
+  name: string
+  /** 原始配置序列中的位置，从 1 开始。 */
+  index: number
+  /** 局部文件匹配条件。 */
+  files: unknown[]
+  /** 配置项声明的忽略条件。 */
+  ignores: unknown[]
+  /** 配置声明注册的插件命名空间，不复制可执行插件对象。 */
+  plugins?: string[]
+  /** 语言与解析器选项，函数仅显示身份描述。 */
+  languageOptions?: Record<string, unknown>
+  /** Linter 自身的检查行为配置。 */
+  linterOptions?: Record<string, unknown>
+  /** 插件共享设置，保留原始数据语义。 */
+  settings?: Record<string, unknown>
+  /** 处理器的名称或身份描述。 */
+  processor?: string
+  /** ESLint 多语言插件声明的语言标识。 */
+  language?: string
+  /** 该配置项的原始规则声明。 */
+  rules: Record<string, unknown>
 }
 
 export interface ToolMetadata {
-  // 请求对应的工具。
+  /** 快照所属工具。 */
   mode: PlaygroundMode
-  // 请求对应的虚拟文件。
+  /** 实际解析的虚拟文件。 */
   filename: string
-  // 当前运行的 lint 引擎版本。
+  /** 构建时安装的引擎版本。 */
   version: string
-  // 引擎为此文件实际解析的规则。
+  /** 当前引擎及已加载插件的规则定义。 */
   rules: RuleItem[]
+  /** 可取得的原始配置项；不伪造未公开的预设继承链。 */
+  configs: ConfigItem[]
 }
 
-export interface Diagnostic {
-  // 一基起始行号；未知位置时不提供。
-  line?: number
-  // 一基起始列号；未知位置时不提供。
-  column?: number
-  // 规则标识；解析错误可能没有规则名。
-  rule?: string
-  // 引擎原始诊断说明。
-  message: string
-  // 引擎原始诊断级别。
-  severity: 'error' | 'warning'
+export interface SetupScripts {
+  /** 对应 package.json 的 lint:<工具名> 检查脚本。 */
+  lint: string
+  /** 对应 package.json 的 format:<工具名> 自动修复脚本。 */
+  format: string
 }
 
-export interface LintRequest {
-  // 选择的工具，不接受任意模块名。
-  mode: PlaygroundMode
-  // 选择的示例文件名，由服务端白名单约束。
-  filename: string
-  // 仅作为待检查文本解析，不作为配置或程序执行。
-  code: string
-  // 是否应用引擎正式支持的自动修复。
-  fix: boolean
-}
-
-export interface LintResult {
-  // 检查对应的工具。
-  mode: PlaygroundMode
-  // 检查对应的虚拟文件。
-  filename: string
-  // 最终文本；修复模式下为引擎修复后的内容。
-  output: string
-  // 最终文本上的真实诊断。
-  diagnostics: Diagnostic[]
-  // 服务端实际测量的处理耗时，单位为毫秒。
-  durationMs: number
+export interface PlaygroundConfig {
+  /** 工具名称。 */
+  name: string
+  /** 配置包名称。 */
+  packageName: string
+  /** 工具适用范围。 */
+  summary: string
+  /** 消费方配置文件名。 */
+  configFile: string
+  /** 配置示例语言。 */
+  language: string
+  /** 消费方接入配置示例。 */
+  config: string
+  /** 安装命令。 */
+  install: string
+  /** 推荐写入 package.json 的标准 scripts。 */
+  scripts: SetupScripts
+  /** 正式文档地址。 */
+  docs: string
+  /** 构建时解析的文件类型，不维护待执行代码草稿。 */
+  targets: { filename: string, label: string }[]
 }

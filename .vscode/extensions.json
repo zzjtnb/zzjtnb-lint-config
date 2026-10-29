@@ -1,4 +1,5 @@
 {
+  // 推荐本工作区使用的扩展，编辑器仅提示安装，不自动启用。
   "recommendations": [
     // Vue 3 语言支持
     "Vue.volar",
@@ -8,7 +9,7 @@
     "oxc.oxc-vscode",
     // Stylelint 样式检查
     "stylelint.vscode-stylelint",
-    // Markdown 检查与格式化，读取项目的 .markdownlint-cli2.jsonc。
+    // Markdown 检查与格式化，读取项目的 .markdownlint-cli2.mjs。
     "DavidAnson.vscode-markdownlint",
     // 支持 dotenv 文件语法
     "mikestead.dotenv",
@@ -40,8 +41,6 @@
     "hediet.vscode-drawio",
     // TOML 文件语法支持
     "tamasfe.even-better-toml",
-    // YAML 语法、补全与结构校验
-    "redhat.vscode-yaml",
     // 修复 checksum 错误
     "RimuruChan.vscode-fix-checksums-next",
     // 在编辑器内显示和操作 iOS、Android 模拟器
@@ -55,6 +54,7 @@
     // HBuilderX 语言服务
     "dcloud-ide.hbuilderx-language-services"
   ],
+  // 标记不适合本工作区的扩展建议，避免重复语言服务。
   "unwantedRecommendations": [
     // Vue 3 项目使用 Vue.volar，避免同时启用 Vetur
     "octref.vetur"

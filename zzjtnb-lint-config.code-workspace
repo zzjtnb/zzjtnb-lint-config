@@ -1,83 +1,57 @@
 {
+  // 列出编辑器工作区根目录，路径相对当前工作区文件。
+  // 多根工作区的窗口级 SDK 设置必须放在这里；目录模式使用 .vscode/settings.json。
+  "settings": {
+    // 使用 Docs 已安装的 TS6 语言服务；根目录没有 TypeScript，TS7 编译器也不提供 tsserver。
+    "js/ts.tsdk.path": "docs/node_modules/typescript/lib"
+  },
   "folders": [
     {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "zzjtnb-lint-config",
+      // 相对本配置的位置或引用目标，按所属工作区解析。
       "path": "."
     },
     {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "@zzjtnb/docs",
+      // 相对本配置的位置或引用目标，按所属工作区解析。
       "path": "docs"
     },
     {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "@zzjtnb/lint-demo",
+      // 相对本配置的位置或引用目标，按所属工作区解析。
       "path": "apps/demo"
     },
     {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "@zzjtnb/handbook",
+      // 相对本配置的位置或引用目标，按所属工作区解析。
       "path": "apps/handbook"
     },
     {
-      "name": "@zzjtnb/commitlint-config",
-      "path": "internal/lint-configs/commitlint-config"
-    },
-    {
-      "name": "@zzjtnb/internal-eslint-config",
-      "path": "internal/lint-configs/eslint-config"
-    },
-    {
-      "name": "@zzjtnb/oxfmt-config",
-      "path": "internal/lint-configs/oxfmt-config"
-    },
-    {
-      "name": "@zzjtnb/oxlint-config",
-      "path": "internal/lint-configs/oxlint-config"
-    },
-    {
-      "name": "@zzjtnb/internal-stylelint-config",
-      "path": "internal/lint-configs/stylelint-config"
-    },
-    {
-      "name": "@zzjtnb/node-utils",
-      "path": "internal/node-utils"
-    },
-    {
-      "name": "@zzjtnb/tsconfig",
-      "path": "internal/tsconfig"
-    },
-    {
-      "name": "@zzjtnb/vite-config",
-      "path": "internal/vite-config"
-    },
-    {
-      "name": "@zzjtnb-core/design",
-      "path": "internal/packages/@core/base/design"
-    },
-    {
-      "name": "@zzjtnb-core/typings",
-      "path": "internal/packages/@core/base/typings"
-    },
-    {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "@zzjtnb/eslint-config",
-      "path": "packages/eslint-config"
+      // 相对本配置的位置或引用目标，按所属工作区解析。
+      "path": "packages/eslint"
     },
     {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "@zzjtnb/markdownlint-config",
-      "path": "packages/markdownlint-config"
+      // 相对本配置的位置或引用目标，按所属工作区解析。
+      "path": "packages/markdownlint"
     },
     {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "@zzjtnb/stylelint-config",
-      "path": "packages/stylelint-config"
+      // 相对本配置的位置或引用目标，按所属工作区解析。
+      "path": "packages/stylelint"
     },
     {
-      "name": "@zzjtnb/styles",
-      "path": "internal/packages/styles"
-    },
-    {
-      "name": "@zzjtnb/types",
-      "path": "internal/packages/types"
-    },
-    {
+      // 该分组的稳定名称，方便识别生成文件或构建日志。
       "name": "@zzjtnb/playground",
+      // 相对本配置的位置或引用目标，按所属工作区解析。
       "path": "playground"
     }
   ]

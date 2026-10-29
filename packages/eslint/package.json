@@ -1,0 +1,73 @@
+{
+  "name": "@zzjtnb/eslint-config",
+  "type": "module",
+  "version": "1.0.6",
+  "description": "TypeScript、JavaScript 和 Vue 的 ESLint 共享配置，支持项目规则覆盖、无障碍检查与按需格式化。",
+  "author": "zzjtnb(https://github.com/zzjtnb)",
+  "license": "MIT",
+  "homepage": "https://lint.docs.zzjtnb.com/eslint",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzjtnb/zzjtnb-lint-config.git",
+    "directory": "packages/eslint"
+  },
+  "bugs": {
+    "url": "https://github.com/zzjtnb/zzjtnb-lint-config/issues"
+  },
+  "keywords": [
+    "eslint",
+    "eslint-config",
+    "eslint-flat-config",
+    "flat-config",
+    "shareable-config",
+    "antfu",
+    "typescript",
+    "vue",
+    "accessibility",
+    "antislop",
+    "unocss",
+    "html"
+  ],
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "README.zh-CN.md",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "release": "bumpp",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "eslint": "catalog:"
+  },
+  "dependencies": {
+    "@antfu/eslint-config": "catalog:",
+    "@shadcn/lint": "catalog:",
+    "@unocss/eslint-plugin": "catalog:",
+    "eslint-plugin-format": "catalog:",
+    "eslint-plugin-slop": "catalog:",
+    "eslint-plugin-sonarjs": "catalog:",
+    "eslint-plugin-vuejs-accessibility": "catalog:",
+    "typescript": "catalog:typescript6"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "bumpp": "catalog:",
+    "eslint": "catalog:",
+    "tsdown": "catalog:",
+    "vitest": "catalog:"
+  }
+}

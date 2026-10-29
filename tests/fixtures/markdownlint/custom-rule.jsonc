@@ -1,7 +1,0 @@
-{
-  "customRules": ["./no-todo.js"],
-  "config": {
-    "extends": "../../../packages/markdownlint-config/index.jsonc",
-    "project-no-todo": true
-  }
-}

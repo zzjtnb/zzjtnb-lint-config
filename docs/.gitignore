@@ -3,3 +3,6 @@ node_modules/
 .vitepress/cache/
 .turbo/
 .env*.local
+
+# 仅提交公共端口默认值，个人覆盖继续使用被忽略的 .env.local。
+!.env

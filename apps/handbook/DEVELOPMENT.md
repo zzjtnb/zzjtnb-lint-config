@@ -7,8 +7,11 @@
 ```bash
 # 将本地默认分支从master重命名为main
 git branch -m master main
+# 获取远端分支与提交信息，不合并到当前分支。
 git fetch origin
+# 将本地 main 的上游设置为 origin/main。
 git branch -u origin/main main
+# 从远端识别并更新 origin 的默认分支指向。
 git remote set-head origin -a
 ```
 
@@ -17,11 +20,17 @@ git remote set-head origin -a
 ```bash
 # 在命令行创建新仓库
 echo "# zzjtnb-lint-config" >> README.md
+# 初始化当前目录的 Git 仓库。
 git init
+# 将 README.md 加入 Git 暂存区。
 git add README.md
+# 将当前暂存内容创建为一次提交，使用指定提交说明。
 git commit -m "first commit"
+# 将当前分支重命名为示例中的 master。
 git branch -M master
+# 添加示例仓库的 origin 远端地址。
 git remote add origin https://github.com/zzjtnb/zzjtnb-lint-config.git
+# 将示例 master 分支推送到 origin 并建立上游跟踪。
 git push -u origin master
 ```
 
@@ -30,7 +39,9 @@ git push -u origin master
 ```bash
 # 关联本地仓库到远程
 git remote add origin https://github.com/zzjtnb/zzjtnb-lint-config.git
+# 将当前分支重命名为示例中的 master。
 git branch -M master
+# 将示例 master 分支推送到 origin 并建立上游跟踪。
 git push -u origin master
 ```
 
@@ -57,6 +68,7 @@ git rebase -i HEAD~N
 假设我们有以下提交历史:
 
 ```bash
+# 按单行格式查看提交历史。
 git log --oneline
 abc1234 添加新特性的测试用例
 def5678 实现新特性核心功能
@@ -67,6 +79,7 @@ jkl1121 更新文档
 执行合并最近4次提交的命令:
 
 ```bash
+# 交互整理最近四次提交，会改写这些提交的历史。
 git rebase -i HEAD~4
 ```
 
@@ -125,6 +138,7 @@ s abc1234 添加新特性的测试用例
 合并完成后,查看提交历史:
 
 ```bash
+# 按单行格式查看提交历史。
 git log --oneline
 abcdef0 实现完整新特性
 ```
@@ -195,7 +209,9 @@ git commit -m "合并feature-branch的所有修改"
 假设我们有两个分支:`main`和`feature-login`.`feature-login`分支有以下提交:
 
 ```bash
+# 切换到 feature-login 分支。
 git checkout feature-login
+# 按单行格式查看提交历史。
 git log --oneline
 abc1234 添加登录表单验证
 def5678 实现登录API集成
@@ -205,7 +221,9 @@ ghi9101 添加登录页面UI
 现在要将所有这些更改作为一个提交合并到`main`分支:
 
 ```bash
+# 切换到 main 分支。
 git checkout main
+# 将功能分支的改动合并到暂存区，等待单独创建汇总提交。
 git merge --squash feature-login
 ```
 
@@ -222,6 +240,7 @@ git merge --squash feature-login
 此时,所有更改已经添加到暂存区,但尚未提交.可以查看状态:
 
 ```bash
+# 查看工作区和暂存区的修改状态。
 git status
 位于分支 main
 要提交的变更:
@@ -234,6 +253,7 @@ git status
 现在执行提交操作:
 
 ```bash
+# 将当前暂存内容创建为一次提交，使用指定提交说明。
 git commit -m "添加完整的用户登录功能"
 [main abcdef0] 添加完整的用户登录功能
  3 files changed, 120 insertions(+), 2 deletions(-)
@@ -259,37 +279,42 @@ git commit -m "添加完整的用户登录功能"
 
 ## 软链接管理
 
+本仓库根 README 和三个包的 README 各有职责，不通过软链接互相替代。下面只演示在临时目录创建链接；先确认目标文件存在、链接路径未被占用，不覆盖现有文件。
+
 ### 创建软链接
 
-> **注意**:Windows和Linux/macOS的软链接命令参数顺序是相反的,使用时需要格外注意.
+Windows 的 mklink 是 cmd 内建命令；创建符号链接通常需要管理员权限或启用开发者模式。Git 的 core.symlinks 只控制检出行为，不会授予创建链接的系统权限。
 
-Windows 用户可能需要启用符号链接支持:
-
-```bash
-git config --global core.symlinks true
+```cmd
+REM 在仓库根目录执行；顺序是“链接文件、目标文件”。
+if not exist .tmp\links mkdir .tmp\links
+mklink .tmp\links\eslint-readme.md ..\..\packages\eslint-config\README.md
 ```
 
 ```bash
-# Windows系统 (格式:mklink [/d] 链接文件 源文件)
-mklink README.md packages\README.md
-# mklink README.zh-CN.md packages\README.zh-CN.md
-
-# macOS/Linux系统 (格式:ln -s 源文件 链接文件)
-# 创建英文 README 的软链接(将 packages/README.md 链接到根目录)
-ln -s packages/README.md .
-# 创建中文 README 的软链接(将 packages/README.zh-CN.md 链接到根目录)
-# ln -s packages/README.zh-CN.md .
+# 在仓库根目录执行；顺序是“目标文件、链接文件”。
+mkdir -p .tmp/links
+# 为原 README 创建符号链接，不复制文件内容。
+ln -s ../../packages/eslint/README.md .tmp/links/eslint-readme.md
 ```
 
-### 删除软链接
+### 移除链接
+
+先确认路径本身是符号链接，再移除链接条目；不要对真实 README 使用链接删除示例。
+
+```powershell
+# 检查链接类型；只有符号链接才移除。
+$link = Get-Item -LiteralPath .tmp/links/eslint-readme.md
+if ($link.LinkType -eq 'SymbolicLink') {
+  # 仅删除已确认为符号链接的路径，不删除目标文件。
+  Remove-Item -LiteralPath $link.FullName
+}
+```
 
 ```bash
-# Windows系统
-del .\README.md
-
-# macOS/Linux系统
-rm ./README.md
-rm ./README.zh-CN.md
+# -L 检查链接本身，不跟随目标；unlink 只移除这个路径条目。
+if [ -L .tmp/links/eslint-readme.md ]; then
+  # 仅移除符号链接本身，保留原 README。
+  unlink .tmp/links/eslint-readme.md
+fi
 ```
-
-> **注意**:以上命令只会删除符号链接,不会影响原始文件.如果要删除原始文件,请确保指定正确的路径.

@@ -1,6 +1,0 @@
-{
-  // 通过原生继承加载当前共享规则。
-  "extends": "../../../packages/markdownlint-config/index.jsonc",
-  // 覆盖共享的 HTML 默认值，仅允许换行及折叠内容标签。
-  "MD033": { "allowed_elements": ["br", "details", "summary"] }
-}

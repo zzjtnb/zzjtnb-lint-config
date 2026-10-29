@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, extname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -53,7 +53,28 @@ const content = new Map(pages.map((page) => {
   ]
 }))
 
+/** 核对指向仓库 Markdown 文件的链接与标题锚点。 */
+function checkRepositoryLink(href: string, page: string) {
+  const repositoryLink = /^https:\/\/github\.com\/zzjtnb\/zzjtnb-lint-config\/blob\/main\/([^#?]+\.md)(?:#([^?]+))?$/.exec(href)
+  if (repositoryLink) {
+    const target = resolve(docs, '..', decodeURIComponent(repositoryLink[1]!))
+    expect(existsSync(target), `${page} -> ${href}`).toBe(true)
+    if (repositoryLink[2]) {
+      // 仓库 Markdown 的链接也核对实际标题，避免改名后留下无法被站内检查发现的旧锚点。
+      const html = renderer.render(readFileSync(target, 'utf8'))
+      const anchors = [
+        ...html.matchAll(/\bid="([^"]+)"/g),
+      ].map(match => match[1])
+      expect(anchors, `${page} -> ${href}`).toContain(decodeURIComponent(repositoryLink[2]))
+    }
+    return true
+  }
+  return false
+}
+
 function checkLink(href: string, page: string) {
+  if (checkRepositoryLink(href, page))
+    return
   if (/^(?:[a-z][\w+.-]*:|\/\/)/i.test(href))
     return
   const [rawPath, rawAnchor] = href.split('#', 2)
@@ -69,9 +90,15 @@ function checkLink(href: string, page: string) {
       `${base}.md`,
       resolve(base, 'index.md'),
     ]
-    if (local.startsWith('/'))
+
+    // 路由使用重写后的地址，锚点仍从实际 Markdown 源文件校验。
+    if (local.startsWith('/')) {
       candidates.push(resolve(sourceRoot, 'public', `.${local}`))
-    target = candidates.find(existsSync)
+      const source = config.rewrites.inv[`${local.slice(1).replace(/\.md$/, '')}.md`]
+      if (source)
+        candidates.unshift(resolve(sourceRoot, source))
+    }
+    target = candidates.find(candidate => existsSync(candidate) && statSync(candidate).isFile())
     expect(target, `${page} -> ${href}`).toBeDefined()
     if (extname(local) && extname(local) !== '.md')
       expect(candidates.some(existsSync), `${page} -> ${href}`).toBe(true)

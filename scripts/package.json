@@ -1,0 +1,8 @@
+{
+  "name": "@zzjtnb/scripts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --experimental-test-module-mocks --test */tests/*.test.js"
+  }
+}

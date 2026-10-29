@@ -1,0 +1,115 @@
+import { Buffer } from 'node:buffer'
+import { expect, test } from '@playwright/test'
+import { chooseOption, replaceEditor } from './helpers'
+
+test('顶部去重、选择菜单键盘与分隔条调整、布局恢复', async ({ page }) => {
+  await page.route('**/runtime/*.json', route => route.fulfill({ status: 503 }))
+  await page.goto('/#/eslint/experiment')
+  await expect(page.locator('.page-heading')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: '代码实验', exact: true })).toHaveCount(0)
+  await expect(page.locator('.experiment-size')).toBeVisible()
+  expect(await page.locator('.experiment-size').evaluate(element => element.getBoundingClientRect().top)).toBeLessThan(260)
+  const select = page.getByRole('combobox', { name: '编辑文件', exact: true })
+  await select.focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByRole('listbox')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(select).toBeFocused()
+  await chooseOption(page, select, 'module.js')
+  await expect(select).toHaveAttribute('data-value', 'module.js')
+  await expect(page.getByRole('combobox', { name: '编辑文件', exact: true })).toHaveAttribute('data-value', 'module.js')
+  await select.click()
+  const list = page.locator('.select-content')
+  expect(await list.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
+  await page.keyboard.press('Escape')
+
+  const configPane = page.locator('.config-pane')
+  const before = (await configPane.boundingBox())!.width
+  const handle = page.getByRole('separator', { name: '调整配置区宽度', exact: true })
+  const box = (await handle.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + 100, box.y + box.height / 2, { steps: 8 })
+  await page.mouse.up()
+  expect((await configPane.boundingBox())!.width).toBeGreaterThan(before + 50)
+  await handle.focus()
+  const dragged = (await configPane.boundingBox())!.width
+  await page.keyboard.press('ArrowLeft')
+  expect((await configPane.boundingBox())!.width).toBeLessThan(dragged)
+  const consoleHandle = page.getByRole('separator', { name: '调整诊断与控制台高度', exact: true })
+  const diagnosticsBefore = (await page.locator('.diagnostics').boundingBox())!.height
+  await consoleHandle.focus()
+  await page.keyboard.press('ArrowUp')
+  expect((await page.locator('.diagnostics').boundingBox())!.height).toBeLessThan(diagnosticsBefore)
+  await page.getByRole('button', { name: '还原布局', exact: true }).click()
+  await expect.poll(async () => (await configPane.boundingBox())!.width).toBeCloseTo(before, 0)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(page.locator('.source-panel')).toBeVisible()
+  await page.getByRole('tablist', { name: '实验工作区' }).getByRole('tab', { name: '配置', exact: true }).click()
+  await expect(page.locator('.config-panel')).toBeVisible()
+  await expect(page.locator('.source-panel')).toBeHidden()
+  await page.getByRole('tablist', { name: '实验工作区' }).getByRole('tab', { name: '结果', exact: true }).click()
+  await expect(page.locator('.console-panel')).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
+
+test('变更只属于实验，默认和实验配置可在任意页面直接下载', async ({ page }) => {
+  await page.route('**/runtime/*.json', route => route.fulfill({ status: 503 }))
+  await page.goto('/#/eslint/experiment')
+  await page.getByRole('switch', { name: 'Vue 语言集成', exact: true }).uncheck()
+  await page.getByRole('tab', { name: '配置源码', exact: true }).click()
+  await page.getByRole('button', { name: '查看源码变更 1', exact: true }).click()
+  await expect(page.locator('.source-changes')).toContainText('vue: false', { timeout: 90000 })
+  await page.getByRole('link', { name: '配置总览', exact: true }).click()
+  await expect(page.getByRole('button', { name: /查看源码变更/ })).toHaveCount(0)
+  for (const name of ['导出当前实验配置', '导出默认配置']) {
+    await page.getByRole('button', { name: '导出配置', exact: true }).click()
+    const event = page.waitForEvent('download')
+    await page.getByRole('menuitem', { name, exact: false }).click()
+    const download = await event
+    expect(download.suggestedFilename()).toBe('eslint.config.js')
+    const stream = await download.createReadStream()
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) chunks.push(chunk)
+    const text = Buffer.concat(chunks).toString('utf8')
+    if (name === '导出当前实验配置')
+      expect(text).toContain('vue: false')
+    else expect(text).not.toContain('vue: false')
+  }
+  await page.getByRole('link', { name: '代码实验', exact: true }).click()
+  await page.getByRole('tab', { name: '配置源码', exact: true }).click()
+  await page.getByRole('button', { name: '返回源码编辑 1', exact: true }).click()
+  await replaceEditor(page, page.locator('.source-config .view-lines'), 'export default { broken:')
+  await page.getByRole('button', { name: '导出配置', exact: true }).click()
+  const fallback = page.waitForEvent('download')
+  await page.getByRole('menuitem', { name: '导出默认配置', exact: false }).click()
+  expect((await fallback).suggestedFilename()).toBe('eslint.config.js')
+})
+
+test('IDE 面板折叠与尺寸跨刷新恢复，恢复布局保留编辑内容', async ({ page }) => {
+  await page.route('**/runtime/*.json', route => route.fulfill({ status: 503 }))
+  await page.goto('/#/eslint/experiment')
+  const pane = page.locator('.config-pane')
+  await page.getByRole('button', { name: '切换配置面板', exact: true }).click()
+  await expect.poll(async () => (await pane.boundingBox())!.width).toBeLessThan(1)
+  await page.getByRole('button', { name: '切换配置面板', exact: true }).click()
+  await expect.poll(async () => (await pane.boundingBox())!.width).toBeGreaterThan(50)
+  const handle = page.getByRole('separator', { name: '调整配置区宽度', exact: true })
+  await handle.focus()
+  await page.keyboard.press('ArrowRight')
+  const size = Number(await handle.getAttribute('aria-valuenow'))
+  await expect.poll(() => page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem('reka:lint-editor-wide') ?? '{}') as Record<string, { layout: number[] }>
+    return Object.values(saved)[0]?.layout[0]
+  })).toBe(size)
+  const width = (await pane.boundingBox())!.width
+  await page.reload()
+  await expect.poll(async () => (await pane.boundingBox())!.width).toBeCloseTo(width, 0)
+  const language = page.getByRole('switch', { name: 'Vue 语言集成', exact: true })
+  await language.uncheck()
+  await page.getByRole('button', { name: '切换控制台', exact: true }).click()
+  await expect.poll(async () => (await page.locator('.console-panel').boundingBox())!.height).toBe(0)
+  await page.getByRole('button', { name: '还原布局', exact: true }).click()
+  await expect.poll(async () => (await page.locator('.console-panel').boundingBox())!.height).toBeGreaterThan(40)
+  await expect(language).not.toBeChecked()
+})

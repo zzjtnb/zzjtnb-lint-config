@@ -1,38 +1,42 @@
+import assert from 'node:assert/strict'
+
 import { EventEmitter } from 'node:events'
+import { afterEach, beforeEach, describe, it, mock } from 'node:test'
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-const mocks = vi.hoisted(() => ({
-  spawn: vi.fn(),
-  question: vi.fn(),
-  close: vi.fn(),
-}))
-vi.mock('node:child_process', () => ({ spawn: mocks.spawn }))
-vi.mock('node:readline/promises', () => ({
-  createInterface: () => ({ question: mocks.question, close: mocks.close }),
-}))
+const mocks = {
+  spawn: mock.fn(),
+  question: mock.fn(),
+  close: mock.fn(),
+}
+mock.module('node:child_process', {
+  exports: { spawn: mocks.spawn },
+})
+mock.module('node:readline/promises', {
+  exports: {
+    createInterface: () => ({ question: mocks.question, close: mocks.close }),
+  },
+})
 
 const { choosePublishPackages } = await import('../packages.js')
 const { applyVersionPlan, chooseVersionPlan } = await import('../plan.js')
-const { publishPackages } = await import('../publish.js')
+const { publishPackages, releasePack } = await import('../publish.js')
 const { unifiedVersionChoices, versionProblem } = await import('../version.js')
 
 beforeEach(() => {
-  vi.resetAllMocks()
-  vi.spyOn(console, 'log').mockImplementation(() => {})
-  vi.spyOn(console, 'error').mockImplementation(() => {})
-  vi.spyOn(console, 'warn').mockImplementation(() => {})
-  mocks.spawn.mockImplementation(() => {
+  for (const fn of Object.values(mocks)) fn.mock.resetCalls()
+  mock.method(console, 'log', () => {})
+  mock.method(console, 'error', () => {})
+  mock.method(console, 'warn', () => {})
+  mocks.spawn.mock.mockImplementation(() => {
     const child = new EventEmitter()
     queueMicrotask(() => child.emit('close', 1))
     return child
   })
-  mocks.question.mockResolvedValueOnce('r').mockResolvedValue('a')
+  answers('r', 'a')
 })
 
 afterEach(() => {
-  vi.restoreAllMocks()
-  vi.unstubAllGlobals()
+  mock.restoreAll()
 })
 
 const state = [
@@ -50,7 +54,7 @@ function packageMetadata(latest, versions = [latest]) {
 }
 
 function commandExitCodes(codes) {
-  mocks.spawn.mockImplementation(() => {
+  mocks.spawn.mock.mockImplementation(() => {
     const child = new EventEmitter()
     const code = codes.shift() ?? 1
     queueMicrotask(() => child.emit('close', code))
@@ -77,26 +81,22 @@ const allPackages = [
 ]
 
 function answers(...values) {
-  mocks.question.mockReset()
-  for (const value of values)
-    mocks.question.mockResolvedValueOnce(value)
-  // 用尽预设答案后中止，避免测试因菜单循环而挂起。
-  mocks.question.mockResolvedValue('a')
+  mocks.question.mock.mockImplementation(async () => values.shift() ?? 'a')
 }
 
 describe('发布范围', () => {
   it('默认首项是全部公开包，不再提供只发两个包的选项', async () => {
     answers('b', 'a')
-    expect(await choosePublishPackages()).toEqual(allPackages.map(item => item.name))
-    const [menu] = mocks.question.mock.calls[0]
-    expect(menu.split('\n')[1]).toContain('发布全部包 [a]')
-    expect(menu).not.toContain('[b]')
+    assert.deepStrictEqual(await choosePublishPackages(), allPackages.map(item => item.name))
+    const [menu] = mocks.question.mock.calls[0].arguments
+    assert.ok((menu.split('\n')[1]).includes('发布全部包 [a]'))
+    assert.ok(!(menu).includes('[b]'))
   })
 })
 
 describe('版本计划', () => {
   it('默认建议基于最高版本统一递增，各包同号', async () => {
-    expect(unifiedVersionChoices(allPackages)).toEqual({
+    assert.deepStrictEqual(unifiedVersionChoices(allPackages), {
       current: undefined,
       patch: '1.0.5',
       minor: '1.1.0',
@@ -104,10 +104,10 @@ describe('版本计划', () => {
     })
     answers('p')
     const plan = await chooseVersionPlan(allPackages)
-    expect([
+    assert.deepStrictEqual([
       ...plan.values(),
-    ]).toEqual(['1.0.5', '1.0.5', '1.0.5'])
-    expect(mocks.question.mock.calls[0][0]).toContain('默认统一版本为 1.0.5')
+    ], ['1.0.5', '1.0.5', '1.0.5'])
+    assert.ok((mocks.question.mock.calls[0].arguments[0]).includes('默认统一版本为 1.0.5'))
   })
 
   it('上次只写入了部分包时，建议沿用已写入的最高本地版本，不再次递增', () => {
@@ -115,21 +115,21 @@ describe('版本计划', () => {
       registryState('@zzjtnb/eslint-config', '1.0.5', '1.0.4'),
       ...allPackages.slice(1),
     ]
-    expect(unifiedVersionChoices(state).current).toBe('1.0.5')
+    assert.strictEqual(unifiedVersionChoices(state).current, '1.0.5')
   })
 
   it('拒绝不可发布的统一版本后可改为自定义版本', async () => {
     answers('c', '1.0.4', 'c', '2.3.0')
     const plan = await chooseVersionPlan(allPackages)
-    expect([
+    assert.deepStrictEqual([
       ...plan.values(),
-    ]).toEqual(['2.3.0', '2.3.0', '2.3.0'])
+    ], ['2.3.0', '2.3.0', '2.3.0'])
   })
 
   it('可以按各包分别设置版本', async () => {
     answers('i', 'p', 'm', 'c', '1.2.0')
     const plan = await chooseVersionPlan(allPackages)
-    expect(Object.fromEntries(plan)).toEqual({
+    assert.deepStrictEqual(Object.fromEntries(plan), {
       '@zzjtnb/eslint-config': '1.0.5',
       '@zzjtnb/stylelint-config': '1.1.0',
       '@zzjtnb/markdownlint-config': '1.2.0',
@@ -141,11 +141,11 @@ describe('版本计划', () => {
       ...registryState('@zzjtnb/eslint-config', '1.0.4', '1.0.4', ['1.0.4', '1.0.6']),
       unpublishedVersions: ['1.0.7'],
     }
-    expect(versionProblem(item, '1.0.6')).toContain('已存在')
-    expect(versionProblem(item, '1.0.7')).toContain('取消')
-    expect(versionProblem(item, '1.0.3')).toContain('必须高于')
-    expect(versionProblem(registryState('@zzjtnb/eslint-config', '0.0.0'), '0.0.0')).toContain('占位')
-    expect(versionProblem(item, '1.0.5')).toBeUndefined()
+    assert.ok((versionProblem(item, '1.0.6')).includes('已存在'))
+    assert.ok((versionProblem(item, '1.0.7')).includes('取消'))
+    assert.ok((versionProblem(item, '1.0.3')).includes('必须高于'))
+    assert.ok((versionProblem(registryState('@zzjtnb/eslint-config', '0.0.0'), '0.0.0')).includes('占位'))
+    assert.strictEqual(versionProblem(item, '1.0.5'), undefined)
   })
 })
 
@@ -154,9 +154,9 @@ describe('版本写入的恢复边界', () => {
 
   it('第二个包写入失败时停止，不重复改写已成功的包，也不同步依赖', async () => {
     commandExitCodes([0, 1])
-    expect(await applyVersionPlan(allPackages, plan)).toBe(false)
-    expect(mocks.spawn).toHaveBeenCalledTimes(2)
-    expect(mocks.spawn.mock.calls.every(([, args]) => args.includes('version'))).toBe(true)
+    assert.strictEqual(await applyVersionPlan(allPackages, plan), false)
+    assert.equal(mocks.spawn.mock.callCount(), 2)
+    assert.strictEqual(mocks.spawn.mock.calls.every(({ arguments: [, args] }) => args.includes('version')), true)
   })
 
   it('只改写版本不同的包；依赖同步失败只重试 install', async () => {
@@ -166,10 +166,12 @@ describe('版本写入的恢复边界', () => {
       registryState('@zzjtnb/eslint-config', '1.0.5', '1.0.4'),
       ...allPackages.slice(1),
     ]
-    expect(await applyVersionPlan(state, plan)).toBe(true)
-    const commands = mocks.spawn.mock.calls.map(([, args]) => args)
-    expect(commands.slice(0, 2).map(args => args[1])).toEqual(state.slice(1).map(item => expect.stringContaining(item.name.split('/')[1])))
-    expect(commands.slice(2)).toEqual([
+    assert.strictEqual(await applyVersionPlan(state, plan), true)
+    const commands = mocks.spawn.mock.calls.map(({ arguments: [, args] }) => args)
+    // 包名保留 -config，版本写入目录使用新的工作区路径。
+    assert.match(commands[0][1], /packages[/\\]stylelint$/)
+    assert.match(commands[1][1], /packages[/\\]markdownlint$/)
+    assert.deepStrictEqual(commands.slice(2), [
       ['install'],
       ['install'],
     ])
@@ -178,23 +180,23 @@ describe('版本写入的恢复边界', () => {
 
 describe('发布失败后的恢复边界', () => {
   it('命令失败后先重新查 registry，已被接收的版本不重复 publish', async () => {
-    const fetch = vi.fn()
-      .mockResolvedValueOnce(packageMetadata('1.2.2'))
-      .mockResolvedValue(packageMetadata('1.2.3'))
-    vi.stubGlobal('fetch', fetch)
-    expect(await publishPackages(state)).toBe(true)
-    expect(fetch).toHaveBeenCalledTimes(2)
-    expect(mocks.spawn).toHaveBeenCalledOnce()
+    let calls = 0
+    const fetch = mock.method(globalThis, 'fetch', async () => packageMetadata(calls++ === 0
+      ? '1.2.2'
+      : '1.2.3'))
+    assert.strictEqual(await publishPackages(state), true)
+    assert.equal(fetch.mock.callCount(), 2)
+    assert.equal(mocks.spawn.mock.callCount(), 1)
   })
 
   it('目标版本已经存在但 latest 指向其他版本时，也不能复用同一个版本号', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(packageMetadata('1.2.2', ['1.2.2', '1.2.3'])))
-    expect(await publishPackages(state)).toBe(false)
-    expect(mocks.spawn).not.toHaveBeenCalled()
+    mock.method(globalThis, 'fetch', async () => packageMetadata('1.2.2', ['1.2.2', '1.2.3']))
+    assert.strictEqual(await publishPackages(state), false)
+    assert.equal(mocks.spawn.mock.callCount(), 0)
   })
 
   it('目标版本曾被取消发布且 latest 较旧时，在 publish 前停止', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({
+    mock.method(globalThis, 'fetch', async () => Response.json({
       'dist-tags': { latest: '1.2.2' },
       'versions': { '1.2.2': {} },
       'time': {
@@ -202,8 +204,82 @@ describe('发布失败后的恢复边界', () => {
           versions: ['1.2.3'],
         },
       },
-    })))
-    expect(await publishPackages(state)).toBe(false)
-    expect(mocks.spawn).not.toHaveBeenCalled()
+    }))
+    assert.strictEqual(await publishPackages(state), false)
+    assert.equal(mocks.spawn.mock.callCount(), 0)
   })
+})
+
+describe('原生打包预览入口', () => {
+  it('直接调用 pnpm pack --dry-run，不依赖包内转发脚本或发布命令', async () => {
+    mocks.spawn.mock.mockImplementation(() => {
+      const child = new EventEmitter()
+      queueMicrotask(() => child.emit('close', 0))
+      return child
+    })
+    assert.strictEqual(await releasePack(['@zzjtnb/eslint-config']), true)
+    const [command, args] = mocks.spawn.mock.calls[0].arguments
+    assert.strictEqual(command, 'pnpm')
+    assert.strictEqual(args[0], '--dir')
+    assert.match(args[1], /packages[/\\]eslint$/)
+    assert.deepStrictEqual(args.slice(2), ['pack', '--dry-run'])
+  })
+})
+
+// 版本确认只读状态，反复选择或中止均不得执行命令。
+describe('版本计划确认', () => {
+  it('确认、重选、取消与返回版本选择均保留交互结果', async () => {
+    const { confirmVersionPlan } = await import('../plan.js')
+    answers('p', 'r', 'm', 'y')
+    assert.equal((await confirmVersionPlan(allPackages)).get(allPackages[0].name), '1.1.0')
+    answers('p', 'a')
+    assert.equal(await confirmVersionPlan(allPackages), undefined)
+    answers('a')
+    assert.equal(await confirmVersionPlan(allPackages), undefined)
+    assert.equal(mocks.spawn.mock.callCount(), 0)
+  })
+
+  it('独立设置支持保持版本、输入非法值后重试、返回上级及中止', async () => {
+    const available = [
+      registryState('@zzjtnb/eslint-config', '1.2.4', '1.2.3'),
+    ]
+    answers('k')
+    assert.equal((await chooseVersionPlan(available)).get(available[0].name), '1.2.4')
+    answers('i', 'k', 'c', '', 'c', 'invalid', '1.0.0', 'c', '1.0.5', 'p')
+    const result = await chooseVersionPlan([
+      available[0],
+      registryState('@zzjtnb/stylelint-config', '1.0.4', '1.0.4'),
+      registryState('@zzjtnb/markdownlint-config', '1.0.4', '1.0.4'),
+    ])
+    assert.deepEqual([
+      ...result.values(),
+    ], ['1.2.4', '1.0.5', '1.0.5'])
+    answers('i', 'a')
+    assert.equal(await chooseVersionPlan(allPackages), undefined)
+  })
+
+  it('自定义统一版本返回菜单后仍可选择，并显示新包和跳版本状态', async () => {
+    const { confirmVersionPlan } = await import('../plan.js')
+    answers('c', '', 'c', '2.0.0', 'y')
+    const result = await confirmVersionPlan([
+      registryState('@zzjtnb/eslint-config', '1.0.5', '1.0.4'),
+      registryState('@zzjtnb/stylelint-config', '1.0.5', undefined),
+    ])
+    assert.deepEqual([
+      ...result.values(),
+    ], ['2.0.0', '2.0.0'])
+  })
+})
+
+describe('单包发布菜单', () => {
+  for (const [key, expected] of [
+    ['e', '@zzjtnb/eslint-config'],
+    ['s', '@zzjtnb/stylelint-config'],
+    ['m', '@zzjtnb/markdownlint-config'],
+  ]) {
+    it(`快捷键 ${key} 只选择 ${expected}`, async () => {
+      answers(key)
+      assert.deepEqual(await choosePublishPackages(), [expected])
+    })
+  }
 })

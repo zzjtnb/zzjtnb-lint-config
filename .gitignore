@@ -44,3 +44,9 @@ yarn-error.log*
 .codegraph/
 
 backup
+
+# 文档开发缓存、工作台构建资料及自动生成的组件声明。
+/docs/.vitepress/cache/
+/playground/public/metadata/
+/playground/public/runtime/
+/playground/src/components.d.ts

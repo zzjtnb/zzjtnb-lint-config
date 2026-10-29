@@ -1,0 +1,7 @@
+{
+  "customRules": ["./no-todo.js"],
+  "config": {
+    "extends": "../../index.jsonc",
+    "project-no-todo": true
+  }
+}

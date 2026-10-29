@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import config from '../.vitepress/config.ts'
+import config from '../.vitepress/config'
 
 beforeEach(() => {
   vi.stubEnv('PLAYGROUND_URL', undefined)
@@ -11,6 +11,13 @@ afterEach(() => {
 })
 
 describe('工作台环境配置', () => {
+  it('文档站端口读取自身环境文件，进程变量可覆盖', () => {
+    vi.stubEnv('VITE_PORT', undefined)
+    expect(config({ command: 'serve', mode: 'development' }).vite!.server!.port).toBe(3000)
+    vi.stubEnv('VITE_PORT', '3090')
+    expect(config({ command: 'serve', mode: 'development' }).vite!.server!.port).toBe(3090)
+  })
+
   it('从文档项目的 .env.development 读取开发工作台地址', () => {
     const settings = config({ command: 'serve', mode: 'development' })
     expect(settings.themeConfig!.nav).toContainEqual({ text: 'Playground', link: 'http://localhost:3001/' })

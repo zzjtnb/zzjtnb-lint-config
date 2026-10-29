@@ -21,6 +21,7 @@ const script = `
     outDir: config.outDir,
     lang: config.site.lang,
     lastUpdated: config.lastUpdated,
+    rewrites: config.rewrites.map,
     search: config.site.themeConfig.search,
     server: config.userConfig.vite.server,
     preview: config.userConfig.vite.preview,
@@ -44,8 +45,10 @@ describe.each([
     expect(config.srcDir).toBe(resolve(docs, 'src'))
     expect(config.outDir).toBe(resolve(docs, '.vitepress/dist'))
     expect(config.lastUpdated).toBe(true)
+    for (const name of ['eslint', 'stylelint', 'markdownlint'])
+      expect(config.rewrites[`${name}/index.md`]).toBe(`${name}.md`)
     expect(config.server).toMatchObject({ port: 3000, strictPort: true })
-    expect(config.preview).toMatchObject({ port: 3000, strictPort: true })
+    expect(config.preview).toBeUndefined()
     expect(config.lang).toBe('zh-CN')
     expect(config.search.provider).toBe('local')
     expect(config.search.options.locales.root.translations.button.buttonText).toBe('搜索')

@@ -13,7 +13,7 @@ Theme:
   ○ Custom Theme
 ```
 
-这是在保留官方文档交互的基础上建立品牌外观，不是安装另一套社区主题，也不是从零编写全站布局。本站的品牌色、首页布局和验收要求见[视觉设计方案](./design.md)。
+这是在保留官方文档交互的基础上建立品牌外观，不是安装另一套社区主题，也不是从零编写全站布局。本站的品牌色、首页布局和验收要求见[视觉设计方案](./文档站视觉设计.md)。
 
 ## 三个选项分别意味着什么
 
@@ -60,7 +60,7 @@ docs/
 
 `docs/` 是 VitePress 项目根目录；配置使用 `srcDir: 'src'` 后，`docs/src/` 是 Markdown 源目录。`srcDir` 相对于项目根目录解析，不需要把 `.vitepress/` 移入 `src/`。
 
-源目录本身不进入访问路径：`src/quick-start.md` 对应 `/quick-start`，`src/en/quick-start.md` 对应 `/en/quick-start`。`guide/` 不是必需目录，内容分组可由侧边栏表达。
+源目录本身不进入访问路径：本站 `src/quick-start.md` 对应 `/quick-start`；目前未配置英文站点或 `/en/` 路由。`guide/` 不是必需目录，内容分组可由侧边栏表达。
 
 主题指南与视觉设计方案均位于 `src/`，通过侧边栏进入公开页面。公共图片位于 `src/public/`，正文通过 `/logo.svg` 等站点资源路径引用。
 
@@ -76,6 +76,7 @@ import './styles/variables.scss'
 import './styles/custom.scss'
 
 export default {
+  // 先加载指定共享规则，再由本地同名规则覆盖；路径或包名须可解析。
   extends: DefaultTheme,
 } satisfies Theme
 ```
@@ -129,8 +130,11 @@ import { h } from 'vue'
 import HomeNotice from './components/HomeNotice.vue'
 
 export default {
+  // 先加载指定共享规则，再由本地同名规则覆盖；路径或包名须可解析。
   extends: DefaultTheme,
+  // 复用默认主题的页面布局，在其插槽中追加定制内容。
   Layout: () => h(DefaultTheme.Layout, null, {
+    // 在默认主题首页主视觉之前插入内容，不替换整套布局。
     'home-hero-before': () => h(HomeNotice),
   }),
 } satisfies Theme
@@ -153,11 +157,17 @@ export default {
 在线图标可直接使用官方主题的图片对象：
 
 ```yaml
+# 图标对象为主题提供资源地址、替代文本与显示尺寸。
 icon:
+  # 在线 SVG 资源；离线部署需改用已发布的本地文件。
   src: https://api.iconify.design/logos/eslint.svg
+  # 图像不可用时的替代文字与可访问名称。
   alt: ESLint
+  # 图标显示宽度，单位为 CSS 像素。
   width: 32
+  # 图标显示高度，单位为 CSS 像素。
   height: 32
+  # 为图片添加主题提供的图标包裹样式。
   wrap: true
 ```
 
@@ -169,20 +179,25 @@ icon:
 
 VitePress 根据 Markdown 文件自动生成路由；本站没有另建路由注册表。frontmatter 用于页面标题、首页布局和其他页面元数据，HTML `meta` 则属于页面头部信息，二者都不是默认主题的自动侧边栏生成器。
 
-`nav` 与 `sidebar` 维护阅读入口、分组及顺序，不决定页面能否访问。本站由 `.vitepress/navigation.ts` 读取页面 frontmatter 生成两者，链接由文件路径推导，不再在配置中逐页维护。正文内部标题目录仍由官方主题按标题层级生成。
+`nav` 与 `sidebar` 维护阅读入口、分组及顺序，不决定页面能否访问。本站由 `.vitepress/navigation.ts` 读取页面 frontmatter 生成两者，链接由文件路径与官方 rewrites 推导，不再在配置中逐页维护。正文内部标题目录仍由官方主题按标题层级生成。
 
 正文页面声明导航短标题、分组和顺序：
 
 ```yaml
 ---
+
+# 本站导航生成器读取的元数据，不决定页面文件路由。
 navigation:
+  # 导航中的短标题，不修改正文标题。
   text: ESLint
-  group: configuration
+  # 将页面归入 ESLint 文档组。
+  group: eslint
+  # 同组内按此数值升序排列。
   order: 10
 ---
 ```
 
-`group` 可取 `start`、`configuration`、`engineering`；组顺序和中英文组名集中维护在生成器中。`order` 是同语言同组内唯一的非负整数，按升序展示。顶栏每组链接到排序后的第一页。中文文件位于源目录根，英文位于 `en/`，两者分别生成导航。首页 `layout: home` 自动排除；其他不需要入口的页面显式使用 `navigation: false`。缺失或无效元数据、同组顺序冲突会阻止配置加载，不静默遗漏页面。
+`group` 可取 `start`、`configuration`、`engineering`；组顺序和中文组名集中维护在生成器中。`order` 是同组内唯一的非负整数，按升序展示。顶栏每组链接到排序后的第一页。当前只生成中文导航，页面链接由相对源目录的文件路径推导。首页 `layout: home` 自动排除；其他不需要入口的页面显式使用 `navigation: false`。缺失或无效元数据、同组顺序冲突会阻止配置加载，不静默遗漏页面。
 
 开发时正文修改使用 VitePress HMR；新增、移除页面，或导航标题、分组、顺序变化时，插件重新加载开发服务器配置。导航短标题放在 `navigation.text`，正文和 SEO 标题仍由页面一级标题提供。
 
@@ -201,7 +216,7 @@ VitePress 2 的 `createContentLoader` 可以读取 frontmatter，但要求站点
 5. 键盘焦点、减少动态效果及关键配色对比度。
 6. 在线资源失败边界与插件版本兼容性。
 
-格式检查不能替代浏览器验收，构建成功不能证明移动端菜单、深色对比度或第三方资源可用。VitePress 升级后，按本站[视觉设计方案](./design.md#验收)回归，而不是承诺长期零维护。
+格式检查不能替代浏览器验收，构建成功不能证明移动端菜单、深色对比度或第三方资源可用。VitePress 升级后，按本站[视觉设计方案](./文档站视觉设计.md#验收)回归，而不是承诺长期零维护。
 
 ## 官方参考
 

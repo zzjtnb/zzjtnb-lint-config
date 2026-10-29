@@ -1,0 +1,22 @@
+{
+  // 继承指定基础配置；本文件的同名选项在继承结果上覆盖。
+  "extends": "./tsconfig.app.json",
+
+  // 当前项目的编译器选项；同名项覆盖 extends 继承的设置。
+  "compilerOptions": {
+
+    // `vue-tsc --build` produces a .tsbuildinfo file for incremental type-checking.
+    // Specified here to keep it out of the root directory.
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
+    // Vitest runs in a different environment than the application code.
+    // Adjust lib and types accordingly.
+    "lib": ["ESNext"],
+    // 仅加载列出的全局类型包，避免测试或 Node.js 类型意外污染其他项目。
+    "types": ["node", "jsdom"]
+  },
+  // Override to include only test files and clear exclusions.
+  // Application code imported in tests is automatically included via module resolution.
+  "include": ["src/**/__tests__/*", "env.d.ts"],
+  // 继承 Vitest 默认排除项，并排除由 Playwright 管理的 e2e 文件。
+  "exclude": []
+}

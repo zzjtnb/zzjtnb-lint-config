@@ -1,0 +1,61 @@
+{
+  "name": "@zzjtnb/markdownlint-config",
+  "type": "module",
+  "version": "1.0.6",
+  "description": "Markdownlint 共享规则与 markdownlint-cli2 扫描配置，支持编辑器接入、自动修复与项目规则覆盖。",
+  "author": "zzjtnb(https://github.com/zzjtnb)",
+  "license": "MIT",
+  "homepage": "https://lint.docs.zzjtnb.com/markdownlint",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzjtnb/zzjtnb-lint-config.git",
+    "directory": "packages/markdownlint"
+  },
+  "bugs": {
+    "url": "https://github.com/zzjtnb/zzjtnb-lint-config/issues"
+  },
+  "keywords": [
+    "markdown",
+    "markdownlint",
+    "markdownlint-config",
+    "markdownlint-cli2"
+  ],
+  "exports": {
+    ".": "./index.jsonc",
+    "./package.json": "./package.json",
+    "./config": "./dist/index.mjs"
+  },
+  "files": [
+    "README.zh-CN.md",
+    "dist",
+    "index.jsonc"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "release": "bumpp",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "markdownlint-cli2": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "markdownlint-cli2": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "bumpp": "catalog:",
+    "jsonc-parser": "catalog:",
+    "markdownlint-cli2": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

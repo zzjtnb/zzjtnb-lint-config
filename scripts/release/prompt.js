@@ -61,6 +61,11 @@ function chooseMenu(question, options) {
   if (!process.stdin.isTTY || !process.stdout.isTTY)
     return choose(fallbackQuestion, options.map(option => option.key))
 
+  return terminalMenu(question, options)
+}
+
+/** 在真实终端内维护选择、按键监听与退出后的终端恢复。 */
+function terminalMenu(question, options) {
   closePrompt()
   return new Promise((resolveChoice) => {
     let selected = 0
@@ -73,7 +78,7 @@ function chooseMenu(question, options) {
         `${question}（↑/↓ 选择，Enter 确认）：`,
         ...options.map((option, index) => `${index === selected
           ? '❯'
-          : ' '} ${option.label} [${option.key}] — ${option.description}`),
+          : ' '} ${option.label} [${option.key}] · ${option.description}`),
       ]
       process.stdout.write(`${lines.join('\n')}\n`)
       lineCount = lines.length
@@ -82,10 +87,12 @@ function chooseMenu(question, options) {
     let cleanup
 
     const onKeypress = (_, key) => {
-      if (key.name === 'up')
+      if (key.name === 'up') {
         selected = (selected + options.length - 1) % options.length
-      else if (key.name === 'down')
+      }
+      else if (key.name === 'down') {
         selected = (selected + 1) % options.length
+      }
       else if (key.name === 'return') {
         const value = options[selected].key
         cleanup()

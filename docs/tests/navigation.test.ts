@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createNavigation, navigationPlugin } from '../.vitepress/navigation.ts'
+import { createNavigation, navigationPlugin } from '../.vitepress/navigation'
 
 vi.mock('node:fs', () => ({
   readdirSync: vi.fn(),
@@ -32,17 +32,34 @@ afterEach(() => {
 })
 
 describe('页面元数据导航', () => {
+  it('工程文档归档后保留公开短地址，导航使用同一重写映射', () => {
+    files({
+      'engineering/versions.md': source('engineering', 10, '依赖版本管理'),
+      'engineering/debugging.md': source('engineering', 20, 'npm 包联调与验证'),
+      'engineering/monorepo.md': source('engineering', 30, 'Turborepo 与 pnpm'),
+      'engineering/scripts.md': source('engineering', 40, '项目脚本'),
+    })
+    const result = createNavigation('/docs/src')
+    expect(result.sidebar[0]?.items?.map(item => item.link)).toEqual([
+      '/dependencies',
+      '/debugging',
+      '/monorepo',
+      '/scripts',
+    ])
+  })
+
   it('按组和顺序生成链接，支持嵌套 index', () => {
     files({
-      'second.md': source('configuration', 20, '第二页'),
-      'nested/index.md': source('configuration', 10, '第一页'),
+      'second.md': source('eslint', 20, '第二页'),
+      'nested/index.md': source('eslint', 10, '第一页'),
       'index.md': '---\nlayout: home\n---\n',
       'hidden.md': '---\nnavigation: false\n---\n',
     })
     const result = createNavigation('/docs/src')
     expect(result.sidebar).toEqual([
       {
-        text: '共享配置',
+        text: 'ESLint',
+        collapsed: false,
         items: [
           { text: '第一页', link: '/nested/' },
           { text: '第二页', link: '/second' },
@@ -50,8 +67,45 @@ describe('页面元数据导航', () => {
       },
     ])
     expect(result.nav).toEqual([
-      { text: '共享配置', link: '/nested/' },
+      {
+        text: 'ESLint',
+        items: [
+          { text: '第一页', link: '/nested/' },
+          { text: '第二页', link: '/second' },
+        ],
+      },
     ])
+  })
+
+  it('顶部使用包子菜单，全局侧栏保持全部包目录', () => {
+    files({
+      'eslint/index.md': source('eslint', 0, '快速开始'),
+      'eslint/configuration.md': source('eslint', 30, '详细配置'),
+      'stylelint/index.md': source('stylelint', 0, '快速开始'),
+      'markdownlint/index.md': source('markdownlint', 0, '快速开始'),
+    })
+    const result = createNavigation('/docs/src')
+    expect(result.nav).toContainEqual({
+      text: 'ESLint',
+      items: [
+        { text: '快速开始', link: '/eslint' },
+        { text: '详细配置', link: '/eslint/configuration' },
+      ],
+    })
+    expect(result.nav).toContainEqual({
+      text: 'Stylelint',
+      items: [
+        { text: '快速开始', link: '/stylelint' },
+      ],
+    })
+    expect(result.nav).toContainEqual({
+      text: 'Markdownlint',
+      items: [
+        { text: '快速开始', link: '/markdownlint' },
+      ],
+    })
+    expect(result.sidebar.map(group => group.text)).toEqual(['ESLint', 'Stylelint', 'Markdownlint'])
+    expect(result.sidebar.every(group => group.collapsed === false)).toBe(true)
   })
 
   it('独立应用入口由配置提供', () => {

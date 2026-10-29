@@ -9,9 +9,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
 // 公开包名到 packages/ 下目录名的映射，顺序即默认检查和发布顺序。
 const PACKAGE_DIRECTORIES = {
-  '@zzjtnb/eslint-config': 'eslint-config',
-  '@zzjtnb/stylelint-config': 'stylelint-config',
-  '@zzjtnb/markdownlint-config': 'markdownlint-config',
+  '@zzjtnb/eslint-config': 'eslint',
+  '@zzjtnb/stylelint-config': 'stylelint',
+  '@zzjtnb/markdownlint-config': 'markdownlint',
 }
 const PACKAGES = Object.keys(PACKAGE_DIRECTORIES)
 
@@ -43,46 +43,38 @@ function packageVersion(packageName) {
  * @returns {Array<[string, string[]]>} 按执行顺序排列的检查说明与 pnpm 参数。
  */
 function packageCheckSteps(packageNames) {
-  return packageNames.flatMap((packageName) => {
-    const directory = packageDirectory(packageName)
-    // JSONC 配置直接发布源码，不执行不存在的构建和类型检查。
-    const sourceSteps = packageName === '@zzjtnb/markdownlint-config'
-      ? []
-      : [
-          [
-            `${packageName} 构建`,
-            ['--dir', directory, 'run', 'build'],
-          ],
-          [
-            `${packageName} 类型检查`,
-            ['--dir', directory, 'run', 'typecheck'],
-          ],
-        ]
-    return [
-      ...sourceSteps,
-      [
-        `${packageName} ESLint 检查`,
+  return [
+    ...packageNames.flatMap((packageName) => {
+      const directory = packageDirectory(packageName)
+      // 每个所选包分别验证构建入口与公开类型。
+      return [
         [
-          '--dir',
-          directory,
-          'run',
-          'lint:eslint',
+          `${packageName} 构建`,
+          ['--dir', directory, 'run', 'build'],
         ],
-      ],
-      [
-        `${packageName} Markdown 检查`,
         [
-          '--dir',
-          directory,
-          'exec',
-          'markdownlint-cli2',
-          '--config',
-          '../../.markdownlint-cli2.jsonc',
-          '**/*.md',
+          `${packageName} 类型检查`,
+          ['--dir', directory, 'run', 'typecheck'],
         ],
-      ],
-    ]
-  })
+        [
+          `${packageName} 测试`,
+          // 单次运行包自身的源码与公开入口测试，禁止进入监听后停在发布前。
+          [
+            '--dir',
+            directory,
+            'run',
+            'test',
+            '--run',
+          ],
+        ],
+      ]
+    }),
+    // 根入口统一维护三个工具、配置与缓存；整仓检查只执行一次。
+    [
+      '仓库检查',
+      ['--dir', ROOT, 'run', 'lint'],
+    ],
+  ]
 }
 
 /**

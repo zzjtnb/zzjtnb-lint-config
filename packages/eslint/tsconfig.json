@@ -1,0 +1,48 @@
+{
+  // 为编辑器选择对应配置 Schema，提供字段校验与补全，不改变运行行为。
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // 当前项目的编译器选项；同名项覆盖 extends 继承的设置。
+  "compilerOptions": {
+    // 指定可接受的 JavaScript 目标版本；这里显式采用配置值，不降低现代语法级别。
+    "target": "esnext",
+    // 选择需要的标准库类型；DOM 仅在浏览器代码需要时加入。
+    "lib": [
+      "es2023"
+    ],
+    // force 将每个源码文件视作模块，避免无导入文件共享全局作用域。
+    "moduleDetection": "force",
+    // 指定模块语法处理方式；与实际的 Node.js 或打包器加载方式配套。
+    "module": "preserve",
+    // 按指定策略解析模块；bundler 与打包器的扩展名及 exports 解析保持一致。
+    "moduleResolution": "bundler",
+    // 允许通过模块导入 JSON，并为导入值生成类型。
+    "resolveJsonModule": true,
+    // 仅加载列出的全局类型包，避免测试或 Node.js 类型意外污染其他项目。
+    "types": [
+      "node"
+    ],
+    // 显式启用 TypeScript 严格检查组，不依赖编译器的宽松默认值。
+    "strict": true,
+    // 报告未使用的局部声明，防止失效代码进入公开配置包。
+    "noUnusedLocals": true,
+    // 允许生成公开类型声明；实际生成入口由 tsdown 的 dts 配置管理。
+    "declaration": true,
+    // 需要输出时仅输出声明，不重复生成 JavaScript；noEmit 检查时不输出文件。
+    "emitDeclarationOnly": true,
+    // 启用 CommonJS 与 ESM 默认导入的类型兼容处理。
+    "esModuleInterop": true,
+    // 限制为可逐文件转换的语法，匹配 Vite 或 tsdown 的编译方式。
+    "isolatedModules": true,
+    // 保留值导入导出，类型依赖必须显式使用 import type，避免运行时误加载。
+    "verbatimModuleSyntax": true,
+    // 跳过依赖声明文件的内部检查；仍检查项目源码与实际使用的公开类型。
+    "skipLibCheck": true
+  },
+  // 将这些文件或匹配路径纳入当前项目检查；路径相对本配置文件。
+  "include": [
+    "src",
+    "tests",
+    "tsdown.config.ts",
+    "vitest.config.ts"
+  ]
+}

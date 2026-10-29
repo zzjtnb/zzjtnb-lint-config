@@ -28,8 +28,8 @@
 - 发布范围由 `packages.js` 的 `PACKAGE_DIRECTORIES` 维护，只包含三个公开配置包，根目录和其他私有 workspace 不发布。
 - 入口先判断 `--help` 与交互条件；帮助不启动登录、版本写入或发布，非 TTY 或设置了 `CI` 时拒绝正式流程。
 - 稳定版本解析集中于 `version.js` 的 `parseVersion`；脚本不支持预发布与自选 dist-tag，不能因此删掉原生命令文档中的有效能力。
-- `packages.js` 的 `packageCheckSteps` 按包的实际产物生成检查；Markdownlint 是 JSONC，不给它追加不存在的 build 或 typecheck。
-- 构建与检查按已选包执行；失败只重试当前检查或中止，不跳过失败项，也不自动修复源码。
+- `packages.js` 的 `packageCheckSteps` 按包的实际产物生成检查；Markdownlint 同样构建与检查 TypeScript 扫描入口。
+- 构建、类型检查与单次测试按已选包执行，随后统一调用一次根目录 lint 检查整个仓库；失败只重试当前检查或中止，不跳过失败项，也不自动修复源码。
 - 发布范围菜单首项（默认）为全部三个包，其余为单包；不保留只发部分组合的旧选项。
 - 版本先由 `plan.js` 的 `chooseVersionPlan` 生成计划且不写文件：默认所选包统一同号，可选统一 patch / minor / major、自定义统一版本或逐包设置。候选基础取所选包本地与 npm `latest` 中的最高版本；已有可用的最高本地版本时优先沿用，供中途失败后恢复。
 - `version.js` 的 `versionProblem` 是版本可用性的唯一判断：拒绝 `0.0.0`、不高于 latest、已发布及曾取消发布的版本；计划确认前任一包不满足即返回选择。
@@ -44,9 +44,12 @@
 在仓库根目录执行已安装工具，不触发真实登录、版本变更、安装或发布：
 
 ```bash
-pnpm --config.verifyDepsBeforeRun=error exec vitest run scripts/release/tests --project unit
-pnpm --config.verifyDepsBeforeRun=error exec eslint scripts/release --fix --max-warnings 0
-pnpm --config.verifyDepsBeforeRun=error exec markdownlint-cli2 --config .markdownlint-cli2.jsonc --fix scripts/release/README.md "apps/handbook/*.md"
+# 使用 Node.js 原生测试运行器执行脚本测试，完成后退出，不启动发布。
+pnpm --config.verifyDepsBeforeRun=error --filter @zzjtnb/scripts run test
+# 检查并自动修复指定 JavaScript、TypeScript 或 Vue 文件。
+pnpm --config.verifyDepsBeforeRun=error exec eslint scripts/release --fix
+# 检查并自动修复指定 Markdown 文件，使用命令中的配置或 CLI2 自动发现配置。
+pnpm --config.verifyDepsBeforeRun=error exec markdownlint-cli2 --config .markdownlint-cli2.mjs --fix scripts/release/README.md "apps/handbook/*.md"
 ```
 
 恢复用例以子进程、readline 和 registry 替身验证调用顺序与停止条件，不能据此宣称真实账号、远程发布或 OTP 已验证。文档 Shell 检查只解析语法，不执行其中的安装或对外写命令。

@@ -3,6 +3,7 @@
   "compilerOptions": {
     // 目标语法和模块格式都使用最新标准。
     "target": "ESNext",
+    // 指定模块语法处理方式；与实际的 Node.js 或打包器加载方式配套。
     "module": "ESNext",
     // bundler 模式：按 Vite 等打包工具的方式解析 import。
     "moduleResolution": "bundler",
@@ -10,8 +11,11 @@
     "types": ["node"],
     // 开启全部严格检查，能在编码阶段发现更多问题。
     "strict": true,
+    // 仅报告类型诊断，不生成 JavaScript 或声明文件；构建产物由所属工具负责。
     "noEmit": true,
+    // 限制为可逐文件转换的语法，匹配 Vite 或 tsdown 的编译方式。
     "isolatedModules": true,
+    // 跳过依赖声明文件的内部检查；仍检查项目源码与实际使用的公开类型。
     "skipLibCheck": true
   },
   // 检查范围：UnoCSS 配置、全部源码和测试。.vue 文件由 ESLint 与 Stylelint 检查，不在这里。

@@ -24,12 +24,14 @@
 1. 安装依赖。在**仓库根目录**执行一次即可：
 
    ```bash
+   # 首次准备工作区或依赖清单变化时安装；只改配置包源码无需重复安装。
    pnpm install
    ```
 
 2. 本教程之后的命令都在示例目录里执行，先进入它：
 
    ```bash
+   # 进入 apps/demo 目录后执行后续命令。
    cd apps/demo
    ```
 
@@ -38,6 +40,7 @@ Node.js 和 pnpm 的版本要求写在仓库根目录 `package.json` 的 `engine
 ## 第一步：跑一遍检查
 
 ```bash
+# 运行当前项目已配置的代码、样式和文档检查，不自动修复。
 pnpm run lint
 ```
 
@@ -46,6 +49,7 @@ pnpm run lint
 再运行类型检查：
 
 ```bash
+# 检查当前项目的 TypeScript 类型，不输出编译产物。
 pnpm run typecheck
 ```
 
@@ -58,6 +62,7 @@ pnpm run typecheck
 ### 试试 ESLint
 
 ```bash
+# 通过标准输入检查一段 TypeScript 示例，不创建源文件。
 printf 'const message = "hello";\nconsole.log(message)\n' | pnpm exec eslint --stdin --stdin-filename src/try.ts
 ```
 
@@ -73,7 +78,8 @@ printf 'const message = "hello";\nconsole.log(message)\n' | pnpm exec eslint --s
 ### 试试 Stylelint
 
 ```bash
-printf '.box {\n  color: #FFFFFF;\n  display: flex;\n}\n' | pnpm exec stylelint --stdin-filename src/try.css --config stylelint.config.ts
+# 通过标准输入检查一段 CSS 示例，不创建源文件。
+printf '.box {\n  color: #FFFFFF;\n  display: flex;\n}\n' | pnpm exec stylelint --stdin-filename src/try.css --config stylelint.config.js
 ```
 
 你会看到：
@@ -90,8 +96,11 @@ printf '.box {\n  color: #FFFFFF;\n  display: flex;\n}\n' | pnpm exec stylelint 
 先新建一个有问题的临时文件，再检查，最后删掉它：
 
 ```bash
+# 写入包含重复标题的 Markdown 临时示例。
 printf '# 标题\n\n## 说明\n\n文字\n\n## 说明\n\n文字\n' > try-duplicate-heading.md
+# 检查指定 Markdown 文件，使用命令中的配置或 CLI2 自动发现配置。
 pnpm exec markdownlint-cli2 try-duplicate-heading.md
+# 移除本节创建的 Markdown 临时示例文件。
 rm try-duplicate-heading.md
 ```
 
@@ -102,6 +111,7 @@ rm try-duplicate-heading.md
 很多问题可以自动修复。在示例里运行：
 
 ```bash
+# 按当前项目配置自动修复代码、样式与文档，会写回文件。
 pnpm run format
 ```
 
@@ -113,9 +123,9 @@ pnpm run format
 
 | 文件 | 它做什么 |
 | --- | --- |
-| `eslint.config.ts` | 只有几行：引入 `zzjtnb()`，并把 Markdown 交给 Markdownlint，避免两个工具重复报告 |
-| `stylelint.config.ts` | 引入 `zzjtnb()` 的默认配置 |
-| `.markdownlint-cli2.jsonc` | 用 `extends` 继承共享规则，并排除 `node_modules` |
+| `eslint.config.js` | 只有几行：引入 `zzjtnb()`，并把 Markdown 交给 Markdownlint，避免两个工具重复报告 |
+| `stylelint.config.js` | 引入 `zzjtnb()` 的默认配置 |
+| `.markdownlint-cli2.mjs` | 通过公开 CLI2 入口复用共享规则和扫描排除项 |
 | `uno.config.ts` | UnoCSS 的配置，下一节细讲 |
 | `tsconfig.json` | TypeScript 的检查范围和严格程度，每个选项都有注释 |
 | `tests/uno.test.ts` | 验证 `uno.config.ts` 是否生效，每条测试都说明它在证明什么 |
@@ -177,8 +187,10 @@ pnpm run format
 4. 运行测试确认配置仍然有效：
 
    ```bash
+   # 返回仓库根目录。
    cd ../..
-   pnpm exec vitest run apps/demo/tests --project unit
+   # 运行消费示例的单元及契约测试，完成一次后退出。
+   pnpm --filter @zzjtnb/lint-demo run test --run
    ```
 
 ### 练习二：新增一个主题颜色
@@ -211,9 +223,9 @@ pnpm run format
 
 ```text
 apps/demo/
-├── eslint.config.ts          ESLint 配置
-├── stylelint.config.ts       Stylelint 配置
-├── .markdownlint-cli2.jsonc  Markdownlint 配置
+├── eslint.config.js          ESLint 配置
+├── stylelint.config.js       Stylelint 配置
+├── .markdownlint-cli2.mjs  Markdownlint 配置
 ├── uno.config.ts             UnoCSS 配置
 ├── tsconfig.json             TypeScript 配置
 ├── src/

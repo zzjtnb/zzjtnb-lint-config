@@ -14,7 +14,7 @@ function releaseCheck(packageNames) {
 }
 
 /**
- * 逐包执行 release:pack（pnpm pack --dry-run）预览发布内容，不上传。
+ * 逐包执行 pnpm pack --dry-run预览发布内容，不上传。
  * @param {string[]} packageNames 本次选择的公开包名。
  * @returns {Promise<boolean>} 全部完成返回 true。
  */
@@ -24,8 +24,8 @@ function releasePack(packageNames) {
     [
       '--dir',
       packageDirectory(packageName),
-      'run',
-      'release:pack',
+      'pack',
+      '--dry-run',
     ],
   ]))
 }
@@ -60,45 +60,62 @@ function publishPackage(packageName) {
  */
 async function publishPackages(state) {
   for (const item of state) {
-    while (true) {
-      let npmState
-      try {
-        npmState = await npmPackageState(item.name)
-      }
-      catch (error) {
-        console.error(`${item.name} 版本查询失败：${error.message}`)
-        const action = await chooseRetryOrAbort(`${item.name} 版本查询失败，请选择操作`, '重新请求 npm registry；状态未确认前不会发布')
-        if (action === 'a')
-          return false
-        continue
-      }
-
-      const { remote, publishedVersions, unpublishedVersions } = npmState
-      if (remote && compareVersions(item.local, remote) <= 0) {
-        if (compareVersions(item.local, remote) === 0) {
-          console.log(`\n${item.name}@${item.local} 已被 registry 确认为 latest，跳过重复发布。`)
-          break
-        }
-        console.error(`\n${item.name} 本地版本低于 npm 版本，需要人工处理：${item.local} < ${remote}`)
-        return false
-      }
-      if (publishedVersions.includes(item.local) || unpublishedVersions.includes(item.local)) {
-        console.error(`\n${item.name}@${item.local} 的版本号已被占用，不能重复发布。请核对 registry 版本与分发标签，再选择未使用的版本号。`)
-        return false
-      }
-
-      console.log(`\n准备发布 ${item.name}@${item.local}`)
-      const code = await publishPackage(item.name)
-      if (code === 0)
-        break
-      // 命令失败不代表 registry 未接收写入；重试必须回到上面的状态查询。
-      console.error('\n发布命令失败；如果终端要求 OTP，请直接在上方 npm 提示中输入一次性验证码。')
-      const action = await chooseRetryOrAbort(`${item.name} 发布失败，请选择操作`, '重新核对 registry 后再决定是否发布；已成功发布的包不会回滚')
-      if (action === 'a')
-        return false
-    }
+    if (!await publishSelected(item))
+      return false
   }
   return true
+}
+
+/** 根据 registry 状态区分已发布、版本冲突和可继续发布。 */
+function publicationStatus(item, npmState) {
+  const { remote, publishedVersions, unpublishedVersions } = npmState
+  if (remote && compareVersions(item.local, remote) === 0) {
+    console.log(`\n${item.name}@${item.local} 已被 registry 确认为 latest，跳过重复发布。`)
+    return 'done'
+  }
+  if (remote && compareVersions(item.local, remote) < 0) {
+    console.error(`\n${item.name} 本地版本低于 npm 版本，需要人工处理：${item.local} < ${remote}`)
+    return 'abort'
+  }
+  if (publishedVersions.includes(item.local) || unpublishedVersions.includes(item.local)) {
+    console.error(`\n${item.name}@${item.local} 的版本号已被占用，不能重复发布。请核对 registry 版本与分发标签，再选择未使用的版本号。`)
+    return 'abort'
+  }
+
+  return 'ready'
+}
+
+/** 查询单个包的 registry 状态并发布；失败后由用户决定是否重试。 */
+async function publishSelected(item) {
+  while (true) {
+    let npmState
+    try {
+      npmState = await npmPackageState(item.name)
+    }
+    catch (error) {
+      console.error(`${item.name} 版本查询失败：${error.message}`)
+      const action = await chooseRetryOrAbort(`${item.name} 版本查询失败，请选择操作`, '重新请求 npm registry；状态未确认前不会发布')
+      if (action === 'a')
+        return false
+      continue
+    }
+
+    const status = publicationStatus(item, npmState)
+    if (status === 'done')
+      return true
+    if (status === 'abort')
+      return false
+
+    console.log(`\n准备发布 ${item.name}@${item.local}`)
+    const code = await publishPackage(item.name)
+    if (code === 0)
+      return true
+      // 命令失败不代表 registry 未接收写入；重试必须回到上面的状态查询。
+    console.error('\n发布命令失败；如果终端要求 OTP，请直接在上方 npm 提示中输入一次性验证码。')
+    const action = await chooseRetryOrAbort(`${item.name} 发布失败，请选择操作`, '重新核对 registry 后再决定是否发布；已成功发布的包不会回滚')
+    if (action === 'a')
+      return false
+  }
 }
 
 /**

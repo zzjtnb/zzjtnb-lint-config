@@ -3,15 +3,16 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint:eslint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.ts --cache --cache-location node_modules/.cache/.stylelintcache",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "lint:eslint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache",
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.js --cache --cache-location node_modules/.cache/.stylelintcache",
     "lint:markdownlint": "markdownlint-cli2 \"**/*.md\"",
     "lint": "pnpm run lint:eslint && pnpm run lint:stylelint && pnpm run lint:markdownlint",
     "format:eslint": "pnpm run lint:eslint --fix",
     "format:stylelint": "pnpm run lint:stylelint --fix",
     "format:markdownlint": "pnpm run lint:markdownlint --fix",
-    "format": "pnpm run format:eslint && pnpm run format:stylelint && pnpm run format:markdownlint",
-    "typecheck": "tsc --noEmit"
+    "format": "pnpm run format:eslint && pnpm run format:stylelint && pnpm run format:markdownlint"
   },
   "devDependencies": {
     "@iconify/utils": "catalog:",
@@ -24,6 +25,7 @@
     "markdownlint-cli2": "catalog:",
     "stylelint": "catalog:",
     "typescript": "catalog:",
-    "unocss": "catalog:"
+    "unocss": "catalog:",
+    "vitest": "catalog:"
   }
 }

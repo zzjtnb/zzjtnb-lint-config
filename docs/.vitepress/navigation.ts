@@ -8,11 +8,21 @@ import { fileURLToPath } from 'node:url'
 import matter from 'gray-matter'
 
 const sourceRoot = fileURLToPath(new URL('../src/', import.meta.url))
-const groups = {
-  start: '入门',
-  configuration: '共享配置',
-  engineering: '工程与维护',
-} as const
+const packageGroups = { eslint: 'ESLint', stylelint: 'Stylelint', markdownlint: 'Markdownlint' } as const
+const groups = { start: '入门', ...packageGroups, engineering: '工程与维护' } as const
+
+/** 目录首页与工程文档通过官方路由重写保留现有公开短地址，导航复用同一映射。 */
+export const rewrites: Record<string, string> = Object.fromEntries(
+  [
+    ...Object.keys(packageGroups).map(name => [`${name}/index.md`, `${name}.md`]),
+    ...Object.entries({
+      versions: 'dependencies',
+      debugging: 'debugging',
+      monorepo: 'monorepo',
+      scripts: 'scripts',
+    }).map(([source, route]) => [`engineering/${source}.md`, `${route}.md`]),
+  ],
+)
 
 type Group = keyof typeof groups
 
@@ -43,30 +53,45 @@ export function createNavigation(root = sourceRoot, links: DefaultTheme.NavItem[
     if (typeof navigation?.text !== 'string' || !navigation.text.trim()
       || !navigation || typeof navigation !== 'object'
       || !Object.hasOwn(groups, navigation.group)
-      || !Number.isSafeInteger(navigation.order) || navigation.order < 0)
+      || !Number.isSafeInteger(navigation.order) || navigation.order < 0) {
       throw new Error(`${path}: 请声明 navigation 的有效 text、group 和非负整数 order`)
+    }
     if (pages.some(page => page.group === navigation.group && page.order === navigation.order))
       throw new Error(`${path}: 同组的 navigation.order 不得重复`)
     pages.push({
       title: navigation.text,
       group: navigation.group,
       order: navigation.order,
-      link: `/${path.replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '')}`,
+      link: `/${(rewrites[path] ?? path).replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '')}`,
     })
   }
 
-  const sidebar: DefaultTheme.SidebarItem[] = Object.entries(groups).flatMap(([group, label]) => {
+  const sections = Object.entries(groups).flatMap(([group, label]) => {
     const items = pages.filter(page => page.group === group)
       .sort((a, b) => a.order - b.order)
       .map(page => ({ text: page.title, link: page.link }))
     return items.length
       ? [
-          { text: label, items },
+          {
+            group,
+            item: { text: label, items },
+          },
         ]
       : []
   })
+  // 全局侧栏始终保留三个包的目录，切换文章不会裁掉其他包。
+  const sidebar: DefaultTheme.SidebarItem[] = sections.map(({ group, item }) => ({
+    ...item,
+    // 包目录允许手动折叠，初始展开；页面切换不重新分配侧栏分组。
+    ...(Object.hasOwn(packageGroups, group)
+      ? { collapsed: false }
+      : {}),
+  }))
   const nav: DefaultTheme.NavItem[] = [
-    ...sidebar.map(group => ({ text: group.text!, link: group.items![0]!.link! })),
+    ...sections.map(({ group, item }) => Object.hasOwn(packageGroups, group)
+      // 顶部包菜单使用官方子菜单，四篇页面仍由同一份元数据生成。
+      ? { text: item.text, items: item.items }
+      : { text: item.text, link: item.items[0]!.link! }),
     ...links,
   ]
   return { nav, sidebar }

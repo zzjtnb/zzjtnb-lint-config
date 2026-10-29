@@ -55,40 +55,92 @@ function versionProblems(state, plan) {
 async function choosePackageVersions(state) {
   const plan = new Map()
   for (const item of state) {
-    const base = item.remote && compareVersions(item.remote, item.local) > 0
-      ? item.remote
-      : item.local
-    while (true) {
-      const options = [
-        ...(versionProblem(item, item.local)
-          ? []
-          : [
-              { description: '本地版本已可发布，不改写', key: 'k', label: `保持 ${item.local}` },
-            ]),
-        ...LEVEL_OPTIONS.map(option => ({ ...option, label: `${option.level}：${incrementVersion(base, option.level)}` })),
-        { description: '输入完整的 x.y.z 版本号', key: 'c', label: '自定义版本' },
-        { description: '退出发布流程，不修改版本', key: 'a', label: '中止' },
-      ]
-      const action = await chooseMenu(`请选择 ${item.name} 的版本（本地 ${item.local} / npm ${item.remote ?? '未发布'}）`, options)
-      if (action === 'a')
-        return undefined
-      const level = LEVEL_OPTIONS.find(option => option.key === action)?.level
-      const version = action === 'k'
-        ? item.local
-        : level
-          ? incrementVersion(base, level)
-          : await askVersion(`请输入 ${item.name} 的版本号（x.y.z，直接回车返回）：`)
-      if (!version)
-        continue
-      const problem = versionProblem(item, version)
-      if (!problem) {
-        plan.set(item.name, version)
-        break
-      }
-      console.error(`${item.name}@${version}：${problem}`)
-    }
+    const version = await choosePackageVersion(item)
+    if (!version)
+      return undefined
+    plan.set(item.name, version)
   }
   return plan
+}
+
+/** 选择本地与 registry 中较新的版本作为递增起点。 */
+function versionBase(item) {
+  if (item.remote && compareVersions(item.remote, item.local) > 0)
+    return item.remote
+  return item.local
+}
+
+/** 统一和逐包选择复用同一快捷键解释，返回上一级时不产生版本。 */
+async function versionForAction(action, current, choices, question) {
+  if (action === 'k')
+    return current
+  const option = LEVEL_OPTIONS.find(option => option.key === action)
+  if (option)
+    return choices[option.level]
+  return askVersion(question)
+}
+
+/** 为单个包选择可发布版本，取消时返回 undefined。 */
+async function choosePackageVersion(item) {
+  const base = versionBase(item)
+  while (true) {
+    const options = [
+      ...(versionProblem(item, item.local)
+        ? []
+        : [
+            { description: '本地版本已可发布，不改写', key: 'k', label: `保持 ${item.local}` },
+          ]),
+      ...LEVEL_OPTIONS.map(option => ({ ...option, label: `${option.level}：${incrementVersion(base, option.level)}` })),
+      { description: '输入完整的 x.y.z 版本号', key: 'c', label: '自定义版本' },
+      { description: '退出发布流程，不修改版本', key: 'a', label: '中止' },
+    ]
+    const action = await chooseMenu(`请选择 ${item.name} 的版本（本地 ${item.local} / npm ${item.remote ?? '未发布'}）`, options)
+    if (action === 'a')
+      return undefined
+    const version = await versionForAction(action, item.local, Object.fromEntries(LEVEL_OPTIONS.map(option => [
+      option.level,
+      incrementVersion(base, option.level),
+    ])), `请输入 ${item.name} 的版本号（x.y.z，直接回车返回）：`)
+    if (!version)
+      continue
+    const problem = versionProblem(item, version)
+    if (!problem) {
+      return version
+    }
+    console.error(`${item.name}@${version}：${problem}`)
+  }
+}
+
+/** 多包发布显示统一版本提示，单包省略该前缀。 */
+function versionScope(state) {
+  return state.length > 1
+    ? '统一'
+    : ''
+}
+
+/** 根据可用版本构造统一发布菜单，不执行交互。 */
+function versionMenu(state, choices, scope) {
+  return [
+    ...(choices.current
+      ? [
+          {
+            description: state.every(item => item.local === choices.current)
+              ? '本地版本已可发布，不改写'
+              : '复用已写入的最高本地版本，只改写其余包',
+            key: 'k',
+            label: `使用${scope}版本 ${choices.current}`,
+          },
+        ]
+      : []),
+    ...LEVEL_OPTIONS.map(option => ({ ...option, label: `${scope}${option.level}：${choices[option.level]}` })),
+    { description: '输入完整的 x.y.z 版本号', key: 'c', label: `自定义${scope}版本` },
+    ...(state.length > 1
+      ? [
+          { description: '每个包单独保持、递增或输入版本', key: 'i', label: '按各包分别设置' },
+        ]
+      : []),
+    { description: '退出发布流程，不修改版本', key: 'a', label: '中止' },
+  ]
 }
 
 /**
@@ -100,42 +152,15 @@ async function choosePackageVersions(state) {
 async function chooseVersionPlan(state) {
   while (true) {
     const choices = unifiedVersionChoices(state)
-    const scope = state.length > 1
-      ? '统一'
-      : ''
+    const scope = versionScope(state)
     const recommended = choices.current ?? choices.patch
-    const action = await chooseMenu(`默认${scope}版本为 ${recommended}，是否使用？`, [
-      ...(choices.current
-        ? [
-            {
-              description: state.every(item => item.local === choices.current)
-                ? '本地版本已可发布，不改写'
-                : '复用已写入的最高本地版本，只改写其余包',
-              key: 'k',
-              label: `使用${scope}版本 ${choices.current}`,
-            },
-          ]
-        : []),
-      ...LEVEL_OPTIONS.map(option => ({ ...option, label: `${scope}${option.level}：${choices[option.level]}` })),
-      { description: '输入完整的 x.y.z 版本号', key: 'c', label: `自定义${scope}版本` },
-      ...(state.length > 1
-        ? [
-            { description: '每个包单独保持、递增或输入版本', key: 'i', label: '按各包分别设置' },
-          ]
-        : []),
-      { description: '退出发布流程，不修改版本', key: 'a', label: '中止' },
-    ])
+    const action = await chooseMenu(`默认${scope}版本为 ${recommended}，是否使用？`, versionMenu(state, choices, scope))
     if (action === 'a')
       return undefined
     if (action === 'i')
       return choosePackageVersions(state)
 
-    const level = LEVEL_OPTIONS.find(option => option.key === action)?.level
-    const version = action === 'k'
-      ? choices.current
-      : level
-        ? choices[level]
-        : await askVersion(`请输入${scope}版本号（x.y.z，直接回车返回）：`)
+    const version = await versionForAction(action, choices.current, choices, `请输入${scope}版本号（x.y.z，直接回车返回）：`)
     if (!version)
       continue
     const plan = new Map(state.map(item => [item.name, version]))

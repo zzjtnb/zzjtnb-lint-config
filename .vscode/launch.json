@@ -4,55 +4,80 @@
   "$schema": "vscode://schemas/launch",
   // 选择下方配置后按 F5，启动对应开发服务，并在服务就绪后打开 Chrome 调试。
   "version": "0.2.0",
+  // 维护可单独启动的调试配置列表。
   "configurations": [
     {
       // 运行 Playground 子包的 dev 脚本，检查示例页面及 Vue 组件的浏览器行为。
       "name": "调试 Playground",
+      // 使用带 Node.js 调试能力的集成终端执行命令。
       "type": "node-terminal",
+      // launch 表示创建新的调试会话，而非附加到现有进程。
       "request": "launch",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm --filter @zzjtnb/playground dev",
+      // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
       "cwd": "${workspaceFolder}",
       // Playground 的 dev 脚本带有 --open，由调试器统一打开浏览器，避免重复窗口。
       "env": {
+        // none 禁止开发服务自行打开浏览器，由调试器统一管理页面。
         "BROWSER": "none"
       },
+      // 匹配开发服务就绪输出后再启动浏览器调试。
       "serverReadyAction": {
+        // debugWithChrome 在服务就绪后打开 Chrome 调试会话。
         "action": "debugWithChrome",
-        // 使用服务输出的实际地址，端口由 playground/vite.config.ts 固定为 3001。
+        // 使用服务输出的实际地址，端口由 playground/.env 的 VITE_PORT 配置。
         "pattern": "Local:\\s+(https?://\\S+)",
+        // %s 直接使用正则从服务日志中捕获的实际地址。
         "uriFormat": "%s",
+        // 浏览器调试映射回源码的根目录，用于断点和源码定位。
         "webRoot": "${workspaceFolder}/playground",
+        // 服务停止时一并结束关联的浏览器调试会话。
         "killOnServerStop": true
       }
     },
     {
       // 运行 docs 子包的 dev 脚本，调试 VitePress 文档站。
       "name": "调试文档站",
+      // 使用带 Node.js 调试能力的集成终端执行命令。
       "type": "node-terminal",
+      // launch 表示创建新的调试会话，而非附加到现有进程。
       "request": "launch",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm --filter @zzjtnb/docs dev",
+      // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
       "cwd": "${workspaceFolder}",
+      // 仅向当前调试进程注入环境变量，不修改用户全局环境。
       "env": {
+        // none 禁止开发服务自行打开浏览器，由调试器统一管理页面。
         "BROWSER": "none"
       },
+      // 匹配开发服务就绪输出后再启动浏览器调试。
       "serverReadyAction": {
+        // debugWithChrome 在服务就绪后打开 Chrome 调试会话。
         "action": "debugWithChrome",
-        // 端口由 docs/.vitepress/config.ts 固定为 3000。
+        // 端口由 docs/.env 的 VITE_PORT 配置。
         "pattern": "Local:\\s+(https?://\\S+)",
+        // %s 直接使用正则从服务日志中捕获的实际地址。
         "uriFormat": "%s",
+        // 浏览器调试映射回源码的根目录，用于断点和源码定位。
         "webRoot": "${workspaceFolder}/docs",
+        // 服务停止时一并结束关联的浏览器调试会话。
         "killOnServerStop": true
       }
     }
   ],
+  // 组合启动已命名的调试配置，不复制其启动命令。
   "compounds": [
     {
       // 同时启动两个调试入口，停止组合调试时一并停止。
       "name": "同时调试 Playground 与文档站",
+      // 引用上面已声明的调试配置名称，作为此组合的启动成员。
       "configurations": [
         "调试 Playground",
         "调试文档站"
       ],
+      // 停止组合调试时一并停止该组合启动的全部会话。
       "stopAll": true
     }
   ]

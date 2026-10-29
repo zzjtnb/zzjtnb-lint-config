@@ -13,13 +13,14 @@ const REGISTRY = 'https://registry.npmjs.org/'
  */
 async function npmPackageState(packageName) {
   const response = await fetch(`${REGISTRY}${encodeURIComponent(packageName)}`)
-  if (response.status === 404)
+  if (response.status === 404) {
     return {
       notFound: true,
       remote: undefined,
       publishedVersions: [],
       unpublishedVersions: [],
     }
+  }
   if (!response.ok)
     throw new Error(`查询 ${packageName} 失败：HTTP ${response.status}`)
 
@@ -90,12 +91,13 @@ async function readReleaseState(packageNames) {
   while (true) {
     try {
       const state = []
-      for (const name of packageNames)
+      for (const name of packageNames) {
         state.push({
           local: packageVersion(name),
           name,
           ...await npmPackageState(name),
         })
+      }
       printReleaseState(state)
       return state
     }

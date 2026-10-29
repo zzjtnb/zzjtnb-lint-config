@@ -29,9 +29,9 @@ describe('官方默认主题扩展', () => {
         md.use(groupIconMdPlugin)
       },
     })
-    const html = renderer.render('::: code-group\n\n```ts [eslint.config.ts]\nexport default {}\n```\n\n```json [package.json]\n{}\n```\n\n:::\n')
+    const html = renderer.render('::: code-group\n\n```js [eslint.config.js]\nexport default {}\n```\n\n```json [package.json]\n{}\n```\n\n:::\n')
     expect(html).toContain('vp-code-group')
-    expect(html).toContain('eslint.config.ts')
+    expect(html).toContain('eslint.config.js')
     expect(html).toContain('package.json')
   })
 

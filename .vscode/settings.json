@@ -4,30 +4,46 @@
   // "http.proxySupport": "on",
   // 集成终端设置
   "terminal.integrated.cursorBlinking": true,
+  // never 不在恢复终端时重启旧进程，避免重复启动开发服务。
   "terminal.integrated.persistentSessionReviveProcess": "never",
+  // 显示终端标签，便于区分文档站与工作台进程。
   "terminal.integrated.tabs.enabled": true,
+  // 保留 10000 行终端历史，便于查看完整安装和检查输出。
   "terminal.integrated.scrollback": 10000,
+  // 启用终端命令区粘性滚动，长输出中保留命令上下文。
   "terminal.integrated.stickyScroll.enabled": true,
+  // 编辑器的包管理操作统一使用 pnpm，不改变仓库声明的版本。
   "npm.packageManager": "pnpm",
-  // 使用仓库根目录安装的 TypeScript，避免编辑器与 vue-tsc 使用不同版本
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  // 编辑器使用文档站声明的 TS6 经典语言服务；根 TS7 原生编译器不包含 tsserver。
+  "js/ts.tsdk.path": "docs/node_modules/typescript/lib",
+  // 开启项目级类型诊断，覆盖未打开的源码文件。
   "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+  // SVG 预览使用透明背景，便于检查图标留白。
   "svg.preview.background": "transparent",
+  // 关闭 HTML 自动闭合，避免与 Vue 或其他模板工具重复插入标签。
   "html.autoClosingTags": false,
+  // 停用 Prettier 扩展，格式规则由项目检查工具管理。
   "prettier.enable": false,
-  "editor.formatOnSave": false, // 关闭全局保存格式化，避免和 ESLint/Stylelint 冲突
+  // 不在保存时额外运行默认格式化器，由显式修复动作统一写回。
+  "editor.formatOnSave": false, // 关闭全局保存格式化，避免与 ESLint、Stylelint、Markdownlint 的保存修复重复
   // 保存时自动修复 ESLint、Stylelint 和 Markdownlint 问题
   "editor.codeActionsOnSave": {
+    // 手动保存时应用 ESLint 自动修复；explicit 不在自动保存时运行。
     "source.fixAll.eslint": "explicit",
+    // 手动保存时应用 Stylelint 自动修复；explicit 不在自动保存时运行。
     "source.fixAll.stylelint": "explicit",
-    // Markdown 在显式保存和自动保存时均修复，规则读取项目的 CLI2 配置。
-    "source.fixAll.markdownlint": "always",
+    // 手动保存时应用 Markdownlint 修复，与另外两个工具统一使用 explicit。
+    "source.fixAll.markdownlint": "explicit",
+    // 禁用编辑器单独整理导入，避免覆盖 ESLint 的导入排序约定。
     "source.organizeImports": "never"
   },
   // 关闭内置校验,仅用 stylelint 检查
   "scss.validate": false,
+  // 停用内置 CSS 校验，避免与 Stylelint 重复报告。
   "css.validate": false,
+  // 停用内置 Less 校验，避免与 Stylelint 重复报告。
   "less.validate": false,
+  // Stylelint 扩展使用 pnpm 解析项目依赖。
   "stylelint.packageManager": "pnpm",
   // 指定要验证的文件
   "stylelint.validate": [
@@ -39,53 +55,83 @@
   // 隐藏编辑器中的样式规则诊断，仍允许自动修复
   "eslint.rules.customizations": [
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "style/*",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "format/*",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*-indent",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*-spacing",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*-spaces",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*-order",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*-dangle",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*-newline",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*quotes",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     },
     {
+      // 通过规则名或 glob 选择要调整展示级别的诊断。
       "rule": "*semi",
+      // 只调整编辑器中匹配诊断的展示级别，不改写仓库 ESLint 规则。
       "severity": "off",
+      // 仅对可自动修复的诊断应用当前展示覆盖，不阻止实际修复。
       "fixable": true
     }
   ],
@@ -106,47 +152,77 @@
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
     // 保存已由 fixAll 处理，关闭重复的保存格式化路径。
     "editor.formatOnSave": false,
+    // 允许粘贴时格式化 Markdown；保存修复仍由所属检查工具负责。
     "editor.formatOnPaste": true
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[html]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[css]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "vscode.css-language-features"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[scss]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "stylelint.vscode-stylelint"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[javascript]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[typescript]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[json]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "vscode.json-language-features"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[jsonc]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[yaml]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[toml]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[vue]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  // 为文件模式指定编辑器语言模式，不更改文件内容或实际解析器。
   "files.associations": {
+    // 将此文件模式关联为右侧语言模式，仅影响编辑器识别与提示。
     "*.css": "tailwindcss",
+    // 将此文件模式关联为右侧语言模式，仅影响编辑器识别与提示。
     "*.ejs": "html",
+    // 将此文件模式关联为右侧语言模式，仅影响编辑器识别与提示。
     "*.art": "html",
+    // 将此文件模式关联为右侧语言模式，仅影响编辑器识别与提示。
     "*.tpl": "html",
+    // 将此文件模式关联为右侧语言模式，仅影响编辑器识别与提示。
     "**/tsconfig.json": "jsonc",
+    // 将此文件模式关联为右侧语言模式，仅影响编辑器识别与提示。
     "*.json": "jsonc",
+    // 将此文件模式关联为右侧语言模式，仅影响编辑器识别与提示。
     "package.json": "json"
   },
+  // 补充项目专有拼写，避免合法工具名和项目名被标为拼写错误。
   "cSpell.words": [
     "lucide",
     "zzjtnb"

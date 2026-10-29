@@ -18,7 +18,7 @@ Cloudflare 当前控制台提供两种 Git 自动部署路径：
 | **Docs** | VitePress 2 (SSG) | `docs/.vitepress/dist` | 静态文档站点 |
 | **Playground** | Vite 8 + Vue 3 | `playground/dist` | 静态客户端工作台 |
 
-> **能力说明**：Playground 的代码实时检查与自动修复在开发时依赖本地 Node.js 接口（`plugins/api.ts`）。部署到云端静态托管后，页面完全支持浏览、配置草稿编辑、规则速查与工作区状态分享；由于静态托管不提供独立常驻的 Node.js 运行环境，实时代码分析服务会处于离线未连接状态。
+> **能力说明**：Playground 是纯静态配置实验台。构建时生成规则元数据和检查服务文件，部署后由浏览器 WebContainer 安装依赖、解析配置、检查和修复示例源码，不依赖本地运行器或检查后端。必须保留产物中的 `_headers`，通过 HTTPS 与 COOP/COEP 实现跨源隔离；兼容性和验证边界见 Playground README。
 
 ---
 
@@ -37,6 +37,7 @@ Cloudflare 当前控制台提供两种 Git 自动部署路径：
 - **构建命令 (Build command)**：
 
   ```bash
+  # 构建文档站的生产产物。
   pnpm --filter @zzjtnb/docs run build
   ```
 
@@ -64,6 +65,7 @@ Cloudflare 当前控制台提供两种 Git 自动部署路径：
 - **构建命令 (Build command)**：
 
   ```bash
+  # 构建工作台的生产产物。
   pnpm --filter @zzjtnb/playground run build
   ```
 
@@ -86,51 +88,57 @@ Cloudflare 当前控制台提供两种 Git 自动部署路径：
 ### 1. 部署 Docs 文档站
 
 - **项目名称**：`lint-docs`
-- **生成默认域名**：`https://lint-docs.pages.dev/`
+- **生成默认域名**：`https://lint-docs.<your-account>.workers.dev/`（Workers 分配的是 workers.dev 二级域名）
 - **建议自定义域名**：`https://lint.docs.zzjtnb.com/`
 - **构建命令**：
 
   ```bash
+  # 构建文档站的生产产物。
   pnpm --filter @zzjtnb/docs run build
   ```
 
 - **部署命令**（核心参数）：
 
   ```bash
+  # 上传文档站的静态生产资源。
   npx wrangler deploy --assets=docs/.vitepress/dist
   ```
 
 - **预览命令**：
 
   ```bash
+  # 预览文档站的静态生产资源。
   npx wrangler preview --assets=docs/.vitepress/dist
   ```
 
 - **高级设置 -> 环境变量**：
   - `NODE_VERSION`：`22`
   - `PNPM_VERSION`：`10`（或 `12.15.0`）
-  - `PLAYGROUND_URL`：（可选）文档站顶栏跳转线上 Playground 的外链地址。若未单独部署 Playground，可留空；若已部署 Playground，填入工作台地址（未绑定域名时填 `https://lint-play.pages.dev/`，绑定自定义域名后填 `https://lint.play.zzjtnb.com/`）
+  - `PLAYGROUND_URL`：（可选）文档站顶栏跳转线上 Playground 的外链地址。若未单独部署 Playground，可留空；若已部署 Playground，填入工作台地址（未绑定域名时填 `https://lint-play.pages.dev/` 或对应的 workers.dev 地址，绑定自定义域名后填 `https://lint.play.zzjtnb.com/`）
 
 ### 2. 部署 Playground 工作台
 
 - **项目名称**：`lint-play`
-- **生成默认域名**：`https://lint-play.pages.dev/`
+- **生成默认域名**：`https://lint-play.<your-account>.workers.dev/`
 - **建议自定义域名**：`https://lint.play.zzjtnb.com/`
 - **构建命令**：
 
   ```bash
+  # 构建工作台的生产产物。
   pnpm --filter @zzjtnb/playground run build
   ```
 
 - **部署命令**：
 
   ```bash
+  # 上传工作台的静态生产资源。
   npx wrangler deploy --assets=playground/dist
   ```
 
 - **预览命令**：
 
   ```bash
+  # 预览工作台的静态生产资源。
   npx wrangler preview --assets=playground/dist
   ```
 
@@ -159,8 +167,11 @@ Cloudflare 当前控制台提供两种 Git 自动部署路径：
 - **解决方案**：在 `pnpm-workspace.yaml` 中配置 `allowBuilds` 显式设为 `true`：
 
   ```yaml
+  # 仅允许列出的依赖执行安装构建脚本，不放开全部第三方生命周期。
   allowBuilds:
+    # 允许文件监听器安装平台适配产物。
     '@parcel/watcher': true
+    # 允许安装脚本准备对应平台的 esbuild 可执行文件。
     esbuild: true
   ```
 

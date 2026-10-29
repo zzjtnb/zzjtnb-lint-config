@@ -1,0 +1,97 @@
+# 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+name: 工程验证
+
+# 声明工作流触发事件，不会由本地执行自动触发。
+on:
+  # 仓库推送满足分支过滤条件时运行。
+  push:
+    # 仅监听列表中的分支，避免所有推送重复执行。
+    branches: [main]
+  # 拉取请求创建或更新时运行验证。
+  pull_request:
+  # 允许维护者在 Actions 页面手动触发验证。
+  workflow_dispatch:
+
+# 显式限制工作流令牌权限，未需要的写权限不开放。
+permissions:
+  # 仅允许读取仓库内容，不创建提交或发布。
+  contents: read
+
+# 定义工作流中要执行的作业。
+jobs:
+  # 执行整仓验证的作业标识。
+  verify:
+    # 使用 GitHub 托管的 Ubuntu 运行器。
+    runs-on: ubuntu-latest
+    # 为整个作业设置 30 分钟上限，避免异常流程长期占用运行器。
+    timeout-minutes: 30
+    # 按数组顺序执行；默认前一步成功后才进入下一步。
+    steps:
+      # 文档更新时间依赖完整 Git 历史。
+      - uses: actions/checkout@v7.0.1
+        # 向当前 Action 传递其正式支持的输入。
+        with:
+          # 0 拉取完整历史，以正确生成 VitePress 的 Git 更新时间。
+          fetch-depth: 0
+      # 使用 pnpm 官方推荐的统一设置入口；版本从根 packageManager 读取。
+      - uses: pnpm/setup@v3.1.2
+        # 向当前 Action 传递其正式支持的输入。
+        with:
+          # 使用 Node.js 26 运行工具链；pnpm 版本从根 packageManager 读取。
+          runtime: node@26
+          # 启用 pnpm/setup 的依赖缓存；不代表跳过后续源码检查。
+          cache: true
+          # false 仅设置运行环境，依赖由后续冻结安装步骤显式安装。
+          install: false
+      # 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+      - name: 按锁文件安装并生成公开包入口
+        # 在当前作业中执行此命令，非零退出状态使该步骤失败。
+        run: pnpm install --frozen-lockfile
+      # CI 只检查格式，不将自动修复写回待验证的源码。
+      - name: 检查代码、样式和 Markdown
+        # 在当前作业中执行此命令，非零退出状态使该步骤失败。
+        run: pnpm --config.verifyDepsBeforeRun=error run lint
+      # 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+      - name: 工作区类型检查
+        # 在当前作业中执行此命令，非零退出状态使该步骤失败。
+        run: pnpm --config.verifyDepsBeforeRun=error run typecheck
+      # 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+      - name: 全部单元及消费契约测试
+        # 在当前作业中执行此命令，非零退出状态使该步骤失败。
+        run: pnpm --config.verifyDepsBeforeRun=error run test
+      # 构建会重建 dist，必须在包入口测试结束后运行。
+      - name: 生产构建
+        # 在当前作业中执行此命令，非零退出状态使该步骤失败。
+        run: pnpm --config.verifyDepsBeforeRun=error run build
+      # 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+      - name: 安装 Chromium 验证环境
+        # 在当前作业中执行此命令，非零退出状态使该步骤失败。
+        run: pnpm --config.verifyDepsBeforeRun=error --filter @zzjtnb/playground exec playwright install --with-deps chromium
+      # 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+      - name: 验证路由、自动匹配与三个真实引擎
+        # 在当前作业中执行此命令，非零退出状态使该步骤失败。
+        run: >-
+          pnpm --config.verifyDepsBeforeRun=error --filter @zzjtnb/playground run test:e2e
+          --project chromium --workers 1
+          e2e/routes.spec.ts e2e/matching.spec.ts e2e/runtime.spec.ts e2e/cache.spec.ts e2e/preparation.spec.ts
+          --grep '工具深链接|配置路径使用|输入未完成|按工具准备依赖|三工具依赖二进制缓存|取消资源下载'
+      # 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+      - name: 保存浏览器报告和失败现场
+        # always() 即使前序失败也执行报告保存，不把失败当作验证通过。
+        if: always()
+        # 调用指定版本的官方 Action，版本变化需重新核对输入契约。
+        uses: actions/upload-artifact@v7.0.2
+        # 向当前 Action 传递其正式支持的输入。
+        with:
+          # 工作流或当前步骤在 GitHub Actions 页面显示的名称。
+          name: 浏览器验证结果
+          # 收集列出的 HTML 报告和失败现场路径。
+          path: |
+            playground/playwright-report/
+            .tmp/playground/e2e-results/
+          # 允许收集 .tmp 下的验证产物，不收集未列出的隐藏文件。
+          include-hidden-files: true
+          # ignore 允许早期失败时没有浏览器报告，保留原始失败结果。
+          if-no-files-found: ignore
+          # 浏览器验证产物保留 7 天，超过期限由平台自动清理。
+          retention-days: 7

@@ -1,121 +1,255 @@
 {
-  // tasks.json 格式说明文档：https://go.microsoft.com/fwlink/?LinkId=733558
+  // 固定为编辑器要求的配置格式版本，不表示项目或工具依赖版本。
   "version": "2.0.0",
+  // 当前任务的执行环境选项，例如命令的工作目录。
   "options": {
+    // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
     "cwd": "${workspaceFolder}"
   },
+  // 定义编辑器可执行任务和依赖顺序，不自动增加包脚本。
   "tasks": [
     {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
       "label": "类型检查：ESLint 配置",
-      "detail": "持续检查 packages/eslint-config 的 TypeScript 类型，文件修改后自动重新检查。",
+      // 任务选择器中的补充说明，不作为执行参数。
+      "detail": "持续检查 packages/eslint 的 TypeScript 类型，文件修改后自动重新检查。",
+      // 任务执行器类型；process 直接调用可执行文件，shell 通过终端解释命令。
       "type": "process",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm",
-      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
+      // 按数组顺序传递命令参数，不额外拼接 shell 字符串。
+      "args": [
+        "run",
+        "typecheck",
+        "--watch",
+        "--pretty",
+        "false"
+      ],
+      // 当前任务的执行环境选项，例如命令的工作目录。
       "options": {
-        "cwd": "${workspaceFolder}/packages/eslint-config"
+        // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
+        "cwd": "${workspaceFolder}/packages/eslint"
       },
+      // 将监听进程标为后台任务，配合 problemMatcher 判断是否已就绪。
       "isBackground": true,
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
       "problemMatcher": {
+        // 继承指定内置问题匹配器，再覆盖需要调整的部分。
         "base": "$tsc-watch",
+        // 给提取出的诊断指定所属来源，避免与其他检查器混用。
         "owner": "typescript-eslint-config",
-        "fileLocation": ["relative", "${workspaceFolder}/packages/eslint-config"]
+        // 按此路径规则解析诊断文件名，保证点击问题可跳转到源码。
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/packages/eslint"
+        ]
       }
     },
     {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
       "label": "类型检查：Stylelint 配置",
-      "detail": "持续检查 packages/stylelint-config 的 TypeScript 类型，文件修改后自动重新检查。",
+      // 任务选择器中的补充说明，不作为执行参数。
+      "detail": "持续检查 packages/stylelint 的 TypeScript 类型，文件修改后自动重新检查。",
+      // 任务执行器类型；process 直接调用可执行文件，shell 通过终端解释命令。
       "type": "process",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm",
-      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
+      // 按数组顺序传递命令参数，不额外拼接 shell 字符串。
+      "args": [
+        "run",
+        "typecheck",
+        "--watch",
+        "--pretty",
+        "false"
+      ],
+      // 当前任务的执行环境选项，例如命令的工作目录。
       "options": {
-        "cwd": "${workspaceFolder}/packages/stylelint-config"
+        // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
+        "cwd": "${workspaceFolder}/packages/stylelint"
       },
+      // 将监听进程标为后台任务，配合 problemMatcher 判断是否已就绪。
       "isBackground": true,
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
       "problemMatcher": {
+        // 继承指定内置问题匹配器，再覆盖需要调整的部分。
         "base": "$tsc-watch",
+        // 给提取出的诊断指定所属来源，避免与其他检查器混用。
         "owner": "typescript-stylelint-config",
-        "fileLocation": ["relative", "${workspaceFolder}/packages/stylelint-config"]
+        // 按此路径规则解析诊断文件名，保证点击问题可跳转到源码。
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/packages/stylelint"
+        ]
       }
     },
     {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
       "label": "类型检查：Demo 示例",
+      // 任务选择器中的补充说明，不作为执行参数。
       "detail": "持续检查 apps/demo 示例代码的 TypeScript 类型，不执行 ESLint 或 Stylelint 规则检查。",
+      // 任务执行器类型；process 直接调用可执行文件，shell 通过终端解释命令。
       "type": "process",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm",
-      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
+      // 按数组顺序传递命令参数，不额外拼接 shell 字符串。
+      "args": [
+        "run",
+        "typecheck",
+        "--watch",
+        "--pretty",
+        "false"
+      ],
+      // 当前任务的执行环境选项，例如命令的工作目录。
       "options": {
+        // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
         "cwd": "${workspaceFolder}/apps/demo"
       },
+      // 将监听进程标为后台任务，配合 problemMatcher 判断是否已就绪。
       "isBackground": true,
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
       "problemMatcher": {
+        // 继承指定内置问题匹配器，再覆盖需要调整的部分。
         "base": "$tsc-watch",
+        // 给提取出的诊断指定所属来源，避免与其他检查器混用。
         "owner": "typescript-demo",
-        "fileLocation": ["relative", "${workspaceFolder}/apps/demo"]
+        // 按此路径规则解析诊断文件名，保证点击问题可跳转到源码。
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/apps/demo"
+        ]
       }
     },
     {
-      "label": "类型检查：根配置与集成测试",
-      "detail": "按根 tsconfig.json 持续检查根配置、Vitest 运行器、两个配置包源码和集成测试的类型，不运行测试。",
-      "type": "process",
-      "command": "pnpm",
-      "args": ["run", "typecheck:root", "--watch", "--pretty", "false"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "isBackground": true,
-      "problemMatcher": {
-        "base": "$tsc-watch",
-        "owner": "typescript-integration",
-        "fileLocation": ["relative", "${workspaceFolder}"]
-      }
-    },
-    {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
       "label": "类型检查：Playground",
+      // 任务选择器中的补充说明，不作为执行参数。
       "detail": "调用 playground 的 typecheck 脚本，用 vue-tsc 持续检查 TypeScript 和 Vue 组件类型。",
+      // 任务执行器类型；process 直接调用可执行文件，shell 通过终端解释命令。
       "type": "process",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm",
-      "args": ["run", "typecheck", "--watch", "--pretty", "false"],
+      // 按数组顺序传递命令参数，不额外拼接 shell 字符串。
+      "args": [
+        "run",
+        "typecheck",
+        "--watch",
+        "--pretty",
+        "false"
+      ],
+      // 当前任务的执行环境选项，例如命令的工作目录。
       "options": {
+        // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
         "cwd": "${workspaceFolder}/playground"
       },
+      // 将监听进程标为后台任务，配合 problemMatcher 判断是否已就绪。
       "isBackground": true,
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
       "problemMatcher": {
+        // 继承指定内置问题匹配器，再覆盖需要调整的部分。
         "base": "$tsc-watch",
+        // 给提取出的诊断指定所属来源，避免与其他检查器混用。
         "owner": "typescript-playground",
-        "fileLocation": ["relative", "${workspaceFolder}/playground"]
+        // 按此路径规则解析诊断文件名，保证点击问题可跳转到源码。
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/playground"
+        ]
       }
     },
     {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
+      "label": "类型检查：Docs",
+      // 任务选择器中的补充说明，不作为执行参数。
+      "detail": "持续检查文档站配置、主题入口和测试类型。",
+      // 任务执行器类型；process 直接调用可执行文件，shell 通过终端解释命令。
+      "type": "process",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
+      "command": "pnpm",
+      // 按数组顺序传递命令参数，不额外拼接 shell 字符串。
+      "args": [
+        "run",
+        "typecheck",
+        "--watch",
+        "--pretty",
+        "false"
+      ],
+      // 当前任务的执行环境选项，例如命令的工作目录。
+      "options": {
+        // 以工作区根目录为运行目录，保证 pnpm 与相对路径解析一致。
+        "cwd": "${workspaceFolder}/docs"
+      },
+      // 将监听进程标为后台任务，配合 problemMatcher 判断是否已就绪。
+      "isBackground": true,
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
+      "problemMatcher": {
+        // 继承指定内置问题匹配器，再覆盖需要调整的部分。
+        "base": "$tsc-watch",
+        // 给提取出的诊断指定所属来源，避免与其他检查器混用。
+        "owner": "typescript-docs",
+        // 按此路径规则解析诊断文件名，保证点击问题可跳转到源码。
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/docs"
+        ]
+      }
+    },
+    {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
       "label": "类型检查：全部工作区",
+      // 任务选择器中的补充说明，不作为执行参数。
       "detail": "打开工作区时并行启动上述全部类型检查监听任务，诊断显示在 VS Code 的问题面板中。",
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
       "dependsOn": [
         "类型检查：ESLint 配置",
         "类型检查：Stylelint 配置",
         "类型检查：Demo 示例",
-        "类型检查：根配置与集成测试",
-        "类型检查：Playground"
+        "类型检查：Playground",
+        "类型检查：Docs"
       ],
+      // sequence 按 dependsOn 的顺序执行，避免需要先后依赖的检查并行。
       "dependsOrder": "parallel",
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
       "problemMatcher": [],
+      // 配置任务自动启动时机，不改变其实际命令。
       "runOptions": {
+        // 指定任务的自动运行时机；folderOpen 表示打开工作区时执行。
         "runOn": "folderOpen"
       }
     },
     {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
       "label": "启动开发服务",
+      // 任务选择器中的补充说明，不作为执行参数。
       "detail": "运行根目录 dev 脚本，通过 Turbo 启动工作区开发服务，包括文档站和 Playground；任务会持续运行。",
+      // 任务执行器类型；process 直接调用可执行文件，shell 通过终端解释命令。
       "type": "process",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm",
-      "args": ["run", "dev"],
+      // 按数组顺序传递命令参数，不额外拼接 shell 字符串。
+      "args": [
+        "run",
+        "dev"
+      ],
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
       "problemMatcher": []
     },
     {
+      // 任务的唯一显示名称，dependsOn 通过此名称引用任务。
       "label": "构建全部项目",
+      // 任务选择器中的补充说明，不作为执行参数。
       "detail": "运行根目录 build 脚本，通过 Turbo 按依赖顺序构建工作区项目，包括配置包、文档站和 Playground。",
+      // 任务执行器类型；process 直接调用可执行文件，shell 通过终端解释命令。
       "type": "process",
+      // 由任务终端执行的完整命令，工作目录由 cwd 指定。
       "command": "pnpm",
-      "args": ["run", "build"],
+      // 按数组顺序传递命令参数，不额外拼接 shell 字符串。
+      "args": [
+        "run",
+        "build"
+      ],
+      // 将任务加入编辑器任务分组，供默认构建等快捷入口选择。
       "group": "build",
+      // 从工具输出提取诊断，并在编辑器问题面板关联到文件位置。
       "problemMatcher": []
     }
   ]

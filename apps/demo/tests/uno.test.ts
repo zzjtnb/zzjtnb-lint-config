@@ -1,5 +1,5 @@
-// 这个文件用来验证 uno.config.ts 的配置是否按预期工作，由根目录的 Vitest 运行：
-//   pnpm exec vitest run apps/demo/tests --project unit
+// 这个文件用来验证 uno.config.ts 的配置是否按预期工作，由消费示例自己的 Vitest 运行：
+//   pnpm --filter @zzjtnb/lint-demo run test --run
 // 读法：每个 it(...) 是一条测试，括号里的中文是它要证明的事；expect(...) 是具体的判断。
 import { createGenerator } from 'unocss'
 import { describe, expect, it } from 'vitest'

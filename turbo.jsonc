@@ -1,0 +1,92 @@
+{
+  // Turbo 官方配置 Schema；使用 JSONC 保留逐项注释与编辑器校验。
+  "$schema": "https://turborepo.dev/schema.json",
+  // NODE_ENV 会影响编译行为，值变化时使相关任务缓存失效。
+  "globalEnv": ["NODE_ENV"],
+  // 根清单、锁文件和依赖包源码已由 Turbo 自动参与哈希，无需重复全局声明。
+  "tasks": {
+    // 先构建依赖包；默认缓存任务，生成物恢复到各工作区自己的 dist。
+    "build": {
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
+      "dependsOn": ["^build"],
+      // 保留默认源码输入，并额外跟踪可能被 Git 忽略的工作区环境文件。
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      // 缓存命中时恢复这些生成文件；空数组表示只缓存检查结果，不恢复文件。
+      "outputs": ["dist/**"]
+    },
+    // 开发服务先取得依赖包产物；持续运行，既不缓存也不等待其退出。
+    "dev": {
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
+      "dependsOn": ["^build"],
+      // false 强制实际执行；未设置时沿用 Turbo 默认缓存行为。
+      "cache": false,
+      // true 表示持续运行的服务，不将其正常驻留当作任务未完成错误。
+      "persistent": true
+    },
+    // 预览自己的最新构建，不能只构建上游包；服务启动结果不缓存。
+    "preview": {
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
+      "dependsOn": ["build"],
+      // false 强制实际执行；未设置时沿用 Turbo 默认缓存行为。
+      "cache": false,
+      // true 表示持续运行的服务，不将其正常驻留当作任务未完成错误。
+      "persistent": true
+    },
+    // //# 是官方根任务标记：对应根 package.json，而非工作区脚本。
+    // 两个检查入口读取公开包构建产物，前置构建依赖；每次均实际检查。
+    "//#lint:eslint": {
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
+      "dependsOn": ["^build"],
+      // false 强制实际执行；未设置时沿用 Turbo 默认缓存行为。
+      "cache": false
+    },
+    // 注册根 Stylelint 检查脚本，与其他工作区同名任务分开调度。
+    "//#lint:stylelint": {
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
+      "dependsOn": ["^build"],
+      // false 强制实际执行；未设置时沿用 Turbo 默认缓存行为。
+      "cache": false
+    },
+    // Markdown 检查读取共享 CLI2 执行入口，需先构建公开包。
+    "//#lint:markdownlint": {
+      // 共享扫描模块与规则来自上游工作区，先准备其构建入口。
+      "dependsOn": ["^build"],
+      // false 强制实际执行；未设置时沿用 Turbo 默认缓存行为。
+      "cache": false
+    },
+    // 各工作区统一入口；只缓存检查结果，不声明编译输出文件。
+    "typecheck": {
+      // 缓存命中时恢复这些生成文件；空数组表示只缓存检查结果，不恢复文件。
+      "outputs": []
+    },
+    // VitePress 的实际输出不在普通 dist；命令行导航地址参与任务哈希。
+    "@zzjtnb/docs#build": {
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
+      "dependsOn": ["^build"],
+      // 参与任务哈希的输入；保留 $TURBO_DEFAULT$，避免漏掉默认源码依赖。
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      // 列出的环境变量同时传入任务并参与缓存哈希，值变化时重新执行。
+      "env": ["PLAYGROUND_URL"],
+      // 缓存命中时恢复这些生成文件；空数组表示只缓存检查结果，不恢复文件。
+      "outputs": [".vitepress/dist/**"]
+    },
+    // 工作台跨目录引用 Docs 主题变量，文件变化时必须重建工作台。
+    "@zzjtnb/playground#build": {
+      // 声明任务依赖；^ 前缀表示上游包，不带前缀表示当前包的同名任务。
+      "dependsOn": ["^build"],
+      // 缓存命中时恢复这些生成文件；空数组表示只缓存检查结果，不恢复文件。
+      "outputs": ["dist/**"],
+      // 参与任务哈希的输入；保留 $TURBO_DEFAULT$，避免漏掉默认源码依赖。
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "$TURBO_ROOT$/docs/.vitepress/theme/styles/variables.scss"
+      ]
+    },
+    // bumpp 会变更版本并可能操作 Git，不能重放或缓存成功结果。
+    "release": {
+      // false 强制实际执行；未设置时沿用 Turbo 默认缓存行为。
+      "cache": false
+    }
+  }
+}

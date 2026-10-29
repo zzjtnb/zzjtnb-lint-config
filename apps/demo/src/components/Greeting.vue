@@ -15,7 +15,7 @@ defineProps<{
   -->
   <p class="greeting flex items-center gap-2 rounded-lg border border-border bg-card p-4 text-card-foreground">
     <!-- i-svg:logo 是 src/assets/icons/logo.svg 提供的本地图标，保留标志原有的品牌蓝色。 -->
-    <span class="i-svg:logo" aria-hidden="true"></span>
+    <span class="i-svg:logo" aria-hidden="true" />
     <strong>{{ greet(name) }}</strong>
   </p>
 </template>

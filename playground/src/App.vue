@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import Workbench from './views/index.vue'
+import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <Workbench />
+  <RouterView />
 </template>
+
+<style scoped></style>

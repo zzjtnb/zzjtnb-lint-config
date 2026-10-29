@@ -26,7 +26,7 @@ defineProps<{
     :data-status="status"
   >
     <!-- 图标类名来自 status.ts；aria-hidden 表示它只是装饰，读屏软件会跳过。 -->
-    <span :class="statusIcons[status]" aria-hidden="true"></span>
+    <span :class="statusIcons[status]" aria-hidden="true" />
     {{ statusLabels[status] }}
   </span>
 </template>

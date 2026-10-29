@@ -16,7 +16,7 @@ import type { Variant } from 'unocss'
  * 新手阅读顺序：
  * 1. 先看 `export default defineConfig({...})` 里每一项的注释，了解各部分的职责。
  * 2. 文件开头的函数和常量（图标目录、圆括号变量、data 变体）是 `rules`、`variants`、`safelist` 的实现细节，需要时再回头看。
- * 3. 改动后用 `pnpm exec vitest run apps/demo/tests --project unit`（仓库根目录）验证配置仍然有效。
+ * 3. 改动后用 `pnpm --filter @zzjtnb/lint-demo exec vitest run`（仓库根目录）验证配置仍然有效。
  */
 import { existsSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -58,11 +58,17 @@ function generateSafeList() {
 // 项目源码和组件依赖中都可能使用这类圆括号变量简写；当前 Wind4 尚未覆盖这些匹配。
 // 这里集中补齐实际用到的工具前缀，避免在业务组件或第三方组件里改写为冗长的 `w-[var(...)]`。
 const cssVariableUtilityProperties = {
+  // 将 bg 工具前缀映射到 background-color CSS 属性，用于圆括号变量简写。
   'bg': 'background-color',
+  // 将 border 工具前缀映射到 border-color CSS 属性，用于圆括号变量简写。
   'border': 'border-color',
+  // 将 max-h 工具前缀映射到 max-height CSS 属性，用于圆括号变量简写。
   'max-h': 'max-height',
+  // 将 max-w 工具前缀映射到 max-width CSS 属性，用于圆括号变量简写。
   'max-w': 'max-width',
+  // 将 origin 工具前缀映射到 transform-origin CSS 属性，用于圆括号变量简写。
   'origin': 'transform-origin',
+  // 将 w 工具前缀映射到 width CSS 属性，用于圆括号变量简写。
   'w': 'width',
 } as const
 
@@ -107,7 +113,9 @@ const dataAttributeVariant: Variant = {
     const [, name, value, rest] = match
 
     return {
+      // 返回尚未消费的工具类片段，供后续 UnoCSS 规则继续匹配。
       matcher: rest,
+      // 为匹配结果追加已正确转义的 data 属性选择器。
       selector: selector => `${selector}[data-${name}=${quoteAttributeValue(value)}]`,
     }
   },
@@ -136,6 +144,7 @@ export default defineConfig({
     },
   },
 
+  // 启用所列 UnoCSS 预设；其默认规则由预设提供，本项目只覆盖明确列出的选项。
   presets: [
     // Wind4 是 Tailwind v4 兼容层，负责基础 reset、工具规则、variant、theme CSS 变量和 @property 输出。
     // theme.mode 使用 on-demand：只为实际命中的工具类生成相关变量，避免全量 theme 增大 CSS 体积。
@@ -161,11 +170,15 @@ export default defineConfig({
     // Web 字体预设：用 UnoCSS 统一生成远程字体 @font-face 和 font-* 主题 token，替代手写 fonts.css。
     // provider 使用 Bunny，和项目原字体来源保持一致；如需离线/Tauri 内置字体，应改成本地字体处理器或本地 @font-face。
     presetWebFonts({
+      // 从 bunny 字体服务生成远程字体样式请求。
       provider: 'bunny',
+      // 指定远程字体族与加载参数，仅对字体预设生效。
       fonts: {
         // sans 是界面默认字体；只加载 Nunito Sans 全量可用字重，中文字符交给系统中文字体兜底。
         sans: {
+          // 远程字体服务中的字体族名称，需与该服务的可用字体一致。
           name: 'Nunito Sans',
+          // 只请求列出的字重；可变字体范围按字体服务支持的区间语法书写。
           weights: [
             '200',
             '300',
@@ -179,7 +192,9 @@ export default defineConfig({
         },
         // mono 用于代码、密钥、日志和数字信息；加载 Fira Code 可用常规字重，满足不同组件的 font-weight 需求。
         mono: {
+          // 远程字体服务中的字体族名称，需与该服务的可用字体一致。
           name: 'Fira Code',
+          // 只请求列出的字重；可变字体范围按字体服务支持的区间语法书写。
           weights: ['300', '400', '500', '600', '700'],
         },
       },
@@ -197,9 +212,13 @@ export default defineConfig({
       cdn: 'https://esm.sh/',
       // 保持图标按文本流内联对齐，避免组件里重复补尺寸样式。
       extraProperties: {
+        // 使用行内块级布局，使图标保留自身尺寸并参与文本行布局。
         'display': 'inline-block',
+        // 将行内图标与周围文字垂直居中对齐。
         'vertical-align': 'middle',
+        // 按字体大小设置图标宽度，1em 会随当前字号缩放。
         'width': '1em',
+        // 按字体大小设置图标高度，1em 会随当前字号缩放。
         'height': '1em',
       },
       // collections 注册自定义图标集合；这里把 src/assets/icons 暴露成 `i-svg:*`。
@@ -225,6 +244,7 @@ export default defineConfig({
   // 已验证当前 UnoCSS 版本的实际声明顺序：fonts → imports → properties → theme → base → preflights → icons → typography → shortcuts → default。
   // 验证方式：使用 createGenerator(config).generate(..., { preflights: true }) 查看输出 CSS 中的 @layer 声明。
   outputToCssLayers: {
+    // 将已生成的全部 UnoCSS 层输出为 CSS Layer，保持层级顺序一致。
     allLayers: true,
   },
 
@@ -233,21 +253,25 @@ export default defineConfig({
     transformerDirectives(),
   ],
 
+  // 追加项目变体处理；此处修正 data 属性选择器，不替换预设的其他变体。
   variants: [
     // 修正 arbitrary data attribute variant 的 CSS 选择器序列化，保证后续 CSS 压缩器可解析。
     dataAttributeVariant,
   ],
 
+  // 自定义工具规则只补齐预设当前无法处理的语法，不替换整套 Wind4 规则。
   rules: [
     // 补齐 Tailwind v4 圆括号变量简写；若 Wind4 原生匹配这些类名，可删除此规则。
     [
       cssVariableUtilityRE,
       ([, utility, variable]) => ({
+        // 按匹配工具前缀输出相应 CSS 属性，值统一引用捕获到的 CSS 变量。
         [cssVariableUtilityProperties[utility as CssVariableUtility]]: `var(${variable})`,
       }),
     ],
   ],
 
+  // 维护工具类使用的主题 token；未覆盖的 token 继续沿用预设默认值。
   theme: {
     // 颜色 token 只引用 CSS 变量；变量值、暗色主题和品牌语义由 src/assets/styles/theme 下的样式文件维护。
     // 示例中这些文件对应 src/styles/theme.css。
@@ -256,39 +280,53 @@ export default defineConfig({
       // shadcn-vue 兼容主题 token：保持与组件库语义一致，主题文件必须为每个 token 提供明暗两套 CSS 变量。
       // 页面基础前景/背景色，供 `bg-background`、`text-foreground` 等全局布局类使用。
       background: 'var(--background)',
+      // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
       foreground: 'var(--foreground)',
       // 卡片容器色，用于信息块、表单块、对话框内部内容等普通承载面。
       card: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--card)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--card-foreground)',
       },
       // 浮层容器色，用于 popover、dropdown、tooltip 等脱离普通文档流的界面层。
       popover: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--popover)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--popover-foreground)',
       },
       // 主操作色，用于 CTA、当前选中项和关键强调状态。
       primary: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--primary)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--primary-foreground)',
       },
       // 次级操作色，用于弱主按钮、次级标签和非主路径操作。
       secondary: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--secondary)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--secondary-foreground)',
       },
       // 弱化色，用于说明文字、空态、禁用背景和低优先级信息。
       muted: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--muted)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--muted-foreground)',
       },
       // 悬停、聚焦、轻量选中等非主品牌强调色。
       accent: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--accent)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--accent-foreground)',
       },
       // 破坏性语义色，属于 shadcn-vue 兼容 token，用于危险操作和错误状态。
       destructive: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--destructive)',
         // destructive 表示危险/删除等高风险动作；foreground 与背景变量成对维护，保证对比度可控。
         foreground: 'var(--destructive-foreground)',
@@ -296,14 +334,21 @@ export default defineConfig({
 
       // border/input/ring 分别服务边框、表单底色和焦点环；保持拆分，避免交互态互相污染。
       border: 'var(--border)',
+      // 输入控件边界的语义颜色，随主题变量切换。
       input: 'var(--input)',
+      // 可聚焦控件的焦点环颜色，随主题变量切换。
       ring: 'var(--ring)',
       // chart 是跨页面复用的数据可视化色板；业务图表只引用语义序号，不直接写具体色值。
       chart: {
+        // 图表第 1 个系列的主题颜色，引用对应 CSS 变量。
         1: 'var(--chart-1)',
+        // 图表第 2 个系列的主题颜色，引用对应 CSS 变量。
         2: 'var(--chart-2)',
+        // 图表第 3 个系列的主题颜色，引用对应 CSS 变量。
         3: 'var(--chart-3)',
+        // 图表第 4 个系列的主题颜色，引用对应 CSS 变量。
         4: 'var(--chart-4)',
+        // 图表第 5 个系列的主题颜色，引用对应 CSS 变量。
         5: 'var(--chart-5)',
       },
       // sidebar 是导航壳层专用色组，和普通 card/popover 分离，避免布局导航色污染内容组件。
@@ -329,12 +374,16 @@ export default defineConfig({
       // 项目自定义语义色：不属于 shadcn-vue 默认主题，主题文件必须在每个明暗主题块底部单独声明。
       // 成功状态色，用于成功提示、完成状态和正向反馈。
       success: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--success)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--success-foreground)',
       },
       // 警告状态色，用于风险提示、待处理状态和需要注意的非破坏性反馈。
       warning: {
+        // 该语义色的默认 token，引用主题 CSS 变量而非复制固定颜色。
         DEFAULT: 'var(--warning)',
+        // 该语义背景上的前景文字色；值随对应主题 CSS 变量变化。
         foreground: 'var(--warning-foreground)',
       },
     },
@@ -369,18 +418,23 @@ export default defineConfig({
       // variationSettings 保持 Wind4/Tailwind v4 可变字体变量契约；未声明专用变量时由 reset 的 fallback 回到 normal。
       variationSettings: 'var(--font-mono--font-variation-settings)',
     },
+
     // 字号 token；当前使用 Wind4 默认值，后续项目级字号只在这里补。
     // 不写空对象，避免覆盖 Wind4 默认字号 token；需要项目级字号时再取消注释并填入实际 token。
     // text: {},
+
     // 行高 token；当前使用 Wind4 默认值，避免正文和组件行高分成两套来源。
     // 不写空对象，避免覆盖 Wind4 默认行高 token；需要项目级行高时再取消注释并填入实际 token。
     // leading: {},
+
     // 字距 token；当前使用 Wind4 默认值，后续品牌化标题字距只在这里补。
     // 不写空对象，避免覆盖 Wind4 默认字距 token；需要项目级字距时再取消注释并填入实际 token。
     // tracking: {},
+
     // 动效曲线 token；当前使用 Wind4 默认值，后续统一动效节奏只在这里补。
     // 不写空对象，避免覆盖 Wind4 默认动效曲线 token；需要项目级动效曲线时再取消注释并填入实际 token。
     // ease: {},
+
     // 横向响应式断点；Wind4 使用单数 key `breakpoint`，不要写回 Tailwind v3 的 `breakpoints`。
     // 不写空对象，避免覆盖 Wind4 默认断点；空 `breakpoint` 会导致 md/lg 等响应式变体无法生成。
     // breakpoint: {},
@@ -390,12 +444,15 @@ export default defineConfig({
     // 外阴影 token；当前使用 Wind4 默认值，后续卡片/浮层阴影只在这里补。
     // 不写空对象，避免覆盖 Wind4 默认外阴影 token；需要项目级外阴影时再取消注释并填入实际 token。
     // shadow: {},
+
     // 内阴影 token；当前使用 Wind4 默认值，后续内凹状态只在这里补。
     // 不写空对象，避免覆盖 Wind4 默认内阴影 token；需要项目级内阴影时再取消注释并填入实际 token。
     // insetShadow: {},
+
     // 间距 token；当前使用 Wind4 默认值，不要恢复 extendTheme 补丁，`--spacing(4)` 已由 Wind4 bracket 解析。
     // 不写空对象，避免覆盖 Wind4 默认间距 token；需要项目级间距时再取消注释并填入实际 token。
     // spacing: {},
+
     // Wind4 @property 相关 token；当前使用默认值，后续自定义 CSS 属性注册只在这里补。
     // 不写空对象，避免覆盖 Wind4 默认 @property token；需要项目级属性注册时再取消注释并填入实际 token。
     // property: {},
