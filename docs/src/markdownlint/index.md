@@ -11,6 +11,15 @@ navigation:
 
 # Markdownlint 快速开始
 
+Markdownlint 检查标题、列表、链接、代码块等 Markdown 写法是否符合规则；markdownlint-cli2 在本地负责发现文件、加载配置并执行检查或修复。
+
+- [Markdownlint 项目说明](https://github.com/DavidAnson/markdownlint)：了解引擎、配置与编辑器集成。
+- [Markdownlint 在线演示](https://dlaa.me/markdownlint/)：输入 Markdown，尝试规则诊断与修复。
+- [Markdownlint 规则清单](https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md)：按规则编号查询原因与参数。
+- [markdownlint-cli2 使用说明](https://github.com/DavidAnson/markdownlint-cli2)：查询命令、配置文件和扫描行为。
+
+在线演示适合验证文档片段，不会读取本地 CLI2 的扫描、忽略或继承配置，也不能代替 VitePress 等站点的渲染验证。
+
 `@zzjtnb/markdownlint-config` 以 Markdownlint 默认规则为基础，只声明本项目差异。CLI2 负责扫描和修复，规则最终按 **上游默认 → 本项目规则 → 消费项目规则** 生效。
 
 ## 安装

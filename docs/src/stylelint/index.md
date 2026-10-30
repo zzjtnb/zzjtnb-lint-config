@@ -11,6 +11,14 @@ navigation:
 
 # Stylelint 快速开始
 
+Stylelint 检查样式中的错误与约定，并提供部分自动修复。CSS、SCSS 和 Vue 样式需要对应的解析器与规则，本包已组合这些支持。
+
+- [Stylelint 官方入门](https://stylelint.io/user-guide/get-started/)：了解安装、配置和首次检查。
+- [Stylelint 在线演示](https://stylelint.io/demo/)：用样式片段尝试规则与修复。
+- [Stylelint 规则清单](https://stylelint.io/user-guide/rules/)：查询核心规则的用途、选项和自动修复能力。
+
+在线演示不会自动加载本包的 SCSS、Vue 预设或项目配置；涉及这些文件时，以消费项目的实际检查结果为准。SCSS 插件规则应查对应插件说明。
+
 `@zzjtnb/stylelint-config` 继承官方 CSS、SCSS、Vue 相关预设，只追加本项目的语法与规则差异。最终优先级是 **上游预设 → 本项目预设 → 消费项目配置**。
 
 ## 安装

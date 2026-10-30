@@ -108,6 +108,8 @@ YAML 是否启用遵循 antfu 的组装顺序：顶层 `yaml: false` 会关闭�
 
 依赖分别是 `@unocss/eslint-plugin`、`eslint-plugin-vuejs-accessibility`、`eslint-plugin-format`、`eslint-plugin-slop` / `eslint-plugin-sonarjs` 和 `@shadcn/lint`。每条规则能否自动修复取决于其实现，启用整个集成不代表所有问题都能自动修改。
 
+UnoCSS 的 Vite 插件、样式入口与 Lucide 图标接入见 [UnoCSS 与图标](/ui/unocss)。本节只说明 ESLint 检查选项。
+
 例如 UnoCSS 项目同时使用 Stylelint、Markdownlint 时，只追加 UnoCSS 和 HTML formatter；默认已开启的 Vue 无障碍、antislop 无需重复声明：
 
 ```js [eslint.config.js]

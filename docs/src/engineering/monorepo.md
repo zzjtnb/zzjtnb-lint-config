@@ -14,6 +14,8 @@ pnpm 负责工作区、依赖安装和锁文件，Turborepo 根据工作区依�
 
 本文以本项目为例：`packages/` 中的 ESLint、Stylelint、Markdownlint 是三个公开配置包，Docs、Playground、消费示例及维护工具是辅助项目。搭建自己的 Monorepo 时，按实际项目职责调整目录与脚本，不必复制所有辅助设施。
 
+初次使用时，先阅读 [Turborepo 官方入门](https://turborepo.dev/docs/getting-started/installation)与 [pnpm 工作区说明](https://pnpm.io/workspaces)；配置任务依赖和缓存时查 [Turbo 配置参考](https://turborepo.dev/docs/reference/configuration)。本文末尾按任务提供更具体的官方参考链接。
+
 ## 先分清配置归属 {#responsibilities}
 
 | 配置位置 | 管理内容 |

@@ -15,6 +15,8 @@ navigation:
 
 ESLint 与 Stylelint 使用具名 `zzjtnb` 工厂，Markdownlint 使用原生配置继承。三个包没有相互依赖，可以按项目需要选用。
 
+不熟悉这些工具时，先看各自的[ESLint 入门](/eslint)、[Stylelint 入门](/stylelint)和 [Markdownlint 入门](/markdownlint)，页面顶部提供官方文档、规则说明与在线试用入口。需要生成工具类样式或使用图标时，参见 [UnoCSS 与图标](/ui/unocss)；安装检查配置包本身不会生成页面样式。
+
 ## 公开包消费要求
 
 ESLint 和 Stylelint 配置包的环境要求如下：
@@ -434,6 +436,8 @@ pnpm run lint
 
 ## 下一步
 
+- [UI 组件方案对比](./ui/)：比较 Reka UI、shadcn-vue、Naive UI 等方案，再按需要接入组件。
+- [UnoCSS 与图标](./ui/unocss)：为 Vue/Vite 应用配置工具类、Lucide 图标和相关检查。
 - [ESLint 配置](./eslint)：查看 Flat Config 工厂、选项转发、规则覆盖和忽略行为。
 - [Stylelint 配置](./stylelint)：查看原生 Config 字段、语法作用域、合并策略和 CLI。
 - [Markdownlint 配置](./markdownlint)：查看配置继承、扫描排除范围和 CLI 用法。

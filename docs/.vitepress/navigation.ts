@@ -9,7 +9,12 @@ import matter from 'gray-matter'
 
 const sourceRoot = fileURLToPath(new URL('../src/', import.meta.url))
 const packageGroups = { eslint: 'ESLint', stylelint: 'Stylelint', markdownlint: 'Markdownlint' } as const
-const groups = { start: '入门', ...packageGroups, engineering: '工程与维护' } as const
+const groups = {
+  start: '入门',
+  ...packageGroups,
+  ui: 'UI',
+  engineering: '工程与维护',
+} as const
 
 /** 目录首页与工程文档通过官方路由重写保留现有公开短地址，导航复用同一映射。 */
 export const rewrites: Record<string, string> = Object.fromEntries(

@@ -11,6 +11,14 @@ navigation:
 
 # ESLint 快速开始
 
+ESLint 检查 JavaScript、TypeScript、Vue 等代码中的规则问题，并修复规则支持自动修改的部分。开始配置前，可先通过以下入口了解工具与规则：
+
+- [ESLint 官方文档](https://eslint.org/docs/latest/)：了解安装、配置、命令行和编辑器集成。
+- [ESLint Playground](https://eslint.org/play/)：在线尝试代码和规则，观察诊断与修复结果。
+- [antfu 配置说明](https://github.com/antfu/eslint-config)：查询本包所基于的语言集成与配置选项。
+
+在线 Playground 使用自身提供的引擎与插件，不会自动加载本包或本地项目配置；项目实际结果应以本地检查为准。插件规则的选项应查对应插件文档，不能只查 ESLint 核心规则。
+
 `@zzjtnb/eslint-config` 在 antfu 的 Flat Config 上只增加本项目需要的差异。最终优先级是 **上游 → 本项目预设 → 消费项目配置**；消费项目不需要复制整套规则。
 
 ## 安装

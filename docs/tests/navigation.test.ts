@@ -32,6 +32,26 @@ afterEach(() => {
 })
 
 describe('页面元数据导航', () => {
+  it('uI 分类首页提供对比入口，Reka UI 教程保留独立页面', () => {
+    files({
+      'ui/index.md': source('ui', 0, '组件方案对比'),
+      'ui/reka-ui.md': source('ui', 10, 'Reka UI'),
+      'ui/unocss.md': source('ui', 20, 'UnoCSS 与图标'),
+      'ui/icons.md': source('ui', 30, '图标方案对比'),
+    })
+    const result = createNavigation('/docs/src')
+    expect(result.nav).toContainEqual({ text: 'UI', link: '/ui/' })
+    expect(result.sidebar).toContainEqual({
+      text: 'UI',
+      items: [
+        { text: '组件方案对比', link: '/ui/' },
+        { text: 'Reka UI', link: '/ui/reka-ui' },
+        { text: 'UnoCSS 与图标', link: '/ui/unocss' },
+        { text: '图标方案对比', link: '/ui/icons' },
+      ],
+    })
+  })
+
   it('工程文档归档后保留公开短地址，导航使用同一重写映射', () => {
     files({
       'engineering/versions.md': source('engineering', 10, '依赖版本管理'),

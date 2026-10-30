@@ -7,6 +7,8 @@ navigation:
 
 # pnpm 统一管理依赖版本
 
+pnpm 是 Node.js 包管理器；Catalog 将多个工作区采用的依赖版本范围集中声明，避免在各份 `package.json` 中重复维护。入门可查 [pnpm 官方文档](https://pnpm.io/)、[工作区说明](https://pnpm.io/workspaces)和 [Catalogs 教程](https://pnpm.io/catalogs)。Catalog 管理声明的版本范围，实际解析结果仍由锁文件记录。
+
 本教程面向使用三个共享配置包的 pnpm Monorepo,说明如何将版本集中管理,同时保持各包的依赖归属.它使用 pnpm 原生 Catalog,不依赖本仓库内部工具,也不要求使用 Turborepo.
 
 工作区目录、任务编排和缓存的完整搭建流程见 [Turborepo 与 pnpm](/monorepo)；本文集中说明依赖版本的声明与维护。
