@@ -653,7 +653,7 @@ pnpm ports --help
 
 ## VS Code 的 TypeScript SDK {#typescript-sdk}
 
-类型检查使用各工作区安装的编译器；编辑器语言服务使用所选 SDK，两者不必来自根目录。以下以本项目为例：根目录不安装 TypeScript，Docs 的 TS6 依赖提供经典 tsserver.js，当前 Stylelint、Markdownlint 使用的 TS7 编译器不提供该经典语言服务。其他项目应选择自身实际包含 tsserver.js 的 SDK，不直接照搬示例目录。
+类型检查使用各工作区安装的编译器；编辑器语言服务使用所选 SDK，两者不必来自根目录。以下以本项目为例：根目录不安装 TypeScript，Docs 的 typescript-native-bridge 依赖提供经典 tsserver.js，当前 Stylelint、Markdownlint 使用的 TS7 编译器不提供该经典语言服务。其他项目应选择自身实际包含 tsserver.js 的 SDK，不直接照搬示例目录。
 
 ### 目录模式与多根工作区
 
@@ -663,7 +663,7 @@ pnpm ports --help
 {
   "settings": {
     // 指向包含 tsserver.js 的 lib 目录，不是编译器可执行文件或 tsserver.js 文件本身。
-    // 本仓库使用 Docs 已声明的 TS6 依赖，不为编辑器额外给根目录安装 TypeScript。
+    // 本仓库使用 Docs 通过定向 override 安装的 bridge 依赖，不为编辑器额外给根目录安装 TypeScript。
     "js/ts.tsdk.path": "docs/node_modules/typescript/lib",
   },
 }

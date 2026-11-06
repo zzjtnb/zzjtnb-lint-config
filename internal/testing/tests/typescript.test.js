@@ -24,6 +24,10 @@ describe('typeScript CLI 与工具 API 共存', () => {
       const require = createRequire(new URL(`../../../${directory}/package.json`, import.meta.url))
       const api = require('typescript')
       assert.match(api.version, /^6\./)
+      const manifest = require('typescript/package.json')
+      assert.strictEqual(manifest.name, directory === 'packages/eslint'
+        ? 'typescript'
+        : 'typescript-native-bridge')
       const result = api.transpileModule('const value: number = 1', {
         compilerOptions: { target: ts.ScriptTarget.ES2022 },
         reportDiagnostics: true,

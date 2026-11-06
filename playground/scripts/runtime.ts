@@ -65,7 +65,10 @@ for (const [mode, names] of Object.entries(engines)) {
     dependencies['@eslint/css-tree'] = bundle.cssVersion
   }
   for (const name of names) {
-    const path = await locate(name, join(root, 'playground'))
+    // 浏览器 ESLint 使用解析器所属的经典 TypeScript，不继承宿主 Vue 的原生 bridge。
+    const path = await locate(name, join(root, name === 'typescript'
+      ? 'packages/eslint'
+      : 'playground'))
     dependencies[name] = JSON.parse(await readFile(join(path, 'package.json'), 'utf8')).version
   }
   const path = join(root, 'packages', mode)

@@ -13,7 +13,7 @@
     "@types/node": "catalog:",
     "gray-matter": "catalog:",
     "sass-embedded": "catalog:",
-    "typescript": "catalog:typescript6",
+    "typescript": "catalog:",
     "vite": "catalog:",
     "vitepress": "catalog:",
     "vitepress-plugin-group-icons": "catalog:",

@@ -131,7 +131,9 @@ export default zzjtnb(
 
 ## TypeScript 与 NestJS
 
-项目可以继续使用自己的 TypeScript 版本。本包为 ESLint 解析器提供 TypeScript 6；这是检查工具使用的依赖，不会替换项目编译器。使用新语法时，还需要确认当前 typescript-eslint 已支持它。
+按 typescript-eslint 维护者的并存建议，本包为 ESLint 解析器提供受支持的 TypeScript 6，消费项目可单独使用 TS7 等编译器。使用新语法时，仍需确认解析器支持情况。官方依据及适配进展见 [编译器版本管理](https://lint.docs.zzjtnb.com/dependencies)。
+
+Vue 项目使用原版 TypeScript 7 时，当前 vue-tsc 需要维护者推荐的 typescript-native-bridge；这属于消费项目的编译器配置，不由本包自动覆盖。接入及验证方式见 [Vue 编译器兼容说明](https://lint.docs.zzjtnb.com/dependencies)。
 
 NestJS 的装饰器设置请按文件范围配置；启用类型感知检查时，也可以从 tsconfig 读取。具体写法见 [NestJS 配置](https://lint.docs.zzjtnb.com/eslint/configuration#nestjs-装饰器与依赖注入)。
 

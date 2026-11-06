@@ -51,7 +51,7 @@
     "sass-embedded": "catalog:",
     "stylelint": "catalog:",
     "tsdown": "catalog:",
-    "typescript": "catalog:typescript6",
+    "typescript": "catalog:",
     "unocss": "catalog:",
     "unplugin-vue-components": "catalog:",
     "vite": "catalog:",

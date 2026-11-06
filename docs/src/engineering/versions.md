@@ -109,19 +109,28 @@ catalog:
 
 第三方包通过 catalog 引用版本，仓库内包通过 workspace 引用本地工作区；依赖方向仍由各项目职责决定。
 
-## 5. 为不同工具保留兼容版本
+## 5. ESLint 与项目编译器分别管理
 
-工具需要不同 TypeScript 主版本时，可以通过命名 catalog 分别声明，由各消费工作区选择兼容范围：
+项目编译使用 TS7，不代表 ESLint 解析器也能直接使用原版 TS7。typescript-eslint 维护者在 [TS7.0.2 兼容问题 #12518](https://github.com/typescript-eslint/typescript-eslint/issues/12518) 中建议让 typescript-eslint 使用 TS6，并链接了[微软的 TS6、TS7 并存说明](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0)。这是解析器与项目编译器分别选用兼容版本的建议，不要求所有项目降级，也不规定依赖别名或 catalog 的名称。
+
+本仓库通过 pnpm 的依赖边界实现并存：默认 catalog 提供原版 TS7；ESLint 配置包的解析器运行时及工程测试通过命名 catalog 引用经典 TS6；Docs、Playground 使用 Vue bridge，见第 12 节。浏览器 ESLint 沙箱读取解析器所属的 TS6，不继承宿主 Vue 的 bridge。
 
 ```yaml [pnpm-workspace.yaml]
-# 维护需要经典编译器 API 的工具版本。
+# 默认目录供使用原版 TS7 的工作区引用。
+catalog:
+  typescript: ^7.0.2
+
+# 经典 API 消费方通过 catalog:typescript6 引用受支持版本。
 catalogs:
   typescript6:
-    # 仅供确实需要 TypeScript 6 API 的工具引用，不要求业务项目的编译器跟随降级。
     typescript: ^6.0.3
 ```
 
-对应工具在自己的依赖中使用 `catalog:typescript6`。catalog 统一声明来源，不限制 `--latest` 升级范围。
+`typescript6` 是本仓库的 catalog 名称，不是官方要求的包名，也不是额外安装的原生预览版。公开配置包发布时转换为正式的 TypeScript 版本范围，消费方无需配置同名 catalog。catalog 统一声明来源，锁文件记录实际安装结果；`--latest` 仍可能越过现有范围，升级时单独核对编译器兼容性。
+
+截至 2026-11-06，[官方依赖文档](https://typescript-eslint.io/users/dependency-versions/)及 typescript-eslint 8.72.1 的 peer 声明支持 `>=4.8.4 <6.1.0`。这说明原版 TS7 不在当前正式支持范围内；Vue Language Tools 推荐 bridge，也不构成 typescript-eslint 正式支持该替代包的声明。
+
+TS7 适配已经在开发：[跟踪问题 #10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940) 仍开放，[PR #12803](https://github.com/typescript-eslint/typescript-eslint/pull/12803) 正在实现基于 IPC 的 TS7.1 实验后端，尚未合并。该 PR 的实验选项尚不属于当前正式发布配置。正式版本发布后，重新核对依赖契约，并通过解析器消费测试、类型检查、构建和浏览器沙箱验证决定是否移除 TS6。
 
 ## 6. 从分散版本迁移
 
@@ -197,7 +206,19 @@ Catalog 自动修复参数及冲突策略以[官方规则源码](https://github.
 
 工作区更新、冻结安装、存储清理及强制重装命令统一见 [Monorepo 常用维护命令](/monorepo#maintenance)。
 
-## 12. TypeScript bridge 与预发布 peer 范围
+## 12. Vue 的 TypeScript bridge 与预发布 peer 范围
+
+当前原版 TypeScript 7 不提供 vue-tsc 所需的经典编译器入口，直接运行可能报 `typescript/lib/tsc` 未导出。Vue Language Tools 维护者在 [#6156](https://github.com/vuejs/language-tools/issues/6156) 和 [#5381](https://github.com/vuejs/language-tools/issues/5381) 推荐使用 `typescript-native-bridge`；这不代表原版 TS7 已直接兼容 vue-tsc。
+
+本仓库 Docs、Playground 在 package.json 中引用默认 TypeScript catalog，通过根工作区的定向 override 安装 bridge；ESLint 解析器及工程测试继续使用经典 TS6，其他 TS7 工作区不受影响。独立 Vue 项目若保留 `typescript: latest`，可在自身 pnpm-workspace.yaml 使用以下覆盖；该示例覆盖该项目依赖图中的 TypeScript，存在需要原版 TS6 的独立工具时，应像本仓库一样改用按直接消费者限定的 override，保留各自依赖边界：
+
+```yaml
+# 保留声明的编译器版本策略，实际安装提供经典 API 的 TS7 桥接包。
+overrides:
+  typescript: npm:typescript-native-bridge@latest
+```
+
+安装后执行项目自身的类型检查、构建和测试，核对实际编译器版本。bridge 使用 tsgo 检查器，但其包版本带有 TS6 兼容层版本，不能将它描述为直接安装原版 TypeScript 7。编辑器选择包含 tsserver.js 的工作区 SDK，参见 [编辑器 TypeScript SDK](./monorepo)。
 
 采用 `typescript-native-bridge` 的消费项目，应区分实际兼容性与版本范围匹配。以 `6.0.3-bridge.19.tsgo.7.0.2` 为例，它带有预发布标识；即使基础版本高于 5.8，默认语义化版本匹配仍不会把它纳入 `@vue/tsconfig@0.9.1` 声明的稳定版范围 `>=5.8`。这类告警本身不能证明兼容，也不能据此要求整个工程降级编译器。
 
@@ -208,6 +229,8 @@ peerDependencyRules:
   allowedVersions:
     # 仅适用于此消费者与已验证的 TS 6.0.3 bridge 系列，不放行其他 TS 主版本。
     '@vue/tsconfig@0.9.1>typescript': '>=6.0.3-bridge.0 <6.0.4-0'
+    # 项目使用该编辑器且已完成浏览器编辑验证时，补充它的精确消费者关系。
+    'modern-monaco@0.4.2>typescript': '>=6.0.3-bridge.0 <6.0.4-0'
 ```
 
 `allowedVersions` 是 pnpm 对已验证版本关系的补充声明，不修改包发布时的 peer 契约，也不会修复真实的 API 或语法不兼容。该示例不属于三个共享 lint 包的默认配置；未采用此 bridge 组合的项目不应照搬。升级消费者或 bridge 超出范围时重新验证，消费者的正式 peer 范围能够接受实际版本后移除这条声明。不使用全局 `allowAny: [typescript]` 或忽略全部 TypeScript peer 来掩盖问题。

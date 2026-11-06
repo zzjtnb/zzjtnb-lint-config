@@ -15,7 +15,11 @@ export async function replaceEditor(page: Page, editor: Locator, source: string)
     position: { x: 80, y: 12 },
     timeout: 5000,
   })
-  await page.keyboard.press('ControlOrMeta+A')
+  // Monaco 按 userAgent 选择快捷键；Playwright 设备预设可能与宿主平台不同。
+  const modifier = await page.evaluate(() => navigator.userAgent.includes('Macintosh')
+    ? 'Meta'
+    : 'Control')
+  await page.keyboard.press(`${modifier}+A`)
   await page.keyboard.insertText(source)
 }
 

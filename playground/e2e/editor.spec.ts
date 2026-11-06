@@ -13,7 +13,7 @@ test('Monaco 编辑配置与代码，诊断和 Console 同屏及主题同步', a
   const configuration = page.locator('.source-config .monaco-editor .view-lines')
   await expect(configuration).toBeVisible({ timeout: 90000 })
   await replaceEditor(page, configuration, 'export default [{ rules: {} }]')
-  await expect(configuration).toContainText('export default [{ rules: {} }]')
+  await expect(configuration).toHaveText('export default [{ rules: {} }]')
   const background = await page.locator('.source-panel .monaco-editor').first().evaluate(element => getComputedStyle(element).backgroundColor)
   await page.getByRole('button', { name: '切换深色', exact: true }).click()
   await expect.poll(() => page.locator('.source-panel .monaco-editor').first().evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(background)

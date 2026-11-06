@@ -14,7 +14,7 @@
   "terminal.integrated.stickyScroll.enabled": true,
   // 编辑器的包管理操作统一使用 pnpm，不改变仓库声明的版本。
   "npm.packageManager": "pnpm",
-  // 编辑器使用文档站声明的 TS6 经典语言服务；根 TS7 原生编译器不包含 tsserver。
+  // 编辑器使用文档站安装的 bridge 经典语言服务；原版 TS7 CLI 不提供 tsserver。
   "js/ts.tsdk.path": "docs/node_modules/typescript/lib",
   // 开启项目级类型诊断，覆盖未打开的源码文件。
   "js/ts.tsserver.experimental.enableProjectDiagnostics": true,

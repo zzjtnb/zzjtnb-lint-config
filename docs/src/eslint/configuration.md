@@ -211,7 +211,7 @@ export default zzjtnb({
 })
 ```
 
-本包依赖 TS6 的经典 API 是因为当前 typescript-eslint 的要求，不是用来加载 JS 配置。消费项目可维护自己的编译器版本；TS7 场景仍受上游 peer 和语法支持范围约束，见[编译器边界](https://github.com/zzjtnb/zzjtnb-lint-config/blob/main/packages/eslint/README.zh-CN.md#typescript-与-nestjs)。
+本包为解析器提供受 typescript-eslint 当前版本支持的经典 TS6，消费项目可单独使用自己的编译器。维护者建议解析器与 TS7 编译器并存，而非要求项目统一降级；官方依据、当前 TS7.1 适配进展及本仓库配置见[编译器版本管理](/dependencies#_5-eslint-与项目编译器分别管理)。JS 配置文件加载不依赖这项编译器选择。
 
 ### NestJS 装饰器与依赖注入
 

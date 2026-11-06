@@ -133,7 +133,9 @@ export default zzjtnb(
 
 ## TypeScript and NestJS
 
-Your project can keep its own TypeScript version. This package provides TypeScript 6 for the ESLint parser; it does not replace your project compiler. New language features still require support from the installed typescript-eslint version.
+Following typescript-eslint maintainers’ side-by-side recommendation, this package supplies a supported TypeScript 6 dependency for the ESLint parser while consumers can use their own compiler, including TypeScript 7. New syntax still requires parser support. See the [compiler version guide](https://lint.docs.zzjtnb.com/dependencies) for upstream references and support progress.
+
+Vue projects using TypeScript 7 currently need typescript-native-bridge for vue-tsc, as recommended by Vue Language Tools maintainers. Configure it in the consuming project; this package does not override its compiler. See the [Vue compiler compatibility guide](https://lint.docs.zzjtnb.com/dependencies).
 
 For NestJS, configure decorator options for NestJS files. Type-aware linting can also read these options from tsconfig. See [NestJS setup](https://lint.docs.zzjtnb.com/eslint/configuration#nestjs-装饰器与依赖注入).
 

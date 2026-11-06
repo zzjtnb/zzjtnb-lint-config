@@ -9,6 +9,14 @@ update:
   ignoreDeps:
     - typescript
 
+# 类型检查、构建、单元测试及浏览器编辑器验证通过后，限定放行 bridge 预发布版本。
+peerDependencyRules:
+  allowedVersions:
+    # 仅补充当前 Vue TS 配置与 TS 6.0.3 bridge 系列的已验证关系。
+    '@vue/tsconfig@0.9.1>typescript': '>=6.0.3-bridge.0 <6.0.4-0'
+    # 仅补充当前编辑器与同一 bridge 系列的已验证关系，不放开其他替代包或主版本。
+    modern-monaco@0.4.2>typescript: '>=6.0.3-bridge.0 <6.0.4-0'
+
 # 沿用上游：使用跨平台 Shell 模拟器运行脚本。
 shellEmulator: true
 
@@ -20,6 +28,11 @@ packages:
   - playground
   - docs
   - scripts
+
+# Vue 工作区保留默认编译器声明，安装时使用维护者推荐的 TS7 桥接包；不影响公开包的编译器。
+overrides:
+  '@zzjtnb/docs>typescript': npm:typescript-native-bridge@latest
+  '@zzjtnb/playground>typescript': npm:typescript-native-bridge@latest
 
 # 仅允许列出的依赖执行安装构建脚本，不放开全部第三方生命周期。
 allowBuilds:
@@ -160,7 +173,8 @@ catalog:
 # 命名目录与默认目录都由本文件统一维护，并非第二套分散版本源。
 # 仅为真实兼容范围保留例外；catalog 本身不冻结版本，升级时核对命令作用范围。
 catalogs:
-  # packages/eslint 的运行时，以及 docs/、playground/、internal/testing/ 的工具 API 共用 TS6。
+  # 按 typescript-eslint 的并存建议隔离经典 API；此 catalog 名称由本仓库自行约定。
+  # packages/eslint 的解析器运行时与 internal/testing 的经典工具 API 使用 TS6。
   typescript6:
     # TS6 兼容范围；消费方通过 catalog:typescript6 引用，不回退到默认 TS7 目录。
     typescript: ^6.0.3
