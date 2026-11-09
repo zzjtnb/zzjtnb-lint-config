@@ -196,7 +196,7 @@ pnpm --config.verifyDepsBeforeRun=error --dir "$LINT_REPO" exec eslint packages
 
 ```bash
 # 安装 ESLint 引擎，并将配置依赖指向本地包目录。
-pnpm --dir "$APP_REPO" add -D 'eslint@^10.13.0' "@zzjtnb/eslint-config@link:$ESLINT_DIR"
+pnpm --dir "$APP_REPO" add -D 'eslint@^10.14.0' "@zzjtnb/eslint-config@link:$ESLINT_DIR"
 # 将 Stylelint 引擎和配置包一并链接到同一仓库，共用解析器的 PostCSS 实例。
 pnpm --dir "$APP_REPO" add -D "stylelint@link:$LINT_REPO/node_modules/stylelint" "@zzjtnb/stylelint-config@link:$STYLELINT_DIR"
 # 安装 CLI2，并链接 Markdownlint 的规则与扫描配置包。
@@ -592,7 +592,7 @@ CONSUMER="$(mktemp -d "$CHECK_ROOT/tarball/XXXXXX")"
 # 初始化明确使用 ESM 的独立消费项目。
 pnpm --dir "$CONSUMER" init --init-type module
 # 显式安装执行工具和此次验证三个真实 tarball。
-pnpm --dir "$CONSUMER" add -D 'eslint@^10.13.0' 'stylelint@^17.16.0' 'markdownlint-cli2@^0.24.0' "$ESLINT_TARBALL" "$STYLELINT_TARBALL" "$MARKDOWNLINT_TARBALL"
+pnpm --dir "$CONSUMER" add -D 'eslint@^10.14.0' 'stylelint@^18.0.0' 'markdownlint-cli2@^0.24.0' "$ESLINT_TARBALL" "$STYLELINT_TARBALL" "$MARKDOWNLINT_TARBALL"
 # 核对独立项目实际安装的直接依赖及来源。
 pnpm --dir "$CONSUMER" list --depth 0
 # 核对已安装工具的 peer 兼容性。
@@ -828,7 +828,7 @@ pnpm --dir "$REGISTRY_APP" init --init-type module
 # 仅为这个新项目显式指定本项目 scope 的本地注册表，避免继承用户线上 scope 配置。
 printf '%s\n' "@zzjtnb:registry=$LOCAL_REGISTRY" > "$REGISTRY_APP/.npmrc"
 # 从本机注册表安装三个指定版本，其他引擎由本机注册表代理。
-pnpm --dir "$REGISTRY_APP" add -D "@zzjtnb/eslint-config@$ESLINT_VERSION" "@zzjtnb/stylelint-config@$STYLELINT_VERSION" "@zzjtnb/markdownlint-config@$MARKDOWNLINT_VERSION" 'eslint@^10.13.0' 'stylelint@^17.16.0' 'markdownlint-cli2@^0.24.0' --registry "$LOCAL_REGISTRY"
+pnpm --dir "$REGISTRY_APP" add -D "@zzjtnb/eslint-config@$ESLINT_VERSION" "@zzjtnb/stylelint-config@$STYLELINT_VERSION" "@zzjtnb/markdownlint-config@$MARKDOWNLINT_VERSION" 'eslint@^10.14.0' 'stylelint@^18.0.0' 'markdownlint-cli2@^0.24.0' --registry "$LOCAL_REGISTRY"
 # 确认实际安装版本和 registry 后，重复三工具配置与验证真实工具验证。
 pnpm --dir "$REGISTRY_APP" list --depth 0
 ```
@@ -871,7 +871,7 @@ pnpm --dir "$PUBLISHED_APP" init --init-type module
 # 只为此次验证验证项目明确配置 npm 官方 scope 解析，不写入认证令牌。
 printf '%s\n' "@zzjtnb:registry=$NPM_REGISTRY" > "$PUBLISHED_APP/.npmrc"
 # 从注册表安装精确版本和工具，不使用 workspace、link、file 或本地 tgz。
-pnpm --dir "$PUBLISHED_APP" add -D --save-exact "@zzjtnb/eslint-config@$ESLINT_VERSION" "@zzjtnb/stylelint-config@$STYLELINT_VERSION" "@zzjtnb/markdownlint-config@$MARKDOWNLINT_VERSION" 'eslint@^10.13.0' 'stylelint@^17.16.0' 'markdownlint-cli2@^0.24.0' --registry "$NPM_REGISTRY"
+pnpm --dir "$PUBLISHED_APP" add -D --save-exact "@zzjtnb/eslint-config@$ESLINT_VERSION" "@zzjtnb/stylelint-config@$STYLELINT_VERSION" "@zzjtnb/markdownlint-config@$MARKDOWNLINT_VERSION" 'eslint@^10.14.0' 'stylelint@^18.0.0' 'markdownlint-cli2@^0.24.0' --registry "$NPM_REGISTRY"
 # 检查实际安装的版本和包来源。
 pnpm --dir "$PUBLISHED_APP" list --depth 0
 # 检查当前消费组合的 peer 兼容性。
@@ -1003,7 +1003,7 @@ TypeScript 源码断点需要对应 sourcemap；没有 map 时可直接在 dist/
 # 切换到本来使用 npm 的消费项目，避免在 pnpm 项目里生成另一套锁文件。
 cd "$APP_REPO"
 # 安装经过发布转换的 ESLint tarball 和兼容引擎。
-npm install -D "$ESLINT_TARBALL" 'eslint@^10.13.0'
+npm install -D "$ESLINT_TARBALL" 'eslint@^10.14.0'
 # 调用消费项目已安装的 ESLint，验证包入口和真实输入。
 npm exec -- eslint "$TARGET_FILE"
 # 用 npm 的打包预览检查同一份归一化 tarball，不直接打包含 catalog: 的源码清单。

@@ -2,17 +2,17 @@
 import { execFile } from 'node:child_process'
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { expect, it } from 'vitest'
+import { paths } from './config'
 
 const execFileAsync = promisify(execFile)
 
 it('发布声明保留忽略数组和继承路径的类型，支持消费方展开追加', async () => {
-  const root = fileURLToPath(new URL('../../../.tmp/markdownlint-types/', import.meta.url))
+  const root = paths.types
   await mkdir(root, { recursive: true })
-  const directory = await mkdtemp(`${root}/consumer-`)
-  const compiler = fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url))
+  const directory = await mkdtemp(root)
+  const compiler = paths.compiler
   await writeFile(`${directory}/tsconfig.json`, JSON.stringify({
     // 检查正式 ESM 包声明，不生成文件，也不引入当前测试的全局类型。
     compilerOptions: {

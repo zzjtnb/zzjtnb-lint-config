@@ -2,18 +2,17 @@
 import type { Linter } from 'eslint'
 import type { Config } from 'stylelint'
 import { mkdir, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { paths } from '../../config'
 import { defaults } from '../../src/stores/config/catalog'
-import { root } from '../utils/index'
 
 interface DefaultConfigs { eslint: Linter.Config[], stylelint: Config }
 
 /** 从临时 ESM 模块加载默认配置，保留正式包名解析和各工具原生返回类型。 */
 export async function loadDefaults<T extends keyof DefaultConfigs>(mode: T): Promise<DefaultConfigs[T]> {
-  const directory = join(root, '.tmp/playground/defaults')
+  const directory = paths.defaultModules
   await mkdir(directory, { recursive: true })
-  const filename = join(directory, `${mode}.mjs`)
+  const filename = paths.defaults[mode]
   await writeFile(filename, defaults(mode))
   const module: { default: DefaultConfigs[T] | Promise<DefaultConfigs[T]> } = await import(pathToFileURL(filename).href)
   return module.default

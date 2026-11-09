@@ -5,15 +5,15 @@ import { createRequire } from 'node:module'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
 import ts from 'typescript'
-import { root } from './utils/index'
+import { paths } from '../config'
 
 /** 构建 CJS 运行资源并记录构建日志；工具、模块解析或构建失败直接报告，不退回删减配置。 */
 export async function bundleESLint() {
-  const shared = createRequire(join(root, 'packages/eslint/package.json'))
+  const shared = createRequire(join(paths.packages.eslint, 'package.json'))
   const upstream = shared.resolve('@antfu/eslint-config')
   const local = createRequire(upstream)
   const css = JSON.parse(await readFile(local.resolve('@eslint/css-tree/package.json'), 'utf8'))
-  const directory = join(root, '.tmp/playground/eslint-bundle')
+  const directory = paths.bundle
   await mkdir(directory, { recursive: true })
   const filename = join(directory, 'build.config.mjs')
   await writeFile(filename, `import { defineConfig } from ${JSON.stringify(import.meta.resolve('tsdown'))}
@@ -56,7 +56,7 @@ export default defineConfig({
     '--config',
     filename,
   ], {
-    cwd: join(root, 'playground'),
+    cwd: paths.root,
     maxBuffer: 4 * 1024 * 1024,
   })
   await writeFile(join(directory, 'build.log'), stdout + stderr)

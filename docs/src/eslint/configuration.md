@@ -15,7 +15,7 @@ navigation:
 
 ## 完整配置示例
 
-在 `package.json` 中声明 `"type": "module"`，创建以下 `eslint.config.js`。示例列出当前本包及 antfu 的正式顶层选项，展示全局选项与文件级片段的放置位置；它不是默认值快照。注释标明默认行为，项目只保留需要调整的字段即可。本包公开类型不包含已弃用的顶层 `overrides`；各语言的规则覆盖放在对应集成对象的 `overrides` 内。
+在 `package.json` 中声明 `"type": "module"`，创建以下 `eslint.config.js`。示例列出当前本包及 antfu 的正式顶层选项，展示全局选项与文件级片段的放置位置；它不是默认值快照。注释标明默认行为，项目只保留需要调整的字段即可。上游仍支持的旧选项继续透传，新代码优先使用各集成对象中的 `overrides`。
 
 ```js [eslint.config.js]
 import { zzjtnb } from '@zzjtnb/eslint-config'
@@ -41,7 +41,7 @@ export default zzjtnb(
 
     // JavaScript 核心集成不能关闭；对象内 overrides 调整该语言的规则。
     javascript: { overrides: {} },
-    // 本包默认开启 TypeScript；false 关闭，更多对象选项见下文。
+    // 未设置时由上游检测 TypeScript 依赖；true 显式开启，false 关闭。
     typescript: true,
     // Node.js 与 JSDoc 默认开启。
     node: true,
@@ -55,7 +55,7 @@ export default zzjtnb(
     perfectionist: true,
     imports: true,
     test: true,
-    // Vue 与 a11y 默认开启；vue: false 关闭整个集成，a11y: false 只关闭无障碍。
+    // 未设置时由上游检测 Vue 依赖；启用后默认检查无障碍。
     vue: {
       // Vue 版本默认 3，按实际项目选择。
       vueVersion: 3,
@@ -153,13 +153,13 @@ export default zzjtnb(
 ## 参数与优先级 {#工厂签名}
 
 ```ts
-async function zzjtnb(
+function zzjtnb(
   options?: ESLintConfigOptions,
   ...configs: ESLintUserConfig[]
-): Promise<Linter.Config[]>
+): ReturnType<typeof import('@antfu/eslint-config').default>
 ```
 
-第一个参数负责集成、全局忽略与规则覆盖；后续参数接收 Flat Config 对象、数组、异步结果及上游 composer。原生 `files` 只能用于后续片段。可配置的规则没有固定数量，`rules` 按当前插件的正式规则名和参数填写，具体默认差异见[规则示例](/eslint/presets#本包的规则覆盖)。
+返回值是 `FlatConfigComposer`，可直接导出、链式组合或 `await` 为配置数组。第一个参数负责集成、全局忽略与规则覆盖；后续参数接收 Flat Config 对象、数组、异步结果及上游 Composer。原生 `files` 只能用于后续片段。可配置的规则没有固定数量，`rules` 按当前插件的正式规则名和参数填写，具体默认差异见[规则示例](/eslint/presets#本包的规则覆盖)。
 
 生成顺序为：上游规则与本包差异 → 各集成的规则覆盖 → 首参 `rules` → 后续片段。同一个实际匹配文件采用最后生效的同名规则；未匹配的片段不参与。`shadcn` 默认注册，但不自动开启全部规则，也不自动忽略生成代码。
 
@@ -178,7 +178,32 @@ async function zzjtnb(
 
 ## 语言与规则集
 
-`node`、`jsdoc`、`jsx`、`e18e`、`unicorn`、`perfectionist`、`imports`、`test`、`jsonc`、`yaml`、`toml`、`markdown`、`stylistic`、`regexp` 默认由上游开启。JavaScript 核心不能关闭；本包另外默认开启 TypeScript 和 Vue。对象选项与规则子集仍由上游维护，不复制为本包的另一套类型。
+`node`、`jsdoc`、`jsx`、`e18e`、`unicorn`、`perfectionist`、`imports`、`test`、`jsonc`、`yaml`、`toml`、`markdown`、`stylistic`、`regexp` 默认由上游开启。JavaScript 核心不能关闭；TypeScript 和 Vue 未显式设置时沿用上游依赖检测。根入口统一检查多个工作区、相关依赖只在子工作区声明时，可在根 ESLint 配置中显式开启对应集成。对象选项与规则子集仍由上游维护，不复制为本包的另一套类型。
+
+自动检测依赖于运行 ESLint 时的项目环境，不会遍历所有子工作区。建议从拥有配置和直接依赖的项目根目录运行；集中在 Monorepo 根检查时，按实际范围显式设置 `typescript`、`vue`。
+
+### 配置组合
+
+`zzjtnb()` 直接返回上游 `FlatConfigComposer`。集成内 `overrides`、TypeScript 的 `overridesTypeAware`、带 `files` 的后置配置和 Composer 链式操作均保留；本包差异先完成，消费方后续的链式覆盖最后应用。下面以已安装 Vue 的项目为例：
+
+```js [eslint.config.js]
+import { zzjtnb } from '@zzjtnb/eslint-config'
+
+export default zzjtnb()
+  .prepend({ name: 'project/before', rules: { 'no-console': 'off' } })
+  .override('antfu/stylistic/rules', {
+    // 按名称调整已有配置，仍保留该配置原来的文件范围。
+    rules: { 'style/quotes': ['error', 'double'] },
+  })
+  .append({
+    name: 'project/vue',
+    // Vue 规则必须限定在对应文件，不扩散到 JavaScript 等其他语言。
+    files: ['**/*.vue'],
+    rules: { 'vue/operator-linebreak': ['error', 'before'] },
+  })
+```
+
+数组、异步配置和其他 Composer 可以继续作为后置参数传入。无需链式操作时，也可 `await zzjtnb()` 或调用 `.toConfigs()` 得到配置数组。Markdown 集成开启时，上游会为没有显式作用域的规则配置排除 Markdown，避免 JS 专用规则作用于 Markdown 的 SourceCode；确实需要检查 Markdown 的规则应明确设置 `files: ['**/*.md']`，并使用适用于该语言的规则。
 
 ### TypeScript
 
@@ -207,11 +232,13 @@ export default zzjtnb({
     filesTypeAware: ['**/*.?([cm])ts', '**/*.?([cm])tsx', '**/*.vue'],
     // 只改变该集成的规则，不影响其他语言。
     overrides: { 'ts/consistent-type-definitions': ['error', 'interface'] },
+    // 需要类型信息的规则在专用入口覆盖。
+    overridesTypeAware: { 'ts/no-unsafe-assignment': 'warn' },
   },
 })
 ```
 
-本包为解析器提供受 typescript-eslint 当前版本支持的经典 TS6，消费项目可单独使用自己的编译器。维护者建议解析器与 TS7 编译器并存，而非要求项目统一降级；官方依据、当前 TS7.1 适配进展及本仓库配置见[编译器版本管理](/dependencies#_5-eslint-与项目编译器分别管理)。JS 配置文件加载不依赖这项编译器选择。
+本包为解析器及内置插件提供其所需的经典 TypeScript API，消费项目可单独使用自己的编译器，无需补充本包的依赖声明。支持范围与适配依据见[编译器版本管理](/dependencies#_5-eslint-与项目编译器分别管理)。JS 配置文件加载不依赖这项编译器选择。
 
 ### NestJS 装饰器与依赖注入
 
@@ -273,7 +300,31 @@ export default zzjtnb(
 
 ### Vue
 
-`vue` 支持 `false` 或对象。`vueVersion` 默认 `3`；`a11y` 在 Vue 集成启用时默认 `true`，对应插件已由本包提供；`sfcBlocks` 默认 `true`，也可传上游 processor 的细分选项；`overrides` 用于 Vue 规则覆盖。可访问性规则只能检查静态模板，不能替代真实页面的键盘、焦点和对比度验收。
+`vue` 未设置时自动检测，也支持布尔值或对象。`vueVersion` 默认 `3`；`a11y` 在 Vue 集成启用时默认 `true`，对应插件已由本包提供；`sfcBlocks` 默认 `true`，也可传上游 processor 的细分选项；`overrides` 用于 Vue 规则覆盖。可访问性规则只能检查静态模板，不能替代真实页面的键盘、焦点和对比度验收。
+
+### Markdown
+
+上游默认同时检查 Markdown 文档本身和受支持语言的围栏代码块。`markdown.overrides` 调整代码块规则；文档的 `markdown/*` 规则使用带 `files: ['**/*.md']` 的后置片段覆盖：
+
+```js [eslint.config.js]
+import { zzjtnb } from '@zzjtnb/eslint-config'
+
+export default zzjtnb(
+  {
+    markdown: {
+      // 围栏代码块规则；上游默认允许示例使用 console，此处显式报告警告。
+      overrides: { 'no-console': 'warn' },
+    },
+  },
+  {
+    // 仅覆盖 Markdown 文档规则，保留其他推荐规则。
+    files: ['**/*.md'],
+    rules: { 'markdown/no-multiple-h1': 'off' },
+  },
+)
+```
+
+使用 Markdownlint 时，按项目需要划分两者的文档检查范围。`markdown: false` 会同时关闭 ESLint 的 Markdown 文档和代码块集成；`formatters.markdown` 是独立的格式化选项，不随这个开关关闭。
 
 ### pnpm
 
@@ -281,8 +332,8 @@ export default zzjtnb(
 
 | 对象字段 | 默认行为与用途 |
 | --- | --- |
-| `json` | 默认 `true`，检查 package.json |
-| `yaml` | 默认 `true`，检查 workspace YAML |
+| `json` | 默认跟随顶层 `jsonc` 是否开启；显式值优先，检查 package.json |
+| `yaml` | 默认跟随顶层 `yaml` 是否开启；显式值优先，检查 workspace YAML |
 | `sort` | 当前上游运行时默认 `true`；`false` 关闭 pnpm 专属 YAML 条目排序 |
 | `catalogs` | 按工作区是否使用 catalogs 自动判断，也可显式覆盖 |
 | `stylistic` | 可覆盖该集成的格式相关行为 |
@@ -322,7 +373,7 @@ export default zzjtnb({
 
 ## 按需扩展与格式化 {#格式化职责}
 
-完整示例中的 UnoCSS、Vue 无障碍、formatter、antislop 依赖均已由本包提供。Vue 无障碍和 antislop 默认开启；UnoCSS、formatter 需要显式开启。对应依赖、默认状态见[按需扩展](/eslint/presets#按需扩展)。
+完整示例中的 UnoCSS、Vue 无障碍、formatter、antislop 依赖均已由本包提供。Vue 集成启用后默认检查无障碍，antislop 默认开启；UnoCSS、formatter 需要显式开启。对应依赖、默认状态与 Oxfmt 示例见[按需扩展](/eslint/presets#按需扩展)。
 
 - `unocss.attributify` 在集成开启后默认为 `true`；`unocss.strict` 默认为 `false`。
 - `antislop.slop`、`antislop.sonarjs` 在集成开启后默认为 `true`；`cognitiveComplexity` 默认 `15`，`false` 关闭复杂度规则。`slop` 还可传对象控制 `cwd` 和 `inspection`，由插件管理扫描范围。
@@ -351,7 +402,7 @@ import type {
 
 | 导出 | 类型 | 用途 |
 | --- | --- | --- |
-| `zzjtnb` | runtime function | 创建异步 Flat Config |
+| `zzjtnb` | runtime function | 返回可链式组合、可 await 的 FlatConfigComposer |
 | `ESLintConfigOptions` | type | 第一个参数的类型 |
 | `ESLintUserConfig` | type | 后续 Flat Config 片段类型 |
 | `ESLintPnpmOptions` | type | antfu `pnpm` 对象选项类型 |
@@ -419,57 +470,6 @@ Flat Config 按配置片段的 `files`、`ignores` 和顺序决定作用范围�
 
 本包不强制写入 trustPolicy；minimumReleaseAgeExcludePrune、shellEmulator 等其他上游设置仍可检查和修复，排序和格式化也不受影响。需要恢复 trustPolicy 强制值时，通过消费方 rules 显式配置该规则的 settings。需要完全排除文件时使用项目的 `ignores`。
 
-## 按真实文件检查最终配置
-
-配置对象能加载，不等于目标文件命中了正确规则。针对实际路径查看合并结果：
-
-```bash
-# 输出指定文件实际合并后的 ESLint 配置，用于核对匹配结果。
-pnpm exec eslint --print-config src/App.vue
-# 检查指定 JavaScript、TypeScript 或 Vue 文件。
-pnpm exec eslint src/App.vue --config eslint.config.js
-```
-
-`--print-config` 用于解释文件最终使用的 parser、插件和规则，不执行该文件的 lint。再运行第二条命令，才能观察真实诊断。换成 `.ts`、`.json`、`.yaml` 时应分别核对，不以 Vue 的配置结果代替其他文件。
-
-### 全局规则与文件级例外如何选
-
-- 整个项目都应改变的行为放首参 `rules`。
-- 仅调整 Vue、JavaScript 等语言默认值时，使用对应集成的覆盖入口。
-- 只对某个目录或文件类型改变时，放后续带 `files` 的 Flat Config 片段。
-- 禁止把 `files` 塞进首个全局选项对象；该位置不是文件级片段。
-
-```js [eslint.config.js]
-import { zzjtnb } from '@zzjtnb/eslint-config'
-
-export default zzjtnb(
-  {
-    // 配置 Markdown 集成；false 关闭，true 或选项对象显式启用或调整该组能力。
-    markdown: false,
-  },
-  {
-    // 只将当前配置块应用到匹配路径；未声明时遵循所属工具的全局适用范围。
-    files: ['scripts/**/*.ts'],
-    // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
-    rules: {
-      // 覆盖 console 使用限制，实际诊断级别由当前规则值决定。
-      'no-console': 'off',
-    },
-  },
-  {
-    // 只将当前配置块应用到匹配路径；未声明时遵循所属工具的全局适用范围。
-    files: ['src/**/*.vue'],
-    // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
-    rules: {
-      // 控制 Vue prop 是否必须声明默认值，按当前示例级别覆盖共享值。
-      'vue/require-default-prop': 'error',
-    },
-  },
-)
-```
-
-该示例不会给业务目录关闭 `no-console`，也不会把 Vue 专属规则应用到所有文件。规则范围应跟实际职责一致，不靠全局关闭来掩盖局部问题。
-
 ## TypeScript 规则不是完整类型检查
 
 共享工厂启用 TypeScript 语法支持，不代表所有规则都启用了类型信息，也不代表检查器执行了项目编译。需要类型感知规则时，按当前 antfu 的正式 TypeScript 选项配置，并核对文件是否属于对应 TypeScript 项目；不要为每个普通配置文件强行启用项目级类型分析。
@@ -525,16 +525,9 @@ pnpm exec eslint . --fix
 
 ### JSONC 排序首次修复后仍有错误
 
-ESLint 10.13.0 的一次 `--fix` 最多执行 10 轮自动修复。`jsonc/sort-keys` 移动多个属性时，部分修复范围可能重叠，因而需要分轮应用；原始配置与目标顺序差异较大时，一次命令可能达到轮数上限，留下仍可自动修复的排序错误。这不等于存在两套排序规则冲突，也不代表第一次命令成功。
+当前 ESLint 的一次 `--fix` 有自动修复轮数上限。`jsonc/sort-keys` 移动多个属性时，部分修复范围可能重叠，因而需要分轮应用；原始配置与目标顺序差异较大时，一次命令可能达到轮数上限，留下仍可自动修复的排序错误。这不等于存在两套排序规则冲突，也不代表第一次命令成功。
 
 先检查退出状态和剩余规则，再对照修复前后的属性、值及注释，确认仅调整顺序且持续收敛。已有文件可以再次执行同一修复命令；若出现 `ESLintCircularFixesWarning`、来回改动或多次仍不收敛，应检查冲突配置，不持续重试。
-
-对于自行维护的创建器，优先让新增选项与相关原有选项集中生成。例如 gateway 的 `incremental` 与 `tsBuildInfoFile` 放在一起，可减少从官方初始顺序到最终顺序的移动；仍由既有规则决定最终格式，不能为此更改配置值、删除官方注释或关闭排序规则。创建器应使用全新生成文件验证首次修复的退出状态，而不是只检查已经格式化的工作区。
-
-本包不增加“失败后自动重跑”的包装命令，也不把某个应用的属性顺序变为全局特例。轮数限制以安装版本的 ESLint 实现为准，排序能力以安装版本的 JSONC 插件为准：
-
-- [ESLint 自动修复实现](https://github.com/eslint/eslint/blob/v10.13.0/lib/linter/linter.js)
-- [jsonc/sort-keys 规则](https://ota-meshi.github.io/eslint-plugin-jsonc/rules/sort-keys.html)
 
 ## 模块导入与源码扩展名
 

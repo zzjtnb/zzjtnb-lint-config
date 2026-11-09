@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 import { attachMetrics } from './helpers'
 
 test('三工具依赖二进制缓存，刷新后恢复并真实检查', async ({ page }) => {
@@ -7,7 +8,7 @@ test('三工具依赖二进制缓存，刷新后恢复并真实检查', async ({
     ['Markdownlint', 'markdownlint'],
     ['Stylelint', 'stylelint'],
     ['ESLint', 'eslint'],
-  ]) {
+  ] as const) {
     await page.goto(`/#/${mode}/overview`)
     await page.getByRole('link', { name, exact: true }).click()
     await page.getByRole('link', { name: '代码实验', exact: true }).click()
@@ -38,6 +39,9 @@ test('三工具依赖二进制缓存，刷新后恢复并真实检查', async ({
     }
     await expect(page.getByRole('button', { name: '应用修复到源码' })).toBeVisible()
     await attachMetrics('RESTORED_TOOL_CHECK_FIX_MS', [name, Date.now() - start])
-    await page.screenshot({ path: `../.tmp/playground/validation/refinement/cache-${mode}.png`, fullPage: true })
+    await page.screenshot({
+      path: paths.screenshots.cache[mode],
+      fullPage: true,
+    })
   }
 })

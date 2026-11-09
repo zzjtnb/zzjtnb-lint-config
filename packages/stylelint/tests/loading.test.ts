@@ -2,22 +2,22 @@ import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-
 import * as stylelintConfigModule from '@zzjtnb/stylelint-config'
+
 import stylelintConfig, { zzjtnb as createStylelintConfig } from '@zzjtnb/stylelint-config'
 import stylelint from 'stylelint'
 import { describe, expect, it } from 'vitest'
+import { paths } from './config'
 
 const execFileAsync = promisify(execFile)
-const compiler = fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url))
-const temporaryRoot = fileURLToPath(new URL('../../../.tmp/stylelint-types/', import.meta.url))
+const compiler = paths.compiler
+const temporaryRoot = paths.types
 
 /** 使用正式 TS7 CLI 检查消费代码，通过包名解析 dist 声明；类型错误保留退出状态与诊断。 */
 async function checkConsumerTypes(source: string) {
   await mkdir(temporaryRoot, { recursive: true })
-  const directory = await mkdtemp(`${temporaryRoot}/consumer-`)
+  const directory = await mkdtemp(temporaryRoot)
   await writeFile(`${directory}/consumer.ts`, source)
   await writeFile(`${directory}/tsconfig.json`, JSON.stringify({
     // 使用 Node ESM 消费发布包，显式检查类型且不生成输出。
@@ -73,7 +73,7 @@ export const configured: Config = zzjtnb({
       import type { Config } from '@zzjtnb/stylelint-config'
       export const invalid: Config = { extends: 123 }
     `)).rejects.toMatchObject({
-      // TS7 类型检查失败退出 1，2322 表示 number 不能赋给 extends 的字符串 / 字符串数组类型。
+      // TS7 类型检查失败退出 1，2322 表示 number 不能赋给原生 Config 的 extends 类型。
       code: 1,
       stdout: expect.stringMatching(/consumer\.ts.*error TS2322:/),
     })
@@ -93,14 +93,17 @@ export const configured: Config = zzjtnb({
     expect(createStylelintConfig()).toEqual(stylelintConfig)
     const { extends: presets, overrides } = stylelintConfig
     assert.ok(Array.isArray(presets))
+    assert.ok(presets.every(preset => typeof preset === 'string'))
     assert.ok(Array.isArray(overrides))
     expect(presets.some(path => path.endsWith('/stylelint-config-standard/index.js'))).toBe(true)
     const scss = overrides.find(override => override.files.includes('*.scss'))
     assert.ok(Array.isArray(scss?.extends))
+    assert.ok(scss.extends.every(preset => typeof preset === 'string'))
     expect(scss.extends.some(path => path.endsWith('/stylelint-config-recommended-scss/index.js'))).toBe(true)
     expect(scss.extends.some(path => path.endsWith('/stylelint-config-recommended-vue/scss/index.js'))).toBe(false)
     const vue = overrides.find(override => override.files.includes('*.vue'))
     assert.ok(Array.isArray(vue?.extends))
+    assert.ok(vue.extends.every(preset => typeof preset === 'string'))
     expect(vue.extends.some(path => path.endsWith('/stylelint-config-recommended-vue/scss/index.js'))).toBe(true)
   })
 

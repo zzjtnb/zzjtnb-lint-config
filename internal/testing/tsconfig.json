@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    // 工程测试由 Node.js 原生执行，不生成 JavaScript。
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    // 从各工作区清单读取实际工程契约。
+    "resolveJsonModule": true,
+    // 只加载 Node 环境类型，严格检查工具与测试。
+    "types": ["node"],
+    // 保留真实 TypeScript 导入后缀并限制为 Node 原生擦除支持的语法。
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "skipLibCheck": true
+  },
+  // 路径配置、工具定位 helper 和原生测试在所属工作区检查。
+  "include": ["helpers/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", ".tmp"]
+}

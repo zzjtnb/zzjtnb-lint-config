@@ -8,7 +8,7 @@
 
 ## 功能简介
 
-为 TypeScript、JavaScript 和 Vue 项目提供统一的 ESLint 配置。默认开启 Vue 无障碍与代码质量检查，也可以按需开启 UnoCSS 和其他格式化工具。
+为 TypeScript、JavaScript 和 Vue 项目提供统一的 ESLint 配置。Vue 启用后默认检查无障碍，并默认开启代码质量检查，也可以按需开启 UnoCSS 和其他格式化工具。
 
 [完整使用文档](https://lint.docs.zzjtnb.com/eslint)
 
@@ -16,8 +16,8 @@
 
 | 包 | 版本 |
 | --- | --- |
-| Node.js | `^20.19.0 \|\| ^22.13.0 \|\| >=24` |
-| ESLint | `^10.13.0` |
+| Node.js | `^20.19.0 \|\| ^22.13.0 \|\| >=24 <26 \|\| >=26.13.0` |
+| ESLint | `^10.14.0` |
 
 ```bash
 # 安装 ESLint 工具与共享配置。
@@ -35,11 +35,11 @@ import { zzjtnb } from '@zzjtnb/eslint-config'
 export default zzjtnb()
 ```
 
-直接调用时默认启用本包提供的 TypeScript、Vue、JSON / JSONC、YAML、TOML、Markdown、Node、perfectionist 和 stylistic 集成。pnpm 集成沿用 antfu 的默认行为，仅当当前目录或上级目录存在 `pnpm-workspace.yaml` 时启用。UnoCSS 和外部 formatter 集成仍需显式开启。
+TypeScript 和 Vue 沿用 antfu 的依赖自动检测，显式布尔值或对象仍可开启、关闭和配置。JSON / JSONC、YAML、TOML、Markdown、Node、perfectionist 和 stylistic 沿用上游默认。pnpm 仅在当前或上级目录存在 `pnpm-workspace.yaml` 时自动启用；UnoCSS 和外部 formatter 仍需显式开启。
 
 ## 按需扩展
 
-本包提供 UnoCSS、Vue 无障碍、formatter 和 antislop 的插件依赖。Vue 无障碍和 antislop 默认开启，UnoCSS、formatter 按 antfu 正式选项显式启用。shadcn 保留注册，不自动开启全部规则。
+本包提供 UnoCSS、Vue 无障碍、formatter 和 antislop 的插件依赖。Vue 启用后默认检查无障碍，antislop 默认开启；UnoCSS、formatter 按 antfu 正式选项显式启用。shadcn 保留注册，不自动开启全部规则。
 
 默认关闭 `sonarjs/no-commented-code`，允许保留注释中的可选代码示例；其他 antislop 检查保持开启，可通过 `antislop.overrides` 或 `rules` 调整。
 
@@ -58,7 +58,7 @@ export default zzjtnb({
 
 ## 完整配置
 
-下面的配置保留语言默认值，显式展示常用集成开关，追加项目级忽略路径并覆盖规则与报告选项。pnpm 不在此强制启用，仍按是否存在 `pnpm-workspace.yaml` 自动判断；只需最小默认值时，直接使用 `zzjtnb()`。这些集成字段沿用 antfu，不是本包重新定义的私有选项。
+下面示例显式启用 TypeScript 与 Vue，并展示常用集成开关，追加项目级忽略路径并覆盖规则与报告选项。pnpm 不在此强制启用，仍按是否存在 `pnpm-workspace.yaml` 自动判断；只需最小默认值时，直接使用 `zzjtnb()`。这些集成字段沿用 antfu，不是本包重新定义的私有选项。根入口统一检查多个子工作区、语言依赖只在子工作区声明时，也可按此方式显式开启集成。
 
 ```js
 // eslint.config.js
@@ -131,15 +131,13 @@ export default zzjtnb(
 
 ## TypeScript 与 NestJS
 
-按 typescript-eslint 维护者的并存建议，本包为 ESLint 解析器提供受支持的 TypeScript 6，消费项目可单独使用 TS7 等编译器。使用新语法时，仍需确认解析器支持情况。官方依据及适配进展见 [编译器版本管理](https://lint.docs.zzjtnb.com/dependencies)。
-
-Vue 项目使用原版 TypeScript 7 时，当前 vue-tsc 需要维护者推荐的 typescript-native-bridge；这属于消费项目的编译器配置，不由本包自动覆盖。接入及验证方式见 [Vue 编译器兼容说明](https://lint.docs.zzjtnb.com/dependencies)。
+按 typescript-eslint 维护者的并存建议，本包为 ESLint 解析器及内置插件提供所需的经典 TypeScript API 依赖，消费项目可单独使用 TS7 等编译器，无需用 packageExtensions 补齐本包依赖。使用新语法时，仍需确认解析器支持情况。官方依据及适配进展见 [编译器版本管理](https://lint.docs.zzjtnb.com/dependencies)。
 
 NestJS 的装饰器设置请按文件范围配置；启用类型感知检查时，也可以从 tsconfig 读取。具体写法见 [NestJS 配置](https://lint.docs.zzjtnb.com/eslint/configuration#nestjs-装饰器与依赖注入)。
 
 ## 修改默认配置
 
-第一个参数设置语言开关、全局规则和忽略路径。需要只修改部分文件时，在后续参数中提供带 `files` 的配置对象；不要把 `files` 放进第一个参数。后续参数还支持 antfu 接受的配置数组、异步配置和 `FlatConfigComposer`。
+工厂直接返回上游 `FlatConfigComposer`，可继续调用 `.prepend()`、`.append()`、`.override()`，也可 `await` 得到配置数组。第一个参数设置语言开关、全局规则和忽略路径；特定文件使用后置配置的 `files`。后续参数保留 antfu 接受的配置数组、异步配置和 Composer，完整示例见[配置组合](https://lint.docs.zzjtnb.com/eslint/configuration#配置组合)。
 
 | 输入 | 行为 |
 | --- | --- |
@@ -147,10 +145,10 @@ NestJS 的装饰器设置请按文件范围配置；启用类型感知检查时�
 | `pnpm` | 原样传给 antfu；只停止强制 trustPolicy，并使用 exact-version 判断 catalog 重复项 |
 | `rules` | 在全部共享默认规则之后应用；可覆盖 JavaScript、TypeScript、Vue、TOML 等集成的规则，后续 Flat Config 片段仍有更高优先级 |
 | `linterOptions` | ESLint 原生报告选项，不额外限制文件范围；后续匹配的配置片段可覆盖 |
-| `imports` | 沿用 antfu 的导入集成开关与对象选项；规则覆盖使用 `imports.overrides`，不使用 `overrides.imports` |
+| `imports` | 沿用 antfu 的导入集成开关与对象选项；新代码优先使用 `imports.overrides`，旧覆盖入口仍按上游支持 |
 | `ignores` | 数组追加到默认忽略项之后；回调接收默认列表并决定最终结果 |
 | `defaultIgnores` | 数组替换本包列表；`false` 同时接管该入口中的上游与本包默认列表，不关闭独立的 `.gitignore` 集成 |
-| 后续 Flat Config 配置片段 | 传给 antfu，并由 ESLint 根据配置片段顺序处理优先级 |
+| 后续配置对象、数组、异步配置或 Composer | 追加在本包生成配置之后，由 ESLint 按匹配范围和顺序处理优先级 |
 
 配置选项与 antfu 同名。修改某种语言的规则时，在对应的 `overrides` 中填写新值；修改所有文件的规则时，使用第一个参数的 `rules`。后续参数中的配置最后生效。全局规则也可能覆盖 TypeScript 声明文件的例外设置，因此只改 Vue 等单种语言时，优先使用 `vue.overrides` 等选项。
 
@@ -276,7 +274,7 @@ export default zzjtnb({
 
 本包不重复实现 antfu 的排序逻辑。import / export 排序、package.json 排序、tsconfig 排序、pnpm workspace 排序和 perfectionist 排序都继续由 antfu 提供。
 
-本包默认允许 ESM 顶层 `await`（`antfu/no-top-level-await: off`），消费方可按需开启限制。本包将 `no-console`、`no-undef`、`no-restricted-syntax`、`antfu/consistent-chaining`、`antfu/consistent-list-newline`、`antfu/curly`、`antfu/if-newline`、`antfu/top-level-function` 配置为 warn。Vue 规则沿用上游，Vue 无障碍和 antislop 默认开启。warn 不影响规则提供的自动修复能力。在 `rules` 中填写规则名和配置值即可覆盖默认设置。首参 `rules` 是高优先级全局覆盖，可能覆盖语言与声明文件豁免；只调整单个集成时，优先使用 `javascript.overrides`、`vue.overrides` 或 `imports.overrides` 等所属入口。
+本包默认允许 ESM 顶层 `await`（`antfu/no-top-level-await: off`），消费方可按需开启限制。本包将 `no-console`、`no-undef`、`no-restricted-syntax`、`antfu/consistent-chaining`、`antfu/consistent-list-newline`、`antfu/curly`、`antfu/if-newline`、`antfu/top-level-function` 配置为 warn。Vue 规则沿用上游，启用 Vue 后默认检查无障碍；antislop 默认开启。warn 不影响规则提供的自动修复能力。在 `rules` 中填写规则名和配置值即可覆盖默认设置。首参 `rules` 是高优先级全局覆盖，可能覆盖语言与声明文件豁免；只调整单个集成时，优先使用 `javascript.overrides`、`vue.overrides` 或 `imports.overrides` 等所属入口。
 
 TOML 关闭 `toml/spaced-comment`，以保留 `#:schema <URL>` 指令；普通 JavaScript 的注释空格约定不因此关闭。
 
@@ -399,7 +397,7 @@ TOML 关闭 `toml/spaced-comment`，以保留 `#:schema <URL>` 指令；普通 J
 }
 ```
 
-本包默认不启用 HTML formatter，只有项目明确启用对应集成后才把 `html` 加入 `eslint.validate`。Markdown 需要 ESLint 检查代码块还是交给 Markdownlint，也应先划分职责再配置编辑器。`eslint.rules.customizations` 只隐藏匹配规则的编辑器诊断并保留修复能力，不会关闭 CLI 中的对应规则。
+本包默认不启用 HTML formatter，只有项目明确启用对应集成后才把 `html` 加入 `eslint.validate`。ESLint 默认同时检查 Markdown 文档和受支持的围栏代码块，使用 Markdownlint 时也应先划分文档检查职责再配置编辑器。`eslint.rules.customizations` 只隐藏匹配规则的编辑器诊断并保留修复能力，不会关闭 CLI 中的对应规则。
 
 ## 脚本
 
@@ -411,16 +409,6 @@ TOML 关闭 `toml/spaced-comment`，以保留 `#:schema <URL>` 指令；普通 J
   }
 }
 ```
-
-### 脚本说明
-
-以上包清单示例保持严格 JSON，字段说明列在此处，不向 package.json 插入注释。
-
-| 字段 | 用途与生效条件 |
-| --- | --- |
-| `scripts` | 将命令声明为 pnpm run 入口；未声明的脚本不能通过 pnpm run 调用。 |
-| `scripts.lint` | 执行对应检查范围；不加 --fix 时只报告问题，不写回文件。 |
-| `scripts.format` | 复用检查入口并追加 --fix，会自动写回可修复的文件。 |
 
 `--fix`、`--cache` 和 `--cache-location` 都是 ESLint CLI 选项。共享配置不会隐式开启文件写回或缓存。默认有 error 时命令失败，warn 不阻断。可选零警告策略及参数说明见 [CLI 检查与修复](https://github.com/zzjtnb/zzjtnb-lint-config/blob/main/docs/src/eslint/configuration.md#cli-检查与修复)。
 

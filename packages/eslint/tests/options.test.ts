@@ -1,10 +1,10 @@
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ESLint } from 'eslint'
 import { describe, expect, it } from 'vitest'
-
 import { zzjtnb } from '../src/index'
+
+import { paths } from './config'
 
 async function createEngine(options: Parameters<typeof zzjtnb>[0] = {}) {
   return new ESLint({
@@ -34,9 +34,9 @@ describe('eSLint 上游选项与生成物边界', () => {
   })
 
   it('沿用官方自动修复，将两类依赖迁入根目录并保留不同版本', async () => {
-    const parent = new URL('../../../.tmp/pnpm-autofix/', import.meta.url)
+    const parent = paths.pnpmAutofix
     await mkdir(parent, { recursive: true })
-    const directory = await mkdtemp(fileURLToPath(new URL('consumer-', parent)))
+    const directory = await mkdtemp(parent)
     const app = join(directory, 'packages', 'app')
     await mkdir(app, { recursive: true })
     await writeFile(join(directory, 'pnpm-workspace.yaml'), 'packages:\n  - packages/*\ncatalog:\n  typescript: ^7.0.2\n  vue: ^3.5.44\n')
@@ -205,9 +205,9 @@ describe('eSLint 上游选项与生成物边界', () => {
     ['^7.0.2', true],
   ] as const)('命名 catalog 中 TypeScript %s 的重复判断按完整版本声明执行', async (version, duplicate) => {
     // 插件只检查所属工作区入口；包内运行时不能借用仓库根的 workspace。
-    const parent = new URL('../../../.tmp/catalog-tests/', import.meta.url)
+    const parent = paths.catalog
     await mkdir(parent, { recursive: true })
-    const directory = await mkdtemp(fileURLToPath(new URL('consumer-', parent)))
+    const directory = await mkdtemp(parent)
     const source = `catalog:\n  typescript: ^7.0.2\ncatalogs:\n  frontend:\n    typescript: ${version}\n`
     await writeFile(join(directory, 'pnpm-workspace.yaml'), source)
     await writeFile(join(directory, 'package.json'), '{"name":"catalog-test","private":true}')
@@ -241,8 +241,8 @@ describe('eSLint 上游选项与生成物边界', () => {
   })
 
   it('vue 规则的嵌套选项不会在工厂调用间共享', async () => {
-    const first = await zzjtnb({ pnpm: false, isInEditor: false })
-    const second = await zzjtnb({ pnpm: false, isInEditor: false })
+    const first = await zzjtnb({ pnpm: false, isInEditor: false, vue: true })
+    const second = await zzjtnb({ pnpm: false, isInEditor: false, vue: true })
     const rule = (configs: typeof first) => configs.find(config => config.name === 'antfu/vue/rules')!.rules!['vue/block-order']
     const before = rule(first)
     const after = rule(second)
@@ -326,8 +326,8 @@ it('原生 Node 测试导入保持不变，消费方仍可重新启用限制', a
   expect((await zzjtnb({ test: false })).some(config => config.rules?.['test/no-import-node-test'])).toBe(false)
 })
 
-it('默认开启 antislop 与 Vue 无障碍，消费方可以关闭集成或单独关闭无障碍', async () => {
-  const defaults = await createEngine({ pnpm: false })
+it('默认开启 antislop，Vue 启用后默认检查无障碍，消费方仍可关闭', async () => {
+  const defaults = await createEngine({ pnpm: false, vue: true })
   const config = await defaults.calculateConfigForFile('component.vue')
   expect(config.plugins).toHaveProperty('vue-a11y')
   expect(config.plugins).toHaveProperty('slop')
@@ -349,7 +349,12 @@ it('默认开启 antislop 与 Vue 无障碍，消费方可以关闭集成或单�
 })
 
 it('antislop 不把独立文档和样式纳入 JavaScript 解析，Vue 样式块仍正常处理', async () => {
-  const engine = await createEngine({ pnpm: false, markdown: false, yaml: false })
+  const engine = await createEngine({
+    pnpm: false,
+    markdown: false,
+    yaml: false,
+    vue: true,
+  })
   for (const file of ['guide.md', 'theme.css', 'theme.scss'])
     expect(await engine.calculateConfigForFile(file)).toBeUndefined()
   const [result] = await engine.lintText('<template><div>内容</div></template>\n<style scoped>\n.card { color: red; }\n</style>\n', { filePath: 'component.vue' })

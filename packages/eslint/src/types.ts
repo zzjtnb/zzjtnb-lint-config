@@ -29,10 +29,10 @@ export type ESLintPnpmOptions = Exclude<
 /**
  * `zzjtnb()` 的首个配置对象。
  *
- * 继承 antfu 当前的 options 与单个 Flat Config 字段，排除已弃用的顶层 overrides，不包装为
+ * 继承 antfu 当前的 options 与单个 Flat Config 字段，不删减上游仍支持的选项，不包装为
  * 本包私有 API。`files` 仅属于后续配置片段，不能出现在全局选项对象中。
  */
-export type ESLintConfigOptions = Omit<NonNullable<Parameters<typeof antfu>[0]>, 'overrides'> & {
+export type ESLintConfigOptions = NonNullable<Parameters<typeof antfu>[0]> & {
   /** 替换本包追加的通用忽略列表；false 同时接管该入口中的上游列表，不关闭独立的 gitignore 集成。 */
   defaultIgnores?: readonly string[] | false
 }

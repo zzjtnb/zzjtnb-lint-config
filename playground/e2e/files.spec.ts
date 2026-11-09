@@ -1,12 +1,12 @@
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 import { chooseOption } from './helpers'
 
 let directory: string
 test.beforeAll(async () => {
-  const root = fileURLToPath(new URL('../../.tmp/playground/status/fixtures', import.meta.url))
+  const root = paths.tests.files
   await mkdir(root, { recursive: true })
   directory = await mkdtemp(join(root, 'workspace-'))
   await mkdir(join(directory, 'src/components'), { recursive: true })

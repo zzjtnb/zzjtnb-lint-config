@@ -21,8 +21,8 @@ navigation:
 
 本包默认向 antfu 传递或启用以下能力：
 
-- `typescript: true`；
-- Vue 集成及 `vue.a11y` 默认开启；
+- TypeScript 和 Vue 沿用 antfu 的自动检测，显式布尔值或对象仍可覆盖；
+- Vue 启用后默认检查 `vue.a11y`；
 - `antislop: true`，通用文本检查限于 JS、TS 和 Vue 源码，不接管独立文档与样式的解析；
 - `pnpm`，仅当当前目录或上级目录存在 `pnpm-workspace.yaml` 时启用（antfu 的默认行为）；
 - antfu 当前版本提供的 JavaScript、JSON、JSONC、YAML、TOML、Markdown、Node.js、perfectionist 和 stylistic 集成。
@@ -44,7 +44,7 @@ export default zzjtnb({
 
 ### Vue
 
-Vue 与无障碍检查默认开启，Vue 规则及其参数全部沿用 antfu 预设，本包不重复声明。
+Vue 沿用上游自动检测，启用后默认检查无障碍；Vue 规则及其参数全部沿用 antfu 预设，本包不重复声明。
 
 关闭 Vue：
 
@@ -110,7 +110,7 @@ YAML 是否启用遵循 antfu 的组装顺序：顶层 `yaml: false` 会关闭�
 
 UnoCSS 的 Vite 插件、样式入口与 Lucide 图标接入见 [UnoCSS 与图标](/ui/unocss)。本节只说明 ESLint 检查选项。
 
-例如 UnoCSS 项目同时使用 Stylelint、Markdownlint 时，只追加 UnoCSS 和 HTML formatter；默认已开启的 Vue 无障碍、antislop 无需重复声明：
+例如 Vue 与 UnoCSS 项目同时使用 Stylelint、Markdownlint 时，只追加 UnoCSS 和 HTML formatter；Vue 启用后的无障碍检查与默认 antislop 无需重复声明：
 
 ```js [eslint.config.js]
 import { zzjtnb } from '@zzjtnb/eslint-config'
@@ -122,6 +122,27 @@ export default zzjtnb({
   formatters: { html: true, css: false, markdown: false },
 })
 ```
+
+`eslint-plugin-format` 已由本包直接提供，当前版本同时包含 Oxfmt 引擎。项目使用独立 Oxfmt 时可保持 `formatters` 关闭；需要通过 ESLint 执行 `format/oxfmt` 时，先用上游空对象选项注册插件，再限定规则的文件范围：
+
+```js [eslint.config.js]
+import { zzjtnb } from '@zzjtnb/eslint-config'
+
+export default zzjtnb(
+  {
+    // 由 Oxfmt 负责代码格式，关闭 ESLint 的 stylistic 格式规则。
+    stylistic: false,
+    // 只注册 format 插件，不额外启用 Prettier、dprint 或全语言格式化。
+    formatters: {},
+  },
+  {
+    files: ['**/*.{js,ts,jsx,tsx}'],
+    rules: { 'format/oxfmt': 'error' },
+  },
+)
+```
+
+TOML 的插件和 parser 由 antfu 的 TOML 集成加载；本包通过 `toml.overrides` 关闭 `toml/spaced-comment`，使 Schema 指令保持原样，这也会停止检查普通 TOML 注释的空格。`toml: false` 会关闭整组配置，消费方的 `toml.overrides` 仍可覆盖本包差异。
 
 ## 本包的规则覆盖
 
@@ -424,7 +445,7 @@ const values = [
 
 本包：`warn`；上游默认：`error`。
 
-不额外要求下面的多行调用使用大括号；消费方恢复 error 后，会要求包围这类多行语句。
+多行语句需要使用大括号；本包报告警告，上游报告错误，两者均可自动补充大括号。
 
 | 配置 | 只检查输入时的结果 | 执行自动修复 |
 | --- | --- | --- |
@@ -458,7 +479,7 @@ if (ready) {
 
 本包：`warn`；上游默认：`error`。
 
-不强制 if 的执行语句另起一行。
+if 的执行语句需要另起一行；本包报告警告，上游报告错误，两者均支持自动修复。
 
 | 配置 | 只检查输入时的结果 | 执行自动修复 |
 | --- | --- | --- |
@@ -484,7 +505,7 @@ if (ready)
 
 本包：`warn`；上游默认：`error`。
 
-允许顶层使用箭头函数，不强制改为 function 声明。
+可转换为函数声明的顶层箭头函数仍会触发检查；本包报告警告，上游报告错误，两者均支持自动修复。
 
 | 配置 | 只检查输入时的结果 | 执行自动修复 |
 | --- | --- | --- |
@@ -515,7 +536,7 @@ export function greet (name: string) {
 
 本包：`off`；上游默认：`error`。
 
-TOML 插件的注释空格规则也关闭，因此不会把 #:schema 改成 # :schema。
+本包关闭 TOML 的注释空格规则，因此不会把 `#:schema` 改成 `# :schema`；JavaScript 注释规则不受影响。
 
 | 配置 | 只检查输入时的结果 | 执行自动修复 |
 | --- | --- | --- |
@@ -773,7 +794,7 @@ export default zzjtnb({
 })
 ```
 
-`rules` 会在本包默认规则之后应用，因此同名规则由消费项目的值生效。它是高优先级全局覆盖，也可能覆盖上游语言或声明文件豁免。只想调整某个集成时，优先保留其作用域：JavaScript、Vue 等使用 `javascript.overrides`、`vue.overrides`，导入规则使用 `imports.overrides`，不使用未声明的 `overrides.imports`。
+`rules` 会在本包默认规则之后应用，因此同名规则由消费项目的值生效。它是高优先级全局覆盖，也可能覆盖上游语言或声明文件豁免。只想调整某个集成时，优先保留其作用域：JavaScript、Vue 等使用 `javascript.overrides`、`vue.overrides`，导入规则使用 `imports.overrides`，旧覆盖入口仍按上游支持。
 
 ```js [eslint.config.js]
 import { zzjtnb } from '@zzjtnb/eslint-config'
@@ -793,7 +814,8 @@ export default zzjtnb({
     // 按上游功能组覆盖规则；imports 的覆盖通过 imports.overrides 传入。
     overrides: {
       // 消费方显式调整该条报告级别；共享默认仍继承上游 error。
-      'antfu/no-import-dist': 'warn' },
+      'antfu/no-import-dist': 'warn',
+    },
   },
 })
 ```
@@ -827,183 +849,9 @@ export default zzjtnb({
 
 ## 忽略行为
 
-默认路径按“antfu 静态默认 → 本包追加 → 消费方追加”合并。下面列出具体模式，页签用于对照读取结果，**不需要把默认数组再抄进项目配置**。
+默认保留 antfu 的忽略列表，再追加本包与消费方的路径。上游列表随安装版本维护，下面只列本包追加项，不需要抄进项目配置。TypeScript 集成关闭时，上游还会忽略 TypeScript 文件。
 
 ::: code-group
-
-```jsonc [本包默认（含上游）]
-[
-  // 依赖安装目录，由包管理器维护。
-  "**/node_modules",
-  // 构建输出或发布制品。
-  "**/dist",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/package-lock.json",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/yarn.lock",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/pnpm-lock.yaml",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/bun.lockb",
-  // 构建输出或发布制品。
-  "**/output",
-  // 测试覆盖率产物。
-  "**/coverage",
-  // 临时内容、工具生成配置或历史记录。
-  "**/temp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/.temp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/tmp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/.tmp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/.history",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.vitepress/cache",
-  // 框架生成内容或开发缓存。
-  "**/.nuxt",
-  // 框架生成内容或开发缓存。
-  "**/.next",
-  // 框架生成内容或开发缓存。
-  "**/.svelte-kit",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.vercel",
-  // 发布版本的变更说明。
-  "**/.changeset",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.idea",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.cache",
-  // 构建输出或发布制品。
-  "**/.output",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.vite-inspect",
-  // Yarn 的安装与缓存数据。
-  "**/.yarn",
-  // 版本记录或许可证文件，不按应用代码检查。
-  "**/CHANGELOG*.md",
-  // 版本记录或许可证文件，不按应用代码检查。
-  "**/LICENSE*",
-  // 已压缩的生成文件。
-  "**/*.min.*",
-  // 测试快照及快照资源。
-  "**/__snapshots__",
-  // 临时内容、工具生成配置或历史记录。
-  "**/vite.config.*.timestamp-*",
-  // 自动生成的类型声明。
-  "**/auto-import?(s).d.ts",
-  // 自动生成的类型声明。
-  "**/components.d.ts",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.context",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.claude",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.agents",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.*/skills",
-  // 构建输出或发布制品。
-  "**/dist-*",
-  // 构建输出或发布制品。
-  "**/*-dist",
-  // 框架生成内容或开发缓存。
-  "**/.nitro",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.wrangler/**",
-  // 构建输出或发布制品。
-  "**/releases/**",
-  // 原生工程及其生成内容，由对应工具链管理。
-  "**/src-tauri/**",
-  // 备份副本，不作为当前源码检查。
-  "**/backup/**",
-  // 代码分析工具生成的索引。
-  "**/.codegraph/**",
-  // 排除嵌套仓库的 Git 元数据，补齐原生根级忽略。
-  "**/.git/**",
-  // 测试快照及快照资源。
-  "**/*.snap",
-  // 二进制字体资源，不由文本规则检查。
-  "**/*.ttf",
-  // 二进制字体资源，不由文本规则检查。
-  "**/*.woff"
-]
-```
-
-```jsonc [上游 antfu 默认]
-[
-  // 依赖安装目录，由包管理器维护。
-  "**/node_modules",
-  // 构建输出或发布制品。
-  "**/dist",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/package-lock.json",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/yarn.lock",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/pnpm-lock.yaml",
-  // 包管理器锁文件，不按应用源码处理。
-  "**/bun.lockb",
-  // 构建输出或发布制品。
-  "**/output",
-  // 测试覆盖率产物。
-  "**/coverage",
-  // 临时内容、工具生成配置或历史记录。
-  "**/temp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/.temp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/tmp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/.tmp",
-  // 临时内容、工具生成配置或历史记录。
-  "**/.history",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.vitepress/cache",
-  // 框架生成内容或开发缓存。
-  "**/.nuxt",
-  // 框架生成内容或开发缓存。
-  "**/.next",
-  // 框架生成内容或开发缓存。
-  "**/.svelte-kit",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.vercel",
-  // 发布版本的变更说明。
-  "**/.changeset",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.idea",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.cache",
-  // 构建输出或发布制品。
-  "**/.output",
-  // 构建、编辑器或部署工具的本地缓存。
-  "**/.vite-inspect",
-  // Yarn 的安装与缓存数据。
-  "**/.yarn",
-  // 版本记录或许可证文件，不按应用代码检查。
-  "**/CHANGELOG*.md",
-  // 版本记录或许可证文件，不按应用代码检查。
-  "**/LICENSE*",
-  // 已压缩的生成文件。
-  "**/*.min.*",
-  // 测试快照及快照资源。
-  "**/__snapshots__",
-  // 临时内容、工具生成配置或历史记录。
-  "**/vite.config.*.timestamp-*",
-  // 自动生成的类型声明。
-  "**/auto-import?(s).d.ts",
-  // 自动生成的类型声明。
-  "**/components.d.ts",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.context",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.claude",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.agents",
-  // 协作工具配置与技能资料，不按应用代码检查。
-  "**/.*/skills"
-]
-```
 
 ```jsonc [本包追加]
 [
@@ -1096,4 +944,4 @@ export default zzjtnb({
 | `.yaml`、`.yml` | antfu YAML / pnpm 集成 | workspace 和普通 YAML |
 | `.toml` | antfu TOML 集成 | TOML 配置文件 |
 | `.md` | antfu Markdown 集成 | Markdown 结构和代码块 |
-| `.css`、`.scss` | 不由 ESLint 负责 | 使用 `@zzjtnb/stylelint-config` |
+| `.css`、`.scss` | 默认不启用 ESLint formatter | 样式规则使用 `@zzjtnb/stylelint-config`；显式启用 `formatters.css` 后也可由 ESLint 格式化，需避免重复写回 |

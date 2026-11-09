@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 import { attachMetrics } from './helpers'
 
 for (const [name, mode] of [
   ['ESLint', 'eslint'],
   ['Stylelint', 'stylelint'],
   ['Markdownlint', 'markdownlint'],
-]) {
+] as const) {
   test(`无缓存固定锁文件安装 ${name}，记录安装与预热耗时`, async ({ page }) => {
     test.setTimeout(480000)
     await page.goto(`/#/${mode}/overview`)
@@ -37,6 +38,9 @@ for (const [name, mode] of [
       await expect(page.locator('.diagnostics .notice.error')).toHaveCount(0)
     }
     await expect(page.getByRole('button', { name: '应用修复到源码' })).toBeVisible()
-    await page.screenshot({ path: `../.tmp/playground/validation/cold-install/${mode}.png`, fullPage: true })
+    await page.screenshot({
+      path: paths.screenshots.coldInstall[mode],
+      fullPage: true,
+    })
   })
 }

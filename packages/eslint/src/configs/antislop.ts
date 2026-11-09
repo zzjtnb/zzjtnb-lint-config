@@ -10,13 +10,16 @@ export const antislopRules = { 'sonarjs/no-commented-code': 'off' } satisfies No
  * 上游此片段没有独立 parser；直接匹配 CSS、Markdown 会将其当作 JavaScript 解析。
  */
 export function scopeAntislop(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] {
+  const files = configs.some(config => config.name === 'antfu/vue/rules')
+    ? [GLOB_SRC, GLOB_VUE]
+    : [GLOB_SRC]
   return configs.map((config) => {
     if (config.name !== 'antfu/antislop/rules/universal')
       return config
 
     return {
       ...config,
-      files: [GLOB_SRC, GLOB_VUE],
+      files,
     }
   })
 }

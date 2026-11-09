@@ -5,11 +5,11 @@ import { mkdir, readdir, readFile, realpath, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import ts from 'typescript'
+import { paths } from '../config'
 import { configurations, defaults } from '../src/stores/config/catalog'
 import { samples } from '../src/stores/experiment/samples'
 import { bundleESLint, rewriteESLintImports } from './bundle'
 import { runtimeManifest } from './manifest'
-import { root } from './utils/index'
 
 const execute = promisify(execFile)
 
@@ -29,10 +29,16 @@ async function locate(name: string, from: string): Promise<string> {
   }
 }
 
-const output = join(root, 'playground/public/runtime')
+const output = paths.runtime
 await mkdir(output, { recursive: true })
 const engines = {
-  eslint: ['@eslint/config-array', 'eslint', 'typescript'],
+  // 虚拟工作区同时演示 TS 与 Vue；声明框架依赖，让共享包按上游方式自动检测。
+  eslint: [
+    '@eslint/config-array',
+    'eslint',
+    'typescript',
+    'vue',
+  ],
   stylelint: ['stylelint'],
   markdownlint: ['markdownlint-cli2'],
 }
@@ -66,12 +72,12 @@ for (const [mode, names] of Object.entries(engines)) {
   }
   for (const name of names) {
     // 浏览器 ESLint 使用解析器所属的经典 TypeScript，不继承宿主 Vue 的原生 bridge。
-    const path = await locate(name, join(root, name === 'typescript'
-      ? 'packages/eslint'
-      : 'playground'))
+    const path = await locate(name, name === 'typescript'
+      ? paths.packages.eslint
+      : paths.root)
     dependencies[name] = JSON.parse(await readFile(join(path, 'package.json'), 'utf8')).version
   }
-  const path = join(root, 'packages', mode)
+  const path = paths.packages[current]
   const manifest = await runtimeManifest(join(path, 'package.json'))
   const contents: FileSystemTree = {}
   if (mode === 'markdownlint') {
@@ -113,7 +119,7 @@ for (const [mode, names] of Object.entries(engines)) {
     },
   }
   // 与 WebContainer 内置 pnpm 8 匹配，构建期解析传递依赖，浏览器仅按锁文件下载和链接。
-  const lockDirectory = join(root, '.tmp/playground/lockfiles', mode)
+  const lockDirectory = paths.lockfiles[current]
   await mkdir(join(lockDirectory, 'packages', mode), { recursive: true })
   await writeFile(join(lockDirectory, 'package.json'), runtimeJSON)
   await writeFile(join(lockDirectory, 'packages', mode, 'package.json'), packageJSON)
@@ -143,7 +149,7 @@ for (const [mode, names] of Object.entries(engines)) {
       ? ['config']
       : []),
   ]) {
-    const source = await readFile(join(root, `playground/sandbox/${name}.ts`), 'utf8')
+    const source = await readFile(join(paths.root, `sandbox/${name}.ts`), 'utf8')
     const result = ts.transpileModule(source, {
       compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
       fileName: `${name}.ts`,

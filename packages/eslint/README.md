@@ -8,7 +8,7 @@
 
 ## Overview
 
-A shared ESLint configuration for TypeScript, JavaScript, and Vue. Vue accessibility and code-quality checks are enabled by default. UnoCSS and additional formatters can be enabled when needed.
+A shared ESLint configuration for TypeScript, JavaScript, and Vue. Vue accessibility checks default to enabled when Vue is active; code-quality checks default to enabled. UnoCSS and additional formatters can be enabled when needed.
 
 [Documentation](https://lint.docs.zzjtnb.com/eslint)
 
@@ -16,10 +16,8 @@ A shared ESLint configuration for TypeScript, JavaScript, and Vue. Vue accessibi
 
 | Package | Version |
 | --- | --- |
-| Node.js | `^20.19.0 \|\| ^22.13.0 \|\| >=24` |
-| ESLint | `^10.13.0` |
-
-The package is ESM-only. Use `eslint.config.js` with `"type": "module"` in your project package.json.
+| Node.js | `^20.19.0 \|\| ^22.13.0 \|\| >=24 <26 \|\| >=26.13.0` |
+| ESLint | `^10.14.0` |
 
 ```bash
 # Install ESLint and the shared configuration.
@@ -37,11 +35,11 @@ import { zzjtnb } from '@zzjtnb/eslint-config'
 export default zzjtnb()
 ```
 
-The default call enables the package's TypeScript, Vue, JSON / JSONC, YAML, TOML, Markdown, Node, perfectionist and stylistic integrations. The pnpm integration follows antfu's default and is enabled only when a `pnpm-workspace.yaml` is found in the current directory or an ancestor. UnoCSS and external formatter integrations remain opt-in.
+TypeScript and Vue follow antfu's dependency auto-detection; explicit booleans and objects still enable, disable, or configure them. JSON / JSONC, YAML, TOML, Markdown, Node, perfectionist, and stylistic follow upstream defaults. pnpm is detected through `pnpm-workspace.yaml` in the current directory or an ancestor. UnoCSS and external formatters remain opt-in.
 
 ## Optional integrations
 
-This package provides the UnoCSS, Vue accessibility, formatter, and antislop plugins. Vue accessibility and antislop are enabled by default; UnoCSS and formatters require explicit activation through antfu options; shadcn remains registered without enabling all its rules.
+This package provides the UnoCSS, Vue accessibility, formatter, and antislop plugins. Accessibility checks default to enabled when Vue is active; antislop defaults to enabled. UnoCSS and formatters require explicit activation through antfu options; shadcn remains registered without enabling all its rules.
 
 The package disables `sonarjs/no-commented-code` to allow optional code examples in comments, while retaining other antislop checks. Override it through `antislop.overrides` or `rules`.
 
@@ -60,7 +58,7 @@ export default zzjtnb({
 
 ## Complete configuration
 
-The following configuration retains language defaults, explicitly shows common integration switches, adds a project ignore, and overrides a rule and reporting options. It does not force pnpm on: detection still depends on whether `pnpm-workspace.yaml` exists. Use `zzjtnb()` when only the defaults are needed. Integration fields follow antfu rather than a package-specific option model.
+The following example explicitly enables TypeScript and Vue, shows common integration switches, adds a project ignore, and overrides a rule and reporting options. It does not force pnpm on: detection still depends on whether `pnpm-workspace.yaml` exists. Use `zzjtnb()` when only the defaults are needed. Integration fields follow antfu rather than a package-specific option model. Explicit activation is also useful when linting multiple workspaces from a root whose language dependencies are declared only in child workspaces.
 
 ```js
 // eslint.config.js
@@ -133,15 +131,13 @@ export default zzjtnb(
 
 ## TypeScript and NestJS
 
-Following typescript-eslint maintainers’ side-by-side recommendation, this package supplies a supported TypeScript 6 dependency for the ESLint parser while consumers can use their own compiler, including TypeScript 7. New syntax still requires parser support. See the [compiler version guide](https://lint.docs.zzjtnb.com/dependencies) for upstream references and support progress.
-
-Vue projects using TypeScript 7 currently need typescript-native-bridge for vue-tsc, as recommended by Vue Language Tools maintainers. Configure it in the consuming project; this package does not override its compiler. See the [Vue compiler compatibility guide](https://lint.docs.zzjtnb.com/dependencies).
+Following typescript-eslint maintainers’ side-by-side recommendation, this package supplies the classic TypeScript API dependencies required by the ESLint parser and built-in plugins. Consumers can use their own compiler, including TypeScript 7, without packageExtensions to supply this package's dependencies. New syntax still requires parser support. See the [compiler version guide](https://lint.docs.zzjtnb.com/dependencies) for upstream references and support progress.
 
 For NestJS, configure decorator options for NestJS files. Type-aware linting can also read these options from tsconfig. See [NestJS setup](https://lint.docs.zzjtnb.com/eslint/configuration#nestjs-装饰器与依赖注入).
 
 ## Customize the configuration
 
-Use the first argument for language options, global rules, and ignored paths. To target specific files, pass a later configuration object with `files`; do not put `files` in the first argument. Later arguments also accept arrays, asynchronous configurations, and antfu `FlatConfigComposer` instances.
+The factory returns the upstream `FlatConfigComposer`, supporting `.prepend()`, `.append()`, `.override()`, or `await` for a resolved config array. Use the first argument for language options, global rules, and ignored paths, and later configs with `files` for specific files. Arrays, asynchronous configs, and Composer inputs remain supported. See [configuration composition](https://lint.docs.zzjtnb.com/eslint/configuration#配置组合) for examples.
 
 | Input | Behavior |
 | --- | --- |
@@ -149,10 +145,10 @@ Use the first argument for language options, global rules, and ignored paths. To
 | `pnpm` | Forwarded to antfu; only trustPolicy enforcement and exact-version catalog duplicate detection differ |
 | `rules` | Applied after all shared defaults, including JavaScript, TypeScript, Vue and TOML rules; later Flat Config fragments still take precedence |
 | `linterOptions` | Native ESLint reporting options, applied without a file restriction; later matching fragments may override them |
-| `imports` | Antfu import integration switch and object options; use `imports.overrides` for rule overrides, not `overrides.imports` |
+| `imports` | Antfu import integration switch and object options; prefer `imports.overrides` in new code; legacy override inputs remain supported as upstream defines |
 | `ignores` | Arrays append to default ignores; a callback receives the defaults and determines the final result |
 | `defaultIgnores` | An array replaces the package list; `false` takes over upstream and package defaults supplied through this option, without disabling the separate `.gitignore` integration |
-| Later Flat Config fragments | Passed to antfu after the package's generated fragments; ESLint resolves their order and precedence |
+| Later config objects, arrays, asynchronous configs, or Composers | Appended after the package-generated configs; ESLint resolves matching scopes and precedence |
 
 Options use the same names as antfu. To change one language, use its `overrides` option. To change rules globally, use the first argument’s `rules`. Later configuration arguments take precedence. Global rules may also replace declaration-file exceptions, so prefer `vue.overrides` or another language-specific option when changing only that language.
 
@@ -278,7 +274,7 @@ Omit extensions when your toolchain supports it. Otherwise use the actual source
 
 The package does not duplicate antfu's sorting implementation. Import / export sorting, package.json sorting, tsconfig sorting, pnpm workspace sorting and perfectionist sorting continue to come from antfu.
 
-The package allows ESM top-level `await` by default (`antfu/no-top-level-await: off`); consumers can enable the restriction when needed. The package reports console use, undefined variables, restricted syntax, chaining, list newlines, control-flow braces, if newlines, and top-level function conventions as warnings. Vue rules follow upstream defaults; Vue accessibility and antislop are enabled by default. Warning severity does not disable automatic fixes. The exact rule map is shipped with the package and can be overridden through the `rules` field. First-argument `rules` are high-priority global overrides and can replace language and declaration-file exemptions. Prefer the owning integration, such as `javascript.overrides`, `vue.overrides`, or `imports.overrides`, when changing only one integration.
+The package allows ESM top-level `await` by default (`antfu/no-top-level-await: off`); consumers can enable the restriction when needed. The package reports console use, undefined variables, restricted syntax, chaining, list newlines, control-flow braces, if newlines, and top-level function conventions as warnings. Vue rules follow upstream defaults; accessibility checks default to enabled when Vue is active, and antislop defaults to enabled. Warning severity does not disable automatic fixes. The exact rule map is shipped with the package and can be overridden through the `rules` field. First-argument `rules` are high-priority global overrides and can replace language and declaration-file exemptions. Prefer the owning integration, such as `javascript.overrides`, `vue.overrides`, or `imports.overrides`, when changing only one integration.
 
 TOML overrides `toml/spaced-comment` to preserve `#:schema <URL>` directives. Ordinary JavaScript comment-spacing rules remain active.
 
@@ -401,7 +397,7 @@ Merge this example into the consuming project's `.vscode/settings.json`, preserv
 }
 ```
 
-The package does not enable an HTML formatter by default; add `html` to `eslint.validate` only after enabling the corresponding integration. Also decide whether ESLint should check Markdown code blocks or Markdownlint should own document checks before configuring the editor. `eslint.rules.customizations` hides matching editor diagnostics while retaining fixes. It does not disable those rules in the CLI.
+The package does not enable an HTML formatter by default; add `html` to `eslint.validate` only after enabling the corresponding integration. ESLint checks both Markdown documents and supported fenced code blocks by default. Decide how ESLint and Markdownlint divide document checks before configuring the editor. `eslint.rules.customizations` hides matching editor diagnostics while retaining fixes. It does not disable those rules in the CLI.
 
 ## Scripts
 
@@ -413,16 +409,6 @@ The package does not enable an HTML formatter by default; add `html` to `eslint.
   }
 }
 ```
-
-### Script fields
-
-The package.json example uses strict JSON. Its fields have the following roles:
-
-| Field | Purpose |
-| --- | --- |
-| `scripts` | Declare commands invoked through pnpm run. |
-| `scripts.lint` | Check the selected files without requesting automatic fixes. |
-| `scripts.format` | Reuse the check command with --fix to write supported fixes. |
 
 `--fix`, `--cache` and `--cache-location` are ESLint CLI options. The shareable config does not turn on file writes or caching implicitly. Errors fail the command by default; warnings do not. See the [CLI policy guide](https://github.com/zzjtnb/zzjtnb-lint-config/blob/main/docs/src/eslint/configuration.md#cli-检查与修复) for the optional zero-warning policy.
 

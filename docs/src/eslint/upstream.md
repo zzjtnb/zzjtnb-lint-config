@@ -15,7 +15,7 @@ navigation:
 
 本包基于 @antfu/eslint-config，使用它提供的语言解析、推荐规则、导入排序和配置文件检查。你只需安装 eslint 和本包，不需要逐个安装已包含的插件。
 
-本包默认开启 TypeScript、Vue、Vue 无障碍和 antislop 代码质量检查，并调整少量规则。UnoCSS 和额外的格式化工具需要手动启用，写法见[按需扩展](/eslint/presets#按需扩展)。
+本包沿用上游的 TypeScript、Vue 自动检测，Vue 启用后默认检查无障碍，antislop 默认开启，并调整少量规则。UnoCSS 和额外的格式化工具需要手动启用，写法见[按需扩展](/eslint/presets#按需扩展)。
 
 另外，本包默认检查导入后缀是否与源码一致。shadcn 插件已注册，但不会自动开启全部规则。
 
@@ -33,6 +33,8 @@ navigation:
 只有匹配当前文件的配置会参与检查。完整示例见[详细配置](/eslint/configuration)，本包调整了哪些规则见[默认规则](/eslint/presets)。
 
 ## 参考文档
+
+- [ESLint 社区插件、配置与工具合集](https://github.com/dustinspecker/awesome-eslint)
 
 - [ESLint 配置对象与数组](https://eslint.org/docs/latest/use/configure/configuration-files)
 - [ESLint 合并配置](https://eslint.org/docs/latest/use/configure/combine-configs)

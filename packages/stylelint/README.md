@@ -16,8 +16,8 @@ Check and fix styles in CSS, SCSS, Vue, and HTML. Includes property sorting, Vue
 
 | Package | Version |
 | --- | --- |
-| Node.js | `^22.12.0 \|\| >=24` |
-| Stylelint | `^17.16.0` |
+| Node.js | `^22.22.2 \|\| ^24.15.0 \|\| >=26.13.0` |
+| Stylelint | `^18.0.0` |
 
 This ESM-only package uses `stylelint.config.js` with `"type": "module"` in the project package.json. No TypeScript configuration loader is required. Projects without ESM enabled can use `stylelint.config.mjs`.
 
@@ -49,7 +49,7 @@ Both forms support local `rules`, `ignoreFiles`, and `overrides`. The factory ap
 
 ## Complete configuration
 
-The following file is a complete, copyable example. It adds repository-specific ignored files, overrides two shared rules, and adds a syntax-scoped override without replacing the shared presets or parser configuration.
+The following file is a complete, copyable example. It adds repository-specific ignored files, overrides two shared rules, and adds an override for legacy Vue files without replacing the shared presets or parser configuration.
 
 ```js
 // stylelint.config.js
@@ -134,11 +134,9 @@ The default configuration extends:
 - `stylelint-config-recommended-vue/scss` in the Vue scope;
 - `stylelint-config-recommended-scss` in the SCSS scope.
 
-The recess-order preset registers `stylelint-order`; the SCSS and Vue presets register `stylelint-scss` in their file scopes. The package declares the required dependencies and resolves preset entries from its own dependency context, without registering the same plugins again. Consumers do not need to install these implementation dependencies separately.
+The recess-order preset registers `stylelint-order`; the SCSS and Vue presets register `stylelint-scss` in their file scopes. Consumers do not need to install these presets, plugins, or parsers separately.
 
 ### Supported file types
-
-The package supplies loaded parser instances, so consumers do not need to install `postcss-html` or `postcss-scss` separately. This applies to both local links and published installations.
 
 | File scope | Parser / extensions | Rules |
 | --- | --- | --- |
@@ -229,11 +227,11 @@ The package.json example uses strict JSON. Its fields have the following roles:
 | `default` | Runtime value | The result of `zzjtnb()`, for native Stylelint loading and `extends` |
 | `Config` | Type | The native `Config` type re-exported from `stylelint` |
 
-`Config` is the Stylelint type itself; this package does not wrap it in a package-specific `Options` or `StylelintConfig` alias.
+Stylelint 18 loads `stylelint.config.ts` using Node.js native type stripping, without an additional loader. Use `import type` for type imports and avoid syntax requiring transformation, such as `enum` and `namespace`.
 
 ## VS Code
 
-Merge this example into the consuming project's `.vscode/settings.json`, preserving save actions for other languages. Let Stylelint own style diagnostics and fixes, and disable duplicate built-in CSS / SCSS / Less validation:
+Install the [Stylelint extension](https://marketplace.visualstudio.com/items?itemName=stylelint.vscode-stylelint), then merge this example into the consuming project's `.vscode/settings.json`, preserving save actions for other languages. Disable built-in CSS / SCSS validation to avoid duplicate diagnostics:
 
 ```jsonc
 {
@@ -241,8 +239,6 @@ Merge this example into the consuming project's `.vscode/settings.json`, preserv
   "css.validate": false,
   // Disable built-in SCSS validation to avoid duplicate diagnostics.
   "scss.validate": false,
-  // Disable built-in Less validation to avoid duplicate diagnostics.
-  "less.validate": false,
   // Use pnpm to resolve project dependencies in the Stylelint extension.
   "stylelint.packageManager": "pnpm",
   // Validate these style and template languages with Stylelint.
@@ -251,18 +247,9 @@ Merge this example into the consuming project's `.vscode/settings.json`, preserv
   "editor.codeActionsOnSave": {
     // Apply Stylelint fixes on explicit saves, not autosave.
     "source.fixAll.stylelint": "explicit",
-    // Avoid a separate editor import organizer competing with ESLint.
-    "source.organizeImports": "never",
   },
 }
 ```
-
-## Notes
-
-- TypeScript and JavaScript configurations can call `zzjtnb()` or export a native object containing `extends`; choose based on the required merge semantics.
-- A same-named rule replaces the shared rule; options inside one rule are not deep-merged.
-- A custom `languageOptions` object replaces the complete shared language model, including the `rpx` unit and at-rule exceptions.
-- Stylelint owns CSS, SCSS, Vue and HTML styles. JavaScript, TypeScript and Markdown should be handled by their respective linters.
 
 ## Official references
 

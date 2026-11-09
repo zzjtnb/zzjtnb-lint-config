@@ -1,11 +1,8 @@
 import type { RuleItem } from '../../types'
 
 import { createRequire } from 'node:module'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-/** 独立生成脚本共享的仓库坐标与包解析上下文，不进入浏览器产物。 */
-export const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
+/** 独立生成脚本共享的包解析上下文，不进入浏览器产物。 */
 export const require = createRequire(import.meta.url)
 
 /**

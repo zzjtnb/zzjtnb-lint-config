@@ -11,7 +11,8 @@ test('饼图不请求柱状图，编辑器按需加载二进制并保留语法�
   // 只验证资源与 UI；不让检查引擎联网安装影响编辑器加载证据。
   await page.route('**/runtime/*.json', route => route.fulfill({ status: 503 }))
   await page.goto('/#/eslint/overview')
-  await expect(page.locator('.data-chart svg path').first()).toBeVisible()
+  // SVG 可含零面积路径，验证实际可见的绘图几何，不依赖内部节点顺序。
+  await expect(page.locator('.data-chart svg path:visible').first()).toBeVisible()
   expect(assets.some(path => path.split('/').pop()!.startsWith('bar-'))).toBe(false)
   expect(assets.some(path => path.endsWith('.wasm'))).toBe(false)
 

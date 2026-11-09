@@ -1,19 +1,19 @@
 /** 使用真实磁盘文件验证源码导入后缀，区分合法 JS、TS 与编译产物映射。 */
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ESLint } from 'eslint'
 import { beforeAll, expect, it } from 'vitest'
 import { zzjtnb } from '../src/index'
+import { paths } from './config'
 
 let directory: string
 let engine: ESLint
 const rule = 'zzjtnb/import-extensions'
 
 beforeAll(async () => {
-  const parent = fileURLToPath(new URL('../../../.tmp/eslint-imports/', import.meta.url))
+  const parent = paths.imports
   await mkdir(parent, { recursive: true })
-  directory = await mkdtemp(join(parent, 'consumer-'))
+  directory = await mkdtemp(parent)
   for (const file of [
     'source.ts',
     'native.mjs',

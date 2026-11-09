@@ -1,13 +1,12 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
+import { join, sep } from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
-
 import { ESLint } from 'eslint'
-import { describe, expect, it, vi } from 'vitest'
 
+import { describe, expect, it, vi } from 'vitest'
 import { zzjtnb } from '../src/index'
+
+import { paths } from './config'
 
 describe('消费项目的 ESLint 配置', () => {
   it('默认沿用上游禁止相对导入 dist，消费方仍可显式覆盖', async () => {
@@ -69,9 +68,9 @@ export class AppController {
   })
 
   it('nestJS 类型感知从所属项目读取装饰器选项，模板不进入项目检查', async () => {
-    const parent = fileURLToPath(new URL('../../../.tmp/eslint-nest/', import.meta.url))
+    const parent = paths.nest
     await mkdir(parent, { recursive: true })
-    const directory = await mkdtemp(join(parent, 'consumer-'))
+    const directory = await mkdtemp(parent)
     const gateway = join(directory, 'apps/gateway')
     await mkdir(gateway, { recursive: true })
     await writeFile(join(directory, 'tsconfig.json'), '{"files":[]}')
@@ -144,6 +143,7 @@ export class AppController {
       overrideConfigFile: true,
       overrideConfig: await zzjtnb({
         pnpm: false,
+        vue: true,
         rules: { 'vue/require-default-prop': 'off' },
       }),
     })
@@ -235,7 +235,9 @@ export class AppController {
 
   it('没有 pnpm-workspace.yaml 的项目默认不启用 pnpm 集成，仍能检查 package.json', async () => {
     // 判断依据是向上查找工作区文件，必须在仓库之外的临时目录验证，仓库自身存在该文件。
-    const directory = await mkdtemp(join(tmpdir(), 'lint-npm-consumer-'))
+    const parent = paths.npmConsumer
+    await mkdir(parent, { recursive: true })
+    const directory = await mkdtemp(`${parent}${sep}`)
     const cwd = vi.spyOn(process, 'cwd').mockReturnValue(directory)
     try {
       const config = await zzjtnb()
@@ -251,7 +253,7 @@ export class AppController {
     }
     finally {
       cwd.mockRestore()
-      await rm(directory, { force: true, recursive: true })
+      // 保留仓库外的独立现场，供无 workspace 的检测结果复核。
     }
   }, 30_000)
 
@@ -261,6 +263,7 @@ export class AppController {
       overrideConfig: await zzjtnb(
         {
           pnpm: false,
+          vue: true,
           rules: { 'vue/require-default-prop': 'off' },
         },
         {

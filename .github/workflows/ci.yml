@@ -38,7 +38,7 @@ jobs:
         # 向当前 Action 传递其正式支持的输入。
         with:
           # 使用 Node.js 26 运行工具链；pnpm 版本从根 packageManager 读取。
-          runtime: node@26
+          runtime: node@^26.13.0
           # 启用 pnpm/setup 的依赖缓存；不代表跳过后续源码检查。
           cache: true
           # false 仅设置运行环境，依赖由后续冻结安装步骤显式安装。

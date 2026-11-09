@@ -40,7 +40,7 @@ Stylelint CLI 仍然按扩展名匹配配置 override；不要把所有文件交
 
 ```ts
 export const languageOptions = {
-  // 扩展 Stylelint 可识别的语言语法；由 languageOptions 或工厂的同名入口承载。
+  // 扩展 Stylelint 可识别的语言语法；通过 languageOptions.syntax 声明。
   syntax: {
     // 声明 @atRules 指令为项目语法，避免按未知 at-rule 处理。
     atRules: {
@@ -95,13 +95,13 @@ export const languageOptions = {
 @variants
 ```
 
-列表只包含 Stylelint 与 SCSS 插件原生不识别的工具类指令；Sass 内置指令由 SCSS 预设和插件识别，Stylelint 已原生识别的 at-rule 也不重复注册。SCSS preset 不读取 Stylelint 17 的 `languageOptions.syntax.atRules`，因此 SCSS 规则会复用同一份工具类指令列表，避免 CSS 与 SCSS 的例外漂移。
+列表只包含 Stylelint 与 SCSS 插件原生不识别的工具类指令；Sass 内置指令由 SCSS 预设和插件识别，Stylelint 已原生识别的 at-rule 也不重复注册。`scss/at-rule-no-unknown` 不读取 `languageOptions.syntax.atRules`，因此 SCSS 规则会复用同一份工具类指令列表，避免 CSS 与 SCSS 的例外漂移。
 
 ## 本包的规则覆盖
 
 逐项展示上游默认值、本包配置和输入代码触发的诊断。每例先对照“只检查”与“自动修复”的行为，再展示输入和正确写法。正确写法明确标注自动修复结果或手动修正；关闭规则可能允许原输入，并不意味着工具会将它改成正确写法。示例聚焦当前规则，不代表完整预设的全部检查结果。error / warn 是诊断级别，与能否修复无关。支持自动修复的已启用规则在执行修复命令时应用；规则关闭、输入无诊断、不提供自动修复是三种不同情况。编辑器的修正建议需要手动确认，不属于自动修复。
 
-Stylelint 上游对照使用相同的官方 preset 和 parser，不叠加本包语法扩展与规则差异。
+Stylelint 上游对照使用相同的上游 preset 和 parser，不叠加本包语法扩展与规则差异。
 
 null 表示关闭该规则；开启时按规则要求使用 true 或字符串选项。at-rule-no-unknown 的对照用于说明语言模型适配，默认规则本身仍跟随预设。
 
@@ -652,7 +652,7 @@ export default zzjtnb({
   rules: {
     // 按配置的正则限制类选择器命名；不会影响其他选择器类型。
     'selector-class-pattern': null,
-    // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+    // 允许空样式源文件。
     'no-empty-source': true,
   },
 })

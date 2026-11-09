@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 import { chooseOption } from './helpers'
 
 test('切换工具清除不适用的规则搜索与插件筛选', async ({ page }) => {
@@ -97,9 +98,15 @@ test('六页信息与图标、文件搜索、规则筛选及窄屏导航', async
     await page.setViewportSize({ width: 1600, height: 1100 })
   }
   await page.getByRole('link', { name: '代码实验', exact: true }).click()
-  await page.screenshot({ path: '../.tmp/playground/validation/refinement/actions-desktop.png', fullPage: true })
+  await page.screenshot({
+    path: paths.screenshots.desktop,
+    fullPage: true,
+  })
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.screenshot({ path: '../.tmp/playground/validation/refinement/actions-mobile.png', fullPage: true })
+  await page.screenshot({
+    path: paths.screenshots.mobile,
+    fullPage: true,
+  })
 })
 
 test('文件支持实际拖入，代码实验不预先加载图表资源', async ({ page }) => {

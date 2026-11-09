@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 import { replaceEditor } from './helpers'
 
 test('Monaco 编辑配置与代码，诊断和 Console 同屏及主题同步', async ({ page }) => {
@@ -17,7 +18,10 @@ test('Monaco 编辑配置与代码，诊断和 Console 同屏及主题同步', a
   const background = await page.locator('.source-panel .monaco-editor').first().evaluate(element => getComputedStyle(element).backgroundColor)
   await page.getByRole('button', { name: '切换深色', exact: true }).click()
   await expect.poll(() => page.locator('.source-panel .monaco-editor').first().evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(background)
-  await page.screenshot({ path: '../.tmp/playground/validation/editor/console.png', fullPage: true })
+  await page.screenshot({
+    path: paths.screenshots.editor,
+    fullPage: true,
+  })
   await page.getByRole('link', { name: '项目接入', exact: true }).click()
   await expect(page.locator('#save pre')).toContainText('rules: {}')
   await page.goBack()

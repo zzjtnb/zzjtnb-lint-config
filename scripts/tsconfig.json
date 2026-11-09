@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    // 脚本由仓库声明的 Node.js 直接执行，不降级语法。
+    "target": "ESNext",
+    // 使用 Node 原生 ESM 解析，源码导入保留真实 .ts 后缀。
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    // 安装守卫从根清单读取环境要求。
+    "resolveJsonModule": true,
+    // 只加载 Node.js 环境类型，不引入浏览器或应用全局类型。
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    // 同时检查实现与测试的类型；检查不输出编译产物。
+    "strict": true,
+    "noEmit": true,
+    // 类型导入显式标记，运行时不请求不存在的值导出。
+    "verbatimModuleSyntax": true,
+    // 仅使用 Node 原生类型擦除支持的 TypeScript 语法。
+    "erasableSyntaxOnly": true,
+    // 跳过依赖声明内部检查，保留脚本自身的严格检查。
+    "skipLibCheck": true
+  },
+  // 共用错误处理、CLI 实现和原生测试统一检查。
+  "include": ["**/*.ts"],
+  // 依赖和运行产物不作为脚本源码发现。
+  "exclude": ["node_modules", ".tmp"]
+}

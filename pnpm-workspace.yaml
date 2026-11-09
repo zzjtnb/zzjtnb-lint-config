@@ -9,13 +9,26 @@ update:
   ignoreDeps:
     - typescript
 
-# 类型检查、构建、单元测试及浏览器编辑器验证通过后，限定放行 bridge 预发布版本。
+# 升级到 pnpm >=12.19.0 并核对正式文档后启用，避免跨工作区复用未声明的可选 peer。
+# projectScopedOptionalPeers: true
+# 启用后重新安装；移除下面两条 Volar 例外，确认其 TS7 告警消失且构建、类型检查和测试通过。
+# 上游文档：https://github.com/pnpm/pnpm/blob/main/pnpm/docs/settings/peer-dependencies.md#projectscopedoptionalpeers
+
+# 限定 peer 告警例外，具体范围与原因在各项维护。
 peerDependencyRules:
   allowedVersions:
+    # 纯 TS 的 tsgo 构建未启用 Vue/Volar；仅忽略可选 peer 复用产生的当前版本告警，不声明 TS7 兼容。
+    '@volar/language-service@2.4.30>typescript': 7.0.2
+    '@volar/typescript@2.4.30>typescript': 7.0.2
     # 仅补充当前 Vue TS 配置与 TS 6.0.3 bridge 系列的已验证关系。
     '@vue/tsconfig@0.9.1>typescript': '>=6.0.3-bridge.0 <6.0.4-0'
     # 仅补充当前编辑器与同一 bridge 系列的已验证关系，不放开其他替代包或主版本。
     modern-monaco@0.4.2>typescript: '>=6.0.3-bridge.0 <6.0.4-0'
+    # 当前默认配置与消费样例已验证；仅忽略以下版本的 Stylelint 18 peer 告警，不承诺所有可选规则兼容。
+    stylelint-config-recess-order@7.10.0>stylelint: 18.0.0
+    stylelint-config-recommended-scss@17.0.1>stylelint: 18.0.0
+    stylelint-config-recommended@18.0.0>stylelint: 18.0.0
+    stylelint-scss@7.4.0>stylelint: 18.0.0
 
 # 沿用上游：使用跨平台 Shell 模拟器运行脚本。
 shellEmulator: true
@@ -48,19 +61,25 @@ catalog:
   # ESLint Flat Config 文件匹配与合并的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   '@eslint/config-array': ^0.23.5
   # 本地 Lucide SVG 图标集合的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  '@iconify-json/lucide': ^1.2.148
+  '@iconify-json/lucide': ^1.2.152
   # Iconify 本地图标读取与转换的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   '@iconify/utils': ^3.1.7
   # 真实浏览器 E2E 测试的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  '@playwright/test': ^1.64.1
+  '@playwright/test': ^1.65.0
   # shadcn 组件规则插件的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  '@shadcn/lint': ^0.2.3
+  '@shadcn/lint': ^0.2.5
   # Node.js 24 编译器基础配置的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   '@tsconfig/node24': ^24.0.5
   # jsdom 类型声明的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   '@types/jsdom': ^30.0.0
   # Node.js 类型声明的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  '@types/node': ^26.6.5
+  '@types/node': ^26.6.6
+  # 工程测试使用 semver 正式类型，不复制库接口。
+  '@types/semver': ^7.8.0
+  # command 插件的必需 peer，由共享 ESLint 包提供并在包内使用经典 TypeScript API。
+  '@typescript-eslint/typescript-estree': ^8.72.1
+  # command 插件的规则辅助 API，与配置包的 TypeScript 6 依赖上下文一致。
+  '@typescript-eslint/utils': ^8.72.1
   # antfu 的 UnoCSS 集成插件；仅在 unocss 选项开启时加载。
   '@unocss/eslint-plugin': ^66.12.0
   # Wind4 原子样式预设的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
@@ -86,7 +105,9 @@ catalog:
   # 图表计算和 SVG 渲染的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   echarts: ^6.1.0
   # JavaScript 与 TypeScript 检查引擎的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  eslint: ^10.13.0
+  eslint: ^10.14.0
+  # 保留 antfu 的 Composer 链式接口与嵌套配置状态。
+  eslint-flat-config-utils: ^3.2.0
   # antfu 的外部格式化集成插件；仅在 formatters 选项开启时加载。
   eslint-plugin-format: ^2.0.1
   # antfu 的 antislop 集成依赖，使用上游维护的规则子集。
@@ -100,9 +121,11 @@ catalog:
   # Node.js 下加载 TypeScript 配置的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   jiti: ^2.7.0
   # Vue 单元测试 DOM 环境的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  jsdom: ^30.1.3
+  jsdom: ^31.0.0
   # Markdownlint 测试读取带注释的公开 JSONC 规则，不依赖编译器 API。
   jsonc-parser: ^3.3.1
+  # 自定义规则夹具复用引擎正式类型，仅用于开发测试。
+  markdownlint: ^0.42.1
   # Markdown 检查 CLI 及其公开转导出 API的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   markdownlint-cli2: ^0.24.0
   # 工作台代码与差异编辑器的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
@@ -120,29 +143,29 @@ catalog:
   # 无样式且可访问的 Vue 交互原语的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   reka-ui: ^2.11.0
   # SCSS 编译的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  sass-embedded: ^1.106.1
+  sass-embedded: ^1.108.1
   # 版本范围与兼容性比较的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  semver: ^7.8.5
+  semver: ^7.8.6
   # 只读配置与代码片段高亮的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  shiki: ^4.5.0
+  shiki: ^4.6.0
   # CSS、SCSS 与 Vue 样式检查引擎的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  stylelint: ^17.16.0
+  stylelint: ^18.0.0
   # Vue 上游预设要求的 HTML 容器配置。
   stylelint-config-html: ^2.0.0
   # CSS 属性排序预设的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  stylelint-config-recess-order: ^7.9.0
+  stylelint-config-recess-order: ^7.10.0
   # Vue 上游预设要求的基础推荐规则配置。
-  stylelint-config-recommended: ^18.0.0
+  stylelint-config-recommended: ^19.0.0
   # SCSS 官方推荐规则的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   stylelint-config-recommended-scss: ^17.0.1
   # Vue 样式容器推荐配置的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   stylelint-config-recommended-vue: ^2.0.0
   # CSS 标准规则预设的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  stylelint-config-standard: ^40.0.0
+  stylelint-config-standard: ^41.0.0
   # Stylelint 属性排序插件的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  stylelint-order: ^8.1.2
+  stylelint-order: ^8.1.3
   # 公开包与沙箱资源构建的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  tsdown: ^0.23.3
+  tsdown: ^0.23.7
   # 工作区任务依赖图和缓存的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   turbo: ^2.11.10
   # 默认 TypeScript 编译器的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
@@ -152,7 +175,7 @@ catalog:
   # 按 Resolver 自动导入 Vue 组件的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   unplugin-vue-components: ^32.1.0
   # 应用开发服务与生产打包的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  vite: ^8.3.5
+  vite: ^8.3.6
   # Vue 本地开发调试面板的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   vite-plugin-vue-devtools: ^8.2.1
   # 文档站生成的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
@@ -160,15 +183,15 @@ catalog:
   # 代码块文件图标的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   vitepress-plugin-group-icons: ^1.8.1
   # 单元及配置消费测试的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  vitest: ^5.0.5
+  vitest: ^5.1.0
   # Vue 应用运行时的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  vue: ^3.5.44
+  vue: ^3.5.45
   # Vue 图表组件的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   vue-echarts: ^8.3.2
   # 工作台 Hash 路由的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
   vue-router: ^5.4.0
   # Vue 单文件组件类型检查的版本范围；消费方通过 catalog: 引用，不在各包重复版本号。
-  vue-tsc: ^3.3.13
+  vue-tsc: ^3.3.14
 
 # 命名目录与默认目录都由本文件统一维护，并非第二套分散版本源。
 # 仅为真实兼容范围保留例外；catalog 本身不冻结版本，升级时核对命令作用范围。

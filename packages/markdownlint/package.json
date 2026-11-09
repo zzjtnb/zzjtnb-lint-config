@@ -1,7 +1,7 @@
 {
   "name": "@zzjtnb/markdownlint-config",
   "type": "module",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Markdownlint 共享规则与 markdownlint-cli2 扫描配置，支持编辑器接入、自动修复与项目规则覆盖。",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",
@@ -53,6 +53,7 @@
     "@types/node": "catalog:",
     "bumpp": "catalog:",
     "jsonc-parser": "catalog:",
+    "markdownlint": "catalog:",
     "markdownlint-cli2": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",

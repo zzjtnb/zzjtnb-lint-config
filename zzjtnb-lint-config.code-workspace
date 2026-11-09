@@ -1,10 +1,6 @@
 {
   // 列出编辑器工作区根目录，路径相对当前工作区文件。
-  // 多根工作区的窗口级 SDK 设置必须放在这里；目录模式使用 .vscode/settings.json。
-  "settings": {
-    // 使用 Docs 已安装的 bridge 语言服务；根目录没有 TypeScript，原版 TS7 CLI 不提供 tsserver。
-    "js/ts.tsdk.path": "docs/node_modules/typescript/lib"
-  },
+  // 不固定 SDK；目录模式与多根模式均默认使用编辑器内置的 TypeScript 语言服务。
   "folders": [
     {
       // 该分组的稳定名称，方便识别生成文件或构建日志。

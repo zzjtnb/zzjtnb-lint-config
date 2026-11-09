@@ -29,9 +29,9 @@ navigation:
 | `test:run` | `vitest run` | `turbo run test:run` | 明确单次执行并返回真实退出状态 |
 | `test:ui` | `vitest --ui` | `turbo run test:ui` | 启动 Vitest UI,需要 @vitest/ui;建议筛选单个应用 |
 | `test` | `vitest` | `turbo run test` | 默认交互测试模式;CI 中工具自动单次执行 |
-| `preinstall` | 不在应用重复声明 | `node ./scripts/preinstall/index.js` | 根依赖安装前检查包管理器 |
+| `preinstall` | 不在应用重复声明 | `node ./scripts/preinstall/index.ts` | 根依赖安装前检查包管理器 |
 | `postinstall` | 工作区声明自身 `build` | `pnpm -r run --if-present build` | 安装后按工作区依赖顺序运行实际存在的构建 |
-| `clean` | 不在应用重复声明 | `node ./scripts/clean/index.js` | 按清理脚本将依赖,产物及锁文件回收 |
+| `clean` | 不在应用重复声明 | `node ./scripts/clean/index.ts` | 按清理脚本将依赖,产物及锁文件回收 |
 | `lint:eslint` | 使用根检查入口 | `eslint . --config eslint.config.js --cache --cache-location node_modules/.cache/.eslintcache` | 检查 JS,TS,Vue 与受支持的配置文件 |
 | `lint:stylelint` | 使用根检查入口 | `stylelint "**/*.{css,scss,vue,html,htm}" --config stylelint.config.js --cache --cache-location node_modules/.cache/.stylelintcache` | 检查样式文件及容器内样式 |
 | `lint:markdownlint` | 使用根检查入口 | `markdownlint-cli2 --config .markdownlint-cli2.mjs "**/*.md"` | 检查 Markdown |
@@ -40,7 +40,7 @@ navigation:
 | `format:stylelint` | 使用根修复入口 | `pnpm run lint:stylelint --fix` | 自动修复 Stylelint 支持的问题 |
 | `format:markdownlint` | 使用根修复入口 | `pnpm run lint:markdownlint --fix` | 自动修复 Markdownlint 支持的问题 |
 | `format` | 使用根修复入口 | `pnpm run format:eslint && pnpm run format:stylelint && pnpm run format:markdownlint` | 按顺序修复,失败立即停止 |
-| `release` | 配置包使用 `bumpp` | `node scripts/release/index.js` | 配置包入口维护版本；根入口执行交互发布流程，二者职责不同 |
+| `release` | 配置包使用 `bumpp` | `node scripts/release/index.ts` | 配置包入口维护版本；根入口执行交互发布流程，二者职责不同 |
 | `prepublishOnly` | `pnpm run build` | 不在私有根工程声明 | 发布前构建;不能作为发布授权 |
 
 表中的根命令给出同名脚本的标准写法;start,build-only,覆盖率和调试等可选入口须先在 Turbo 注册对应任务,才加入根清单.应用列的"使用根入口"表示复用表中右侧命令,不在应用重复安装或维护一套工具.
@@ -81,9 +81,9 @@ navigation:
     "test:run": "turbo run test:run",
     "test:ui": "turbo run test:ui",
     "test": "turbo run test",
-    "preinstall": "node ./scripts/preinstall/index.js",
+    "preinstall": "node ./scripts/preinstall/index.ts",
     "postinstall": "pnpm -r run --if-present build",
-    "clean": "node ./scripts/clean/index.js",
+    "clean": "node ./scripts/clean/index.ts",
     "lint:eslint": "eslint . --config eslint.config.js --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html,htm}\" --config stylelint.config.js --cache --cache-location node_modules/.cache/.stylelintcache",
     "lint:markdownlint": "markdownlint-cli2 --config .markdownlint-cli2.mjs \"**/*.md\"",

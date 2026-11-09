@@ -588,16 +588,29 @@ pnpm outdated -r
 
 ### 更新依赖
 
+先在实际消费项目中核对已发布的共享配置要求与本地安装结果，例如：
+
 ```bash
-# 递归更新，遵守现有声明范围。
-pnpm update -r
-# 只更新指定工作区，缩小本次改动范围。
-pnpm --filter @zzjtnb/playground update
-# 需要主动跨主版本升级时使用，升级前核对兼容范围与排除策略。
-pnpm update -r --latest
+# 查询 npm 最新发布版本及其检查引擎范围；不读取本地未发布源码。
+pnpm view @zzjtnb/stylelint-config@latest version peerDependencies --json
+# 查看当前项目实际安装的配置包和引擎版本。
+pnpm list @zzjtnb/stylelint-config stylelint --depth 0
 ```
 
---latest 可以改写清单和 catalog 中的版本范围。本项目排除 TypeScript 等兼容敏感依赖的批量升级；配置与维护方式见[依赖版本管理](/dependencies)。升级完成后审查清单和锁文件，再运行[检查与测试](#checks)。
+```bash
+# 更新根项目和所有工作区，遵守现有声明范围。
+pnpm --include-workspace-root up -r
+# 只更新指定工作区，缩小本次改动范围。
+pnpm --filter @zzjtnb/playground update
+# 只将指定工作区的 jsdom 升级到 latest，并更新它引用的 catalog 范围。
+pnpm --filter @zzjtnb/playground up jsdom -L
+# 升级根项目和所有工作区到 latest，允许跨主版本；先核对兼容范围与排除策略。
+pnpm --include-workspace-root up -r -L
+```
+
+`-r` 遍历工作区，`--include-workspace-root` 同时包含根项目，`-L`（`--latest`）按 npm 的 latest 标签升级，允许跨主版本，并更新所选消费者引用的 catalog 条目。仅在根目录执行 `pnpm up -L` 不会将所有子项目依赖都升级到 latest；例如只在 playground 声明的 jsdom，需要选中该工作区才能更新对应 catalog 范围。
+
+兼容依赖的排除策略统一见[依赖版本管理](/dependencies#_9-后续日常维护)。升级完成后审查清单和锁文件，再运行[检查与测试](#checks)。
 
 ### 按锁文件安装或重建安装链接
 
@@ -653,27 +666,16 @@ pnpm ports --help
 
 ## VS Code 的 TypeScript SDK {#typescript-sdk}
 
-类型检查使用各工作区安装的编译器；编辑器语言服务使用所选 SDK，两者不必来自根目录。以下以本项目为例：根目录不安装 TypeScript，Docs 的 typescript-native-bridge 依赖提供经典 tsserver.js，当前 Stylelint、Markdownlint 使用的 TS7 编译器不提供该经典语言服务。其他项目应选择自身实际包含 tsserver.js 的 SDK，不直接照搬示例目录。
+本仓库默认使用 VS Code 内置的 TypeScript 语言服务，不设置 `js/ts.tsdk.path`。类型检查和构建仍使用各工作区安装的编译器；Vue 工具链的 bridge 依赖继续由所属工作区维护，不用于强制编辑器版本。编辑器内置语言服务与项目编译器相互独立，见 [VS Code 官方说明](https://code.visualstudio.com/docs/typescript/typescript-transpiling#_using-newer-typescript-versions)。
 
 ### 目录模式与多根工作区
 
-直接打开仓库目录时，SDK 设置由 `.vscode/settings.json` 提供。通过 `zzjtnb-lint-config.code-workspace` 打开多根工作区时，`js/ts.tsdk.path` 是窗口级设置，需要放在工作区文件的 `settings` 中，不能只依赖其中某个目录的设置。两种入口均指向实际安装的 `docs/node_modules/typescript/lib`。
-
-```jsonc [zzjtnb-lint-config.code-workspace（设置节选）]
-{
-  "settings": {
-    // 指向包含 tsserver.js 的 lib 目录，不是编译器可执行文件或 tsserver.js 文件本身。
-    // 本仓库使用 Docs 通过定向 override 安装的 bridge 依赖，不为编辑器额外给根目录安装 TypeScript。
-    "js/ts.tsdk.path": "docs/node_modules/typescript/lib",
-  },
-}
-```
+直接打开仓库目录和通过 `zzjtnb-lint-config.code-workspace` 打开多根工作区时，均默认使用内置服务，不绑定某个子目录。确需统一编辑器语言服务版本时，再指定实际包含 `tsserver.js` 的 SDK：目录模式放在 `.vscode/settings.json`，多根模式放在工作区文件的窗口级 `settings` 中，并通过“TypeScript: 选择 TypeScript 版本”选择工作区版本。
 
 ### 提示 SDK 无效时
 
-1. 核对提示中的路径是否存在 `tsserver.js`。本仓库若提示根目录 `node_modules/typescript/lib/tsserver.js`，说明仍在使用旧路径。
-2. 检查用户级、当前目录及多根工作区设置，确认当前窗口实际使用的 SDK；不要把编译器的存在等同于语言服务存在。
-3. 在 VS Code 命令面板执行“TypeScript: 选择 TypeScript 版本”，选择有效工作区版本；也可选择编辑器内置版本作为临时回退。
-4. 执行“TypeScript: 重启 TS 服务器”；切换打开方式或设置未刷新时，执行“开发人员: 重新加载窗口”。
+1. 检查用户级、目录及多根工作区设置，清除失效的 `js/ts.tsdk.path` 覆盖。
+2. 在命令面板执行“TypeScript: 选择 TypeScript 版本”，选择 VS Code 内置版本。
+3. 执行“TypeScript: 重启 TS 服务器”；设置未刷新时再执行“开发人员: 重新加载窗口”。
 
-如果 Docs 依赖尚未安装，先在仓库根目录执行 `pnpm install`，再检查 SDK 路径。不要为了消除提示创建虚假的 tsserver 文件，或给所有工作区重复安装同一套语言服务。
+若主动选择工作区 SDK，路径必须指向完整 TypeScript 安装中含 `tsserver.js` 的 lib 目录；TS7 编译器可执行文件不等于经典 SDK。不要创建占位 tsserver 文件或为消除路径提示重复安装依赖。编辑器诊断可能与项目编译器版本不同，交付仍运行项目的类型检查入口。

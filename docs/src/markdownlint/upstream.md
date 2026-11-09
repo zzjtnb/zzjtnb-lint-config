@@ -35,6 +35,8 @@ Markdownlint 负责检查文档内容；markdownlint-cli2 负责查找文件、�
 
 ## 参考文档
 
+- [Markdownlint 官方相关工具与集成列表](https://github.com/DavidAnson/markdownlint#related)
+
 - [Markdownlint 原生配置](https://github.com/DavidAnson/markdownlint#configuration)
 - [Markdownlint 规则清单](https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md)
 - [CLI2 配置选项](https://github.com/DavidAnson/markdownlint-cli2#configuration)

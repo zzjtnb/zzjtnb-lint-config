@@ -19,15 +19,7 @@ ESLint 与 Stylelint 使用具名 `zzjtnb` 工厂，Markdownlint 使用原生配
 
 ## 公开包消费要求
 
-ESLint 和 Stylelint 配置包的环境要求如下：
-
-| 使用范围 | 要求 |
-| --- | --- |
-| ESLint 配置包的 Node.js | `^20.19.0 \|\| ^22.13.0 \|\| >=24` |
-| Stylelint 配置包的 Node.js | `^22.12.0 \|\| >=24` |
-| ESLint 配置包的 peer dependency | ESLint `^10.13.0` |
-| Stylelint 配置包的 peer dependency | Stylelint `^17.16.0` |
-| 包管理器 | 支持 npm、pnpm 等包管理器，本文使用 pnpm |
+Node.js 与检查引擎的兼容范围分别在 [ESLint 包](https://github.com/zzjtnb/zzjtnb-lint-config/blob/main/packages/eslint/README.zh-CN.md#环境要求与安装)和 [Stylelint 包](https://github.com/zzjtnb/zzjtnb-lint-config/blob/main/packages/stylelint/README.zh-CN.md#环境要求与安装)维护。本教程使用 pnpm。
 
 ESLint 与 Stylelint 包是 ESM-only，不提供 CommonJS 入口。对应配置文件使用 ESM `import` / `export`；默认使用 `eslint.config.js` 和 `stylelint.config.js`，项目需声明 `"type": "module"`。Markdownlint 包提供带注释的 JSONC，使用 CLI2 `0.24.x` 时需要 Node.js `>=22`。
 
@@ -81,12 +73,11 @@ import { zzjtnb } from '@zzjtnb/eslint-config'
 export default zzjtnb()
 ```
 
-`zzjtnb()` 返回 `Promise<Linter.Config[]>`。ESLint 会等待异步配置结果，配置文件不需要自行包一层 `async`。
+`zzjtnb()` 返回可直接导出的 `FlatConfigComposer`，支持链式组合，也可 `await` 得到配置数组。
 
 默认组合包括：
 
-- TypeScript；
-- Vue；
+- TypeScript、Vue（按依赖自动检测，也可显式开启或关闭）；
 - JSON / JSONC；
 - YAML；
 - TOML；
@@ -96,7 +87,7 @@ export default zzjtnb()
 - perfectionist 排序；
 - antfu stylistic 规则。
 
-本包已提供 UnoCSS、Vue 无障碍、外部 formatter、antislop 的插件依赖，不需要消费项目重复安装；Vue 无障碍和 antislop 默认开启，UnoCSS、外部 formatter 按 antfu 选项显式启用。依赖、默认状态与完整开启示例见[按需扩展](/eslint/presets#按需扩展)。shadcn 已默认注册，但不会自动开启全部规则。
+本包已提供 UnoCSS、Vue 无障碍、外部 formatter、antislop 的插件依赖，不需要消费项目重复安装；Vue 集成启用后默认检查无障碍，antislop 默认开启，UnoCSS、外部 formatter 按 antfu 选项显式启用。依赖、默认状态与完整开启示例见[按需扩展](/eslint/presets#按需扩展)。shadcn 已默认注册，但不会自动开启全部规则。
 
 ## 配置 Stylelint
 

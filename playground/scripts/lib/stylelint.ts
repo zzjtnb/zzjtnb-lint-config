@@ -4,7 +4,8 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import stylelint from 'stylelint'
-import { require, root } from '../utils/index'
+import { paths } from '../../config'
+import { require } from '../utils/index'
 import { loadDefaults } from './defaults'
 
 const stylelintDefaults = loadDefaults('stylelint')
@@ -16,7 +17,7 @@ const stylelintDefaults = loadDefaults('stylelint')
  */
 export async function inspect(filename: string): Promise<ToolMetadata> {
   const mode = 'stylelint' as const
-  const target = join(root, 'playground', filename)
+  const target = join(paths.root, filename)
   const resolved = await stylelint.resolveConfig(target, {
     config: await stylelintDefaults,
   })

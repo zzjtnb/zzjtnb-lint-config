@@ -10,7 +10,8 @@ it('文档扩展示例直接加载随包提供的插件，不要求消费方另�
   const example = /```js \[eslint\.config\.js\]\n([\s\S]*?)\n```/.exec(section)![1]!
   // 示例只有正式工厂导入；去掉该导入后注入当前公开入口，不复制配置值。
   const run = compileFunction(example.replace(/^import[^\n]*$/gm, '').replace('export default', 'return'), ['zzjtnb'])
-  const configs: Awaited<ReturnType<typeof zzjtnb>> = await run(zzjtnb)
+  // 此段是 Vue 项目的扩展示例；依赖自动检测另由独立消费进程验证。
+  const configs: Awaited<ReturnType<typeof zzjtnb>> = await run((options: Parameters<typeof zzjtnb>[0]) => zzjtnb({ vue: true, ...options }))
   const plugins = configs.flatMap(config => Object.keys(config.plugins ?? {}))
   expect(plugins).toEqual(expect.arrayContaining([
     'unocss',

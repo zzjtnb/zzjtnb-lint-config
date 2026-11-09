@@ -34,6 +34,7 @@ navigation:
 
 ## 参考文档
 
+- [Stylelint 插件、配置与工具合集](https://github.com/stylelint/awesome-stylelint)
 - [Stylelint 配置与继承](https://stylelint.io/user-guide/configure/)
 - [CSS 标准预设](https://github.com/stylelint/stylelint-config-standard)
 - [SCSS 推荐预设](https://github.com/stylelint-scss/stylelint-config-recommended-scss)

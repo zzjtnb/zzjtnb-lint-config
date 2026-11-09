@@ -1,7 +1,7 @@
 import type { PlaygroundMode, RuleItem } from '../types'
-
 import { mkdir, writeFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+
+import { paths } from '../config'
 
 import { configurations } from '../src/stores/config/catalog'
 import { inspect as eslint } from './lib/eslint'
@@ -11,7 +11,7 @@ import { inspect as stylelint } from './lib/stylelint'
 const inspectors = { eslint, stylelint, markdownlint }
 
 // 数据生成是独立构建步骤，失败时中断 dev/build，不以旧数据冒充成功。
-const output = fileURLToPath(new URL('../public/metadata/', import.meta.url))
+const output = paths.metadata
 for (const mode of Object.keys(configurations) as PlaygroundMode[]) {
   await mkdir(`${output}${mode}`, { recursive: true })
   const rules = new Map<string, RuleItem>()

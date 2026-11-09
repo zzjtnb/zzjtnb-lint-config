@@ -2,12 +2,12 @@
 import type { TypedFlatConfigItem } from '@antfu/eslint-config'
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import antfu from '@antfu/eslint-config'
 import { ESLint } from 'eslint'
 import { expect, it } from 'vitest'
 import { pnpm } from '../src/configs/pnpm'
 import { zzjtnb } from '../src/index'
+import { paths } from './config'
 
 it.each([
   { name: 'antfu/pnpm/pnpm-workspace-yaml' },
@@ -33,9 +33,9 @@ it.each([
 
 /** pnpm 规则只处理真实工作区的根文件；隔离目录避免读取或改写仓库的工作区设置。 */
 async function workspace() {
-  const root = fileURLToPath(new URL('../../../.tmp/pnpm-settings/', import.meta.url))
+  const root = paths.pnpmSettings
   await mkdir(root, { recursive: true })
-  const cwd = await mkdtemp(join(root, 'consumer-'))
+  const cwd = await mkdtemp(root)
   await writeFile(join(cwd, 'package.json'), JSON.stringify({ name: 'settings-consumer', private: true }))
   await writeFile(join(cwd, 'pnpm-workspace.yaml'), 'packages:\n  - packages/*\n')
   return cwd

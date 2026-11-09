@@ -3,8 +3,9 @@ import type { RuleItem, ToolMetadata } from '../../types'
 import { join } from 'node:path'
 import { ESLint } from 'eslint'
 import { builtinRules } from 'eslint/use-at-your-own-risk'
+import { paths } from '../../config'
 import { describeConfig } from '../../sandbox/config'
-import { root, severity } from '../utils/index'
+import { severity } from '../utils/index'
 import { loadDefaults } from './defaults'
 
 const eslintDefaults = loadDefaults('eslint')
@@ -16,10 +17,10 @@ const eslintDefaults = loadDefaults('eslint')
  */
 export async function inspect(filename: string): Promise<ToolMetadata> {
   const mode = 'eslint' as const
-  const target = join(root, 'playground', filename)
+  const target = join(paths.root, filename)
   // 插件元数据按 ESLint 原生契约读取；本包返回值额外提供已知规则选项提示。
   const defaults: Linter.Config[] = await eslintDefaults
-  const engine = new ESLint({ cwd: root, overrideConfigFile: true, overrideConfig: defaults })
+  const engine = new ESLint({ cwd: paths.root, overrideConfigFile: true, overrideConfig: defaults })
   const resolved = await engine.calculateConfigForFile(target)
   if (!resolved)
     throw new Error(`ESLint 未解析到 ${filename} 的配置`)

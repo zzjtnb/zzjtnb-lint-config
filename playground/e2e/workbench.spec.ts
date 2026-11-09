@@ -1,5 +1,5 @@
-import { fileURLToPath } from 'node:url'
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 import { attachMetrics } from './helpers'
 
 test('静态工作台导航、配置展示与窄屏布局', async ({ page }) => {
@@ -59,7 +59,7 @@ test('文件分组和真实工作区性能四种排行', async ({ page }) => {
   await page.getByRole('button', { name: '匹配分组', exact: true }).click()
   await expect(page.locator('.file-entry').first()).toBeVisible()
   await page.screenshot({
-    path: fileURLToPath(new URL('../../.tmp/playground/validation/implementation/files-verified.png', import.meta.url)),
+    path: paths.screenshots.files,
   })
   await page.getByRole('link', { name: '统计与性能', exact: true }).click()
   await page.getByRole('button', { name: '运行工作区性能分析', exact: true }).click()
@@ -70,7 +70,7 @@ test('文件分组和真实工作区性能四种排行', async ({ page }) => {
     await expect(page.locator('.ranking').first()).toBeVisible()
   }
   await page.screenshot({
-    path: fileURLToPath(new URL('../../.tmp/playground/validation/implementation/stats-verified.png', import.meta.url)),
+    path: paths.screenshots.stats,
   })
   await attachMetrics('WORKSPACE_MATCH_AND_STATS_MS', [Date.now() - started])
 })

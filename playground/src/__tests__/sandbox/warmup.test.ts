@@ -1,15 +1,16 @@
 import { spawn } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, join, resolve, sep } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 import { expect, it } from 'vitest'
+import { paths } from '../../../config'
 
 it('真实服务启动仅解析所选类型配置，不执行检查或修复', async () => {
-  const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../.tmp/playground/validation/selective-startup')
+  const root = paths.tests.warmup
   await mkdir(root, { recursive: true })
-  const directory = await mkdtemp(join(root, 'runner-'))
+  const directory = await mkdtemp(`${root}${sep}`)
   const source = await readFile(resolve(dirname(fileURLToPath(import.meta.url)), '../../../sandbox/index.ts'), 'utf8')
   const runner = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },

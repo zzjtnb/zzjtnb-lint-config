@@ -3,6 +3,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --experimental-test-module-mocks --test */tests/*.test.js"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-test-module-mocks --test */tests/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   }
 }

@@ -2,10 +2,19 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
 import { loadEnv } from 'vite'
+import { paths } from './config'
 
 // 与 Vite 开发服务读取同一工作台环境；CI 预览使用 production 模式。
 const env = loadEnv(process.env.CI ? 'production' : 'development', fileURLToPath(new URL('.', import.meta.url)), 'VITE_')
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${env.VITE_PORT || (process.env.CI ? 4173 : 5173)}`
+
+// 桌面项目在设备预设之后复用此尺寸，避免设备自带的 1280×720 覆盖测试工作区视口。
+const viewport = {
+  // 测试浏览器视口宽度，单位为 CSS 像素。
+  width: 1600,
+  // 测试浏览器视口高度，单位为 CSS 像素。
+  height: 1100,
+}
 
 /**
  * 从文件读取环境变量。
@@ -36,7 +45,14 @@ export default defineConfig({
   /* CI 中使用单个工作进程；也可通过 CLI 调整并发。 */
   workers: process.env.CI ? 1 : undefined,
   /* 报告器说明见 https://playwright.dev/docs/test-reporters。 */
-  reporter: 'html',
+  reporter: [
+    [
+      'html',
+      {
+        outputFolder: paths.reports,
+      },
+    ],
+  ],
   /* 以下设置供所有浏览器项目共用，接口见 https://playwright.dev/docs/api/class-testoptions。 */
   use: {
     /* click 等单个操作的最长时间；0 表示不限制。 */
@@ -44,12 +60,7 @@ export default defineConfig({
     /* 用于 `await page.goto('/')` 等操作的基础地址。 */
     baseURL,
     // 固定浏览器初始视口尺寸，单个用例仍可覆盖窄屏场景。
-    viewport: {
-      // 测试浏览器视口宽度，单位为 CSS 像素。
-      width: 1600,
-      // 测试浏览器视口高度，单位为 CSS 像素。
-      height: 1100,
-    },
+    viewport,
     // 传给浏览器启动器的选项，与页面交互选项分开维护。
     launchOptions: {
       // 可通过环境变量选择已安装的浏览器；未设置时使用 Playwright 管理的版本。
@@ -71,6 +82,7 @@ export default defineConfig({
       // 当前浏览器项目的设备与上下文选项，覆盖顶层 use 的同名项。
       use: {
         ...devices['Desktop Chrome'],
+        viewport,
       },
     },
     {
@@ -79,6 +91,7 @@ export default defineConfig({
       // 当前浏览器项目的设备与上下文选项，覆盖顶层 use 的同名项。
       use: {
         ...devices['Desktop Firefox'],
+        viewport,
       },
     },
     {
@@ -87,6 +100,7 @@ export default defineConfig({
       // 当前浏览器项目的设备与上下文选项，覆盖顶层 use 的同名项。
       use: {
         ...devices['Desktop Safari'],
+        viewport,
       },
     },
 
@@ -120,7 +134,7 @@ export default defineConfig({
   ],
 
   /* 截图、视频和追踪等测试产物目录。 */
-  outputDir: '../.tmp/playground/e2e-results',
+  outputDir: paths.results,
 
   /* 测试开始前启动本地服务。 */
   webServer: {

@@ -1,7 +1,7 @@
 {
   "name": "@zzjtnb/eslint-config",
   "type": "module",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "TypeScript、JavaScript 和 Vue 的 ESLint 共享配置，支持项目规则覆盖、无障碍检查与按需格式化。",
   "author": "zzjtnb(https://github.com/zzjtnb)",
   "license": "MIT",
@@ -40,7 +40,7 @@
     "access": "public"
   },
   "engines": {
-    "node": "^20.19.0 || ^22.13.0 || >=24"
+    "node": "^20.19.0 || ^22.13.0 || >=24 <26 || >=26.13.0"
   },
   "scripts": {
     "dev": "tsdown --watch",
@@ -56,7 +56,10 @@
   "dependencies": {
     "@antfu/eslint-config": "catalog:",
     "@shadcn/lint": "catalog:",
+    "@typescript-eslint/typescript-estree": "catalog:",
+    "@typescript-eslint/utils": "catalog:",
     "@unocss/eslint-plugin": "catalog:",
+    "eslint-flat-config-utils": "catalog:",
     "eslint-plugin-format": "catalog:",
     "eslint-plugin-slop": "catalog:",
     "eslint-plugin-sonarjs": "catalog:",

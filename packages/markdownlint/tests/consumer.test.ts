@@ -3,27 +3,28 @@ import type { ParseError } from 'jsonc-parser'
 import { execFile } from 'node:child_process'
 import fs from 'node:fs/promises'
 import { createRequire, findPackageJSON } from 'node:module'
-import { dirname, resolve } from 'node:path'
+import { dirname, resolve, sep } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
 import { parse } from 'jsonc-parser'
 import { describe, expect, it } from 'vitest'
+import { paths } from './config'
 
 const execFileAsync = promisify(execFile)
 const markdownConfigPath = createRequire(import.meta.url).resolve('@zzjtnb/markdownlint-config')
 const manifestPath = findPackageJSON('markdownlint-cli2', import.meta.url)!
 const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'))
 const markdownlintCli = resolve(dirname(manifestPath), manifest.bin['markdownlint-cli2'])
-const temporaryRoot = fileURLToPath(new URL('../../../.tmp/markdownlint-consumers/', import.meta.url))
 
 /** 在隔离文件目录运行真实 CLI；失败保留 CLI 的退出状态与完整诊断。 */
 async function check(source: string, config: Record<string, unknown> = { extends: markdownConfigPath }, customRules: string[] = []) {
-  await fs.mkdir(temporaryRoot, { recursive: true })
-  const cwd = await fs.mkdtemp(resolve(temporaryRoot, 'case-'))
+  const parent = paths.consumers.cases
+  await fs.mkdir(parent, { recursive: true })
+  const cwd = await fs.mkdtemp(`${parent}${sep}`)
   await fs.writeFile(resolve(cwd, 'sample.md'), source)
   await fs.writeFile(resolve(cwd, '.markdownlint-cli2.jsonc'), JSON.stringify({
-    // 测试目录位于仓库 .tmp，必须显式关闭 Git 忽略，才能验证实际文件输入。
+    // 测试目录位于项目 .tmp，必须显式关闭 Git 忽略，才能验证实际文件输入。
     gitignore: false,
     // 使用真实共享规则或测试指定的本地继承配置。
     config,
@@ -129,7 +130,7 @@ describe('消费项目的 Markdownlint 配置', { timeout: 30_000 }, () => {
       'extends': markdownConfigPath,
       'project-no-todo': false,
     }, [
-      fileURLToPath(new URL('./fixtures/no-todo.js', import.meta.url)),
+      fileURLToPath(new URL('./fixtures/no-todo.ts', import.meta.url)),
     ])
   })
 
@@ -157,8 +158,9 @@ describe('消费项目的 Markdownlint 配置', { timeout: 30_000 }, () => {
   }, 30_000)
 
   it('公开 CLI2 入口默认忽略索引、临时目录和生成物，同时保留正常文档检查', async () => {
-    await fs.mkdir(temporaryRoot, { recursive: true })
-    const cwd = await fs.mkdtemp(resolve(temporaryRoot, 'ignores-'))
+    const parent = paths.consumers.ignores
+    await fs.mkdir(parent, { recursive: true })
+    const cwd = await fs.mkdtemp(`${parent}${sep}`)
     const entry = createRequire(import.meta.url).resolve('@zzjtnb/markdownlint-config/config')
     await fs.writeFile(resolve(cwd, '.markdownlint-cli2.mjs'), `import config from ${JSON.stringify(pathToFileURL(entry).href)}; export default { ...config, gitignore: false }`)
     for (const folder of [

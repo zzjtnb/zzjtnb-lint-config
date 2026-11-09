@@ -69,7 +69,7 @@ export default zzjtnb(
 | `overrides` | 用 files / excludedFiles 为文件提供局部规则 | 按顺序追加 |
 | `extends` | 追加其他共享配置；本包默认的 standard、SCSS、Vue、排序 preset 已提供 | 按顺序追加，不必重复声明 |
 | `plugins` | 追加项目自己的规则插件；已有插件由 preset 注册 | 按顺序追加 |
-| `customSyntax` | 显式选择自定义语法；默认按 CSS、SCSS、Vue、HTML 文件选择 | 整体替换；新增语言才按需提供 |
+| `customSyntax` | 显式选择自定义语法；默认按 CSS、SCSS、Vue、HTML 文件选择 | 顶层值替换；已有文件级 customSyntax 仍优先，修改这些语言时追加文件 override |
 | `languageOptions` | 扩展语法模型；共享模型包含工具类指令和 rpx | 整体替换，不做深度合并 |
 | `defaultSeverity` | 默认 error，单条规则可覆盖 | 后置替换 |
 | `report*Disables` | 检查缺少原因、无效范围、不必要或全局禁用；共享默认 warning | 后置替换 |
@@ -78,7 +78,8 @@ export default zzjtnb(
 | `allowEmptyInput` | 本包默认 true；false 要求有匹配文件 | 后置替换，不用于文件 override |
 | `fix`、`cache` | 工具默认 false；建议由脚本或 CLI 控制 | 后置替换，不用于文件 override |
 | `quiet`、`maxWarnings`、`formatter` | 控制终端诊断、warning 上限与输出格式，不是规则配置 | 后置替换 |
-| `processors`、`referenceFiles` | Stylelint 的实验性处理与参考文件能力；本包不默认启用 | 使用当前上游契约，按实际需求设置 |
+| `processors` | 注册诊断后处理器；本包不默认启用 | 后续配置替换前面的列表 |
+| `referenceFiles` | 从其他文件读取 CSS 自定义属性等参考信息；本包不默认启用 | 后续配置替换前面的值 |
 
 ## 原生继承
 
@@ -108,7 +109,7 @@ export default zzjtnb(
   {
     // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
     rules: {
-      // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+      // 开启空样式源文件检查。
       'no-empty-source': true,
     },
   },
@@ -123,8 +124,6 @@ export default zzjtnb(
   },
 )
 ```
-
-工厂不会重新命名 Stylelint 字段，也不会把 `Config` 包装成私有的 `StylelintConfigOptions` 或执行选项类型。
 
 ## 合并行为
 
@@ -147,11 +146,11 @@ import { zzjtnb } from '@zzjtnb/stylelint-config'
 export default zzjtnb({
   // 描述当前输入的语言语法与解析能力，供对应规则判断合法语法。
   languageOptions: {
-    // 扩展 Stylelint 可识别的语言语法；由 languageOptions 或工厂的同名入口承载。
+    // 扩展 Stylelint 可识别的语言语法；通过 languageOptions.syntax 声明。
     syntax: {
       // 按单位维度声明额外合法单位，供相关语法检查使用。
       units: {
-        // 示例额外识别 upx；标准单位 vw 无需登记，本包默认已提供 rpx。
+        // 此示例只保留 upx；共享 rpx 和 at-rule 扩展会被替换。
         length: ['upx'],
       },
     },
@@ -159,7 +158,7 @@ export default zzjtnb({
 })
 ```
 
-上面的 `languageOptions` 会替换共享的完整 language model。它不会自动保留共享配置中的 at-rule 列表；如果需要保留共享语法能力，应在本地完整声明，或只使用原有 `languageOptions` 并通过规则字段进行调整。
+上面的 `languageOptions` 会替换共享的完整 language model。它不会自动保留共享配置中的 `rpx` 和 at-rule 列表；如果需要保留共享语法能力，应在本地完整声明，或只使用原有 `languageOptions` 并通过规则字段进行调整。
 
 规则同名覆盖示例：
 
@@ -175,23 +174,6 @@ export default zzjtnb({
 })
 ```
 
-## 原生字段
-
-本包公开的配置字段就是 Stylelint 原生字段：
-
-| 字段 | 作用 |
-| --- | --- |
-| `extends` | 加载共享 preset 或其他配置文件 |
-| `plugins` | 注册 Stylelint plugin |
-| `ignoreFiles` | 忽略不需要检查的文件 |
-| `rules` | 设置规则及其选项 |
-| `overrides` | 按文件 glob 追加局部配置 |
-| `languageOptions` | 声明语法、at-rule 和单位 |
-| `allowEmptyInput` | 控制空输入是否失败 |
-| `cache` | 控制 Stylelint 缓存 |
-| `fix` | 控制是否写回修复结果 |
-| `report*` | 控制 disable 注释报告 |
-
 ## CLI 脚本
 
 推荐使用样式文件 glob：
@@ -199,7 +181,7 @@ export default zzjtnb({
 ```json [package.json]
 {
   "scripts": {
-    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html}\" --config stylelint.config.js --cache --cache-location node_modules/.cache/.stylelintcache",
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue,html,htm}\" --config stylelint.config.js --cache --cache-location node_modules/.cache/.stylelintcache",
     "format:stylelint": "pnpm run lint:stylelint --fix"
   }
 }
@@ -249,7 +231,13 @@ export default config
 | `default` | runtime value | `zzjtnb()` 的默认配置结果，供原生 `extends` 加载 |
 | `Config` | type | 从 Stylelint 原样重新导出的原生类型 |
 
-`Config` 就是 Stylelint 的原生类型。本包不定义冗长的私有配置类型别名。
+使用 `stylelint.config.ts` 时，Stylelint 18 通过 Node.js 原生类型擦除加载配置，无需额外加载器。使用 `import type` 导入 `Config`，避免使用需要转换的 `enum` 和 `namespace`。
+
+## 跨文件 CSS 自定义属性
+
+Stylelint 18 会将已知 CSS 自定义属性的值代入 `var()`，再由 `declaration-property-value-no-unknown` 检查属性和值是否匹配。变量定义在独立文件时，在工厂参数中设置 `referenceFiles: ['tokens/**/*.css']`，路径相对于消费项目的工作目录。先创建实际的变量文件；模式没有匹配文件时，Stylelint 会报告配置错误。
+
+参考文件用于补充检查信息，不会把变量注入样式或运行框架编译。SCSS 和 Vue 作用域沿用上游预设关闭该核心属性值规则；添加参考文件不会自动开启它。字段说明见 [Stylelint referenceFiles](https://stylelint.io/user-guide/configure/#referencefiles)。
 
 ## VS Code
 
@@ -307,17 +295,17 @@ export default zzjtnb(
   {
     // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
     rules: {
-      // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+      // 开启空样式源文件检查。
       'no-empty-source': true,
     },
     // 按所属配置分组或文件范围覆盖已有选项，保留未列出的默认规则。
     overrides: [
       {
-        // 只将当前配置块应用到匹配路径；未声明时遵循所属工具的全局适用范围。
+        // 仅对匹配路径应用当前文件例外。
         files: ['legacy/**/*.scss'],
         // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
         rules: {
-          // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+          // 允许这些旧目录文件包含空样式源文件。
           'no-empty-source': null,
         },
       },
@@ -327,11 +315,11 @@ export default zzjtnb(
     // 按所属配置分组或文件范围覆盖已有选项，保留未列出的默认规则。
     overrides: [
       {
-        // 只将当前配置块应用到匹配路径；未声明时遵循所属工具的全局适用范围。
+        // 仅对匹配路径应用当前文件例外。
         files: ['legacy/strict/**/*.scss'],
         // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
         rules: {
-          // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+          // 开启空样式源文件检查。
           'no-empty-source': true,
         },
       },

@@ -1,8 +1,11 @@
 {
+  // 按需启用编辑器 HTTP 代理，地址与端口应与本机代理服务一致。
   // "http.proxy": "http://127.0.0.1:10808",
+  // 按需关闭代理证书校验；false 会跳过严格的 SSL 证书验证。
   // "http.proxyStrictSSL": false,
+  // 按需启用扩展的代理支持；on 使用编辑器配置的代理。
   // "http.proxySupport": "on",
-  // 集成终端设置
+  // 启用集成终端光标闪烁，便于定位当前输入位置。
   "terminal.integrated.cursorBlinking": true,
   // never 不在恢复终端时重启旧进程，避免重复启动开发服务。
   "terminal.integrated.persistentSessionReviveProcess": "never",
@@ -14,25 +17,25 @@
   "terminal.integrated.stickyScroll.enabled": true,
   // 编辑器的包管理操作统一使用 pnpm，不改变仓库声明的版本。
   "npm.packageManager": "pnpm",
-  // 编辑器使用文档站安装的 bridge 经典语言服务；原版 TS7 CLI 不提供 tsserver。
-  "js/ts.tsdk.path": "docs/node_modules/typescript/lib",
+  // 默认使用编辑器内置 TypeScript 语言服务，不固定到某个子工作区的 SDK 路径。
   // 开启项目级类型诊断，覆盖未打开的源码文件。
   "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
-  // SVG 预览使用透明背景，便于检查图标留白。
-  "svg.preview.background": "transparent",
+  // SVG 预览使用黑色背景，便于检查图形在深色背景下的显示效果。
+  "svg.preview.background": "black",
   // 关闭 HTML 自动闭合，避免与 Vue 或其他模板工具重复插入标签。
   "html.autoClosingTags": false,
   // 停用 Prettier 扩展，格式规则由项目检查工具管理。
   "prettier.enable": false,
   // 不在保存时额外运行默认格式化器，由显式修复动作统一写回。
-  "editor.formatOnSave": false, // 关闭全局保存格式化，避免与 ESLint、Stylelint、Markdownlint 的保存修复重复
+  // 关闭全局保存格式化，避免与 ESLint、Stylelint、Markdownlint 的保存修复重复
+  "editor.formatOnSave": false,
   // 保存时自动修复 ESLint、Stylelint 和 Markdownlint 问题
   "editor.codeActionsOnSave": {
     // 手动保存时应用 ESLint 自动修复；explicit 不在自动保存时运行。
     "source.fixAll.eslint": "explicit",
     // 手动保存时应用 Stylelint 自动修复；explicit 不在自动保存时运行。
     "source.fixAll.stylelint": "explicit",
-    // 手动保存时应用 Markdownlint 修复，与另外两个工具统一使用 explicit。
+    // Markdown 仅在显式保存时修复，自动保存时不运行；规则读取项目的 CLI2 配置。
     "source.fixAll.markdownlint": "explicit",
     // 禁用编辑器单独整理导入，避免覆盖 ESLint 的导入排序约定。
     "source.organizeImports": "never"
@@ -52,6 +55,11 @@
     "vue",
     "html"
   ],
+  // 固定使用当前工作区根目录解析 ESLint；默认由扩展按文件位置决定。
+  // 适用于根配置统一管理的项目；各包独立配置时改为 [{ "mode": "auto" }] 或明确目录列表。
+  "eslint.workingDirectories": ["."],
+  // 默认自动发现配置。只有确认要固定根配置时才启用，路径相对上述工作目录。
+  // "eslint.options": { "overrideConfigFile": "./eslint.config.js" },
   // 隐藏编辑器中的样式规则诊断，仍允许自动修复
   "eslint.rules.customizations": [
     {
@@ -138,11 +146,14 @@
   // 为以下受支持的语言启用 ESLint 检查
   "eslint.validate": [
     "javascript",
+    "javascriptreact",
     "typescript",
+    "typescriptreact",
     "vue",
     "html",
     "json",
     "jsonc",
+    "json5",
     "yaml",
     "toml"
   ],
@@ -177,6 +188,16 @@
   },
   // 仅对该语言覆盖编辑器选项，其余语言继续继承工作区设置。
   "[typescript]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  // JSX/TSX 沿用 ESLint；需要项目配置启用相应语法与规则。
+  "[javascriptreact]": {
+    // 为该语言指定显式格式化器，仅在请求格式化时调用。
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  // 为 TSX 文件覆盖编辑器选项；项目配置需启用相应语法与规则。
+  "[typescriptreact]": {
     // 为该语言指定显式格式化器，仅在请求格式化时调用。
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },

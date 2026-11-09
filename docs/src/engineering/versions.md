@@ -128,6 +128,8 @@ catalogs:
 
 `typescript6` 是本仓库的 catalog 名称，不是官方要求的包名，也不是额外安装的原生预览版。公开配置包发布时转换为正式的 TypeScript 版本范围，消费方无需配置同名 catalog。catalog 统一声明来源，锁文件记录实际安装结果；`--latest` 仍可能越过现有范围，升级时单独核对编译器兼容性。
 
+`catalog:` 是 `catalog:default` 的简写，默认目录可以用顶层 `catalog` 或 `catalogs.default` 声明，二者不能重复定义。命名引用只读取对应目录，不回退到默认目录；同名依赖有不同兼容范围时使用命名目录，相同范围共用一项。
+
 截至 2026-11-06，[官方依赖文档](https://typescript-eslint.io/users/dependency-versions/)及 typescript-eslint 8.72.1 的 peer 声明支持 `>=4.8.4 <6.1.0`。这说明原版 TS7 不在当前正式支持范围内；Vue Language Tools 推荐 bridge，也不构成 typescript-eslint 正式支持该替代包的声明。
 
 TS7 适配已经在开发：[跟踪问题 #10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940) 仍开放，[PR #12803](https://github.com/typescript-eslint/typescript-eslint/pull/12803) 正在实现基于 IPC 的 TS7.1 实验后端，尚未合并。该 PR 的实验选项尚不属于当前正式发布配置。正式版本发布后，重新核对依赖契约，并通过解析器消费测试、类型检查、构建和浏览器沙箱验证决定是否移除 TS6。
@@ -175,7 +177,13 @@ format/lint 名称应按消费项目的真实脚本配置.再执行所属项目�
 
 新增外部依赖:先定归属和兼容范围,在 catalog 增加条目,再由消费者引用并更新锁文件.移除依赖:先移除真实消费者,无其他消费者后再清理 catalog 条目.升级:修改唯一版本源,更新锁文件并验证受影响链路.
 
-pnpm 的配置与命令按项目锁定版本核对,官方入口为 [Catalogs](https://pnpm.io/catalogs).
+升级检查引擎时，一并核对共享配置包对应发布版本的 `peerDependencies`。各包的 latest 标签分别移动，不保证它们能任意组合；仓库当前源码和文档也可能领先于 npm 发布。以实际安装版本及其发布清单判断兼容性，不能用尚未发布的源码说明替代已安装包的契约。
+
+共享配置默认内置插件所需的运行依赖和 peer 提供方由配置包维护。缺失时应修复配置包，不要求每个消费项目补装内部依赖、降级自己的编译器或复制 packageExtensions。消费方只保留自己的框架、编译器和文件范围差异；已有临时补充在相关依赖升级后须重新核对，确认新版已解决或旧条件不再适用时移除，并同步项目模板。
+
+本仓库在根 `pnpm-workspace.yaml` 使用 [update.ignoreDeps](https://pnpm.io/settings/dependency-resolution#updateignoredeps) 将 `typescript` 排除出批量升级，覆盖默认与命名 catalog。命名目录本身不限制 latest 升级；更新编译器时，单独修改对应 catalog 范围，再执行安装、类型检查、受影响包的消费测试与构建，核对 CLI、经典 API、Vue SFC 和声明生成。
+
+批量升级、限定消费者与指定依赖的命令统一见 [Monorepo 更新依赖](/monorepo#更新依赖)。pnpm 的配置与命令按项目锁定版本核对，官方入口为 [Catalogs](https://pnpm.io/catalogs)。
 
 ## 10. 预发布标签与可复现安装
 
@@ -203,8 +211,6 @@ pnpm --filter @zzjtnb/docs list vitepress
 升级应保留能复现的旧输入与失败信息,按受影响的配置包,Vue 工具和原生模块分别回归.通用 lint 通过不能证明二进制依赖,所有版本范围或生产部署已通过.
 
 Catalog 自动修复参数及冲突策略以[官方规则源码](https://github.com/antfu/pnpm-workspace-utils/blob/main/packages/eslint-plugin-pnpm/src/rules/json/json-enforce-catalog.ts)与[官方测试](https://github.com/antfu/pnpm-workspace-utils/blob/main/packages/eslint-plugin-pnpm/src/rules/json/json-enforce-catalog.test.ts)为准。插件官方 README 标明 YAML 集成仍属实验功能；JSON 引用与 workspace 的变更需要一并检查，不把目录命名当成版本兼容性的判断。
-
-工作区更新、冻结安装、存储清理及强制重装命令统一见 [Monorepo 常用维护命令](/monorepo#maintenance)。
 
 ## 12. Vue 的 TypeScript bridge 与预发布 peer 范围
 

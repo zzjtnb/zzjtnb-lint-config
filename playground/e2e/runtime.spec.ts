@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 import { attachMetrics } from './helpers'
 
 test('按工具准备依赖，首次访问隔离，返回与重启复用服务', async ({ page }) => {
@@ -54,7 +55,10 @@ test('按工具准备依赖，首次访问隔离，返回与重启复用服务',
   await expect(page.getByRole('button', { name: '重启沙箱', exact: true })).toBeEnabled({ timeout: 30000 })
   await expect(page.locator('.runtime-state')).toContainText('浏览器引擎已就绪')
   expect(resources).toEqual(before)
-  await page.screenshot({ path: '../.tmp/playground/validation/refinement/tools-ready.png', fullPage: true })
+  await page.screenshot({
+    path: paths.screenshots.ready,
+    fullPage: true,
+  })
 })
 
 test('全新会话先准备 ESLint，再后台准备其他工具', async ({ page }) => {

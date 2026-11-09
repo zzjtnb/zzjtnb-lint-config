@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { paths } from '../config'
 
 test('配置路径使用可搜索候选，选择及自由输入均自动解析真实配置', async ({ page }) => {
   test.setTimeout(480000)
@@ -44,5 +45,5 @@ test('输入未完成文件名只过滤候选，不执行不支持的文件匹�
   await expect(page.locator('.notice.error')).toHaveCount(0)
   const form = (await page.locator('.matching-form').boundingBox())!
   expect((await path.boundingBox())!.width).toBeGreaterThan(form.width * 0.75)
-  await page.screenshot({ path: '../.tmp/ui-matching/fragment-verified.png', fullPage: true })
+  await page.screenshot({ path: paths.screenshots.matching, fullPage: true })
 })

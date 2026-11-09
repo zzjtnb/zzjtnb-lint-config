@@ -16,8 +16,8 @@
 
 | 包 | 版本 |
 | --- | --- |
-| Node.js | `^22.12.0 \|\| >=24` |
-| Stylelint | `^17.16.0` |
+| Node.js | `^22.22.2 \|\| ^24.15.0 \|\| >=26.13.0` |
+| Stylelint | `^18.0.0` |
 
 本包为 ESM-only。默认使用 `stylelint.config.js`，项目需声明 `"type": "module"`；不需要 TypeScript 配置加载器。未声明 ESM 的项目可使用 `stylelint.config.mjs`。
 
@@ -49,7 +49,7 @@ export default {
 
 ## 完整配置
 
-下面是一份完整且可以直接复制的配置文件。它追加仓库特有的忽略文件，覆盖两条共享规则，并添加一个按语法划分的 override；共享 preset 和 parser 配置不会因此被替换。
+下面是一份完整且可以直接复制的配置文件。它追加仓库特有的忽略文件，覆盖两条共享规则，并为旧版 Vue 文件添加一个 override；共享 preset 和 parser 配置不会因此被替换。
 
 ```js
 // stylelint.config.js
@@ -63,18 +63,18 @@ export default zzjtnb({
   rules: {
     // null 关闭类名格式检查，保留其他选择器检查。
     'selector-class-pattern': null,
-    // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+    // 开启空样式源文件检查。
     'no-empty-source': true,
   },
 
   // 追加在包内 HTML、Vue 和 SCSS override 之后。
   overrides: [
     {
-      // 只将当前配置块应用到匹配路径；未声明时遵循所属工具的全局适用范围。
+      // 仅匹配旧版应用中的 Vue 文件。
       files: ['apps/legacy/**/*.vue'],
       // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
       rules: {
-        // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+        // 允许这些旧版 Vue 文件包含空样式源文件。
         'no-empty-source': null,
       },
     },
@@ -92,7 +92,7 @@ export default zzjtnb(
   {
     // 仅覆盖列出的规则；未列出的规则继续使用共享配置或继承配置的值。
     rules: {
-      // 控制空样式输入的诊断；null 表示关闭这条 Stylelint 规则。
+      // 开启空样式源文件检查。
       'no-empty-source': true,
     },
   },
@@ -134,11 +134,9 @@ export default zzjtnb(
 - `stylelint-config-recommended-vue/scss`：Vue 作用域；
 - `stylelint-config-recommended-scss`：SCSS 作用域。
 
-`stylelint-order` 由 recess-order preset 注册，`stylelint-scss` 由 SCSS 和 Vue preset 在文件作用域内注册。本包声明必要依赖并从自身依赖上下文解析 preset 入口，不再重复注册同一个插件。消费方不需要额外安装这些实现依赖。
+`stylelint-order` 由 recess-order preset 注册，`stylelint-scss` 由 SCSS 和 Vue preset 在文件作用域内注册。消费方不需要额外安装这些预设、插件或解析器。
 
 ### 支持的文件类型
-
-解析器由本包直接加载并提供实例，消费项目无需额外安装 `postcss-html` 或 `postcss-scss`，本地链接与正式安装均适用。
 
 | 文件作用域 | Parser / 扩展 | 规则 |
 | --- | --- | --- |
@@ -229,11 +227,11 @@ Stylelint 配置没有 ESLint Flat Config 的 `files` 白名单，因此 CLI 应
 | `default` | 运行时值 | `zzjtnb()` 的结果，供 Stylelint 原生加载和 `extends` 使用 |
 | `Config` | 类型 | 从 `stylelint` 直接重新导出的原生 `Config` 类型 |
 
-`Config` 就是 Stylelint 的原生类型；本包不再用自定义的 `Options` 或 `StylelintConfig` 别名包装它。
+使用 `stylelint.config.ts` 时，Stylelint 18 通过 Node.js 原生类型擦除加载配置，无需额外加载器。类型使用 `import type` 导入，配置中避免使用需要转换的 `enum` 和 `namespace`。
 
 ## VS Code
 
-将以下示例合并到消费项目的 `.vscode/settings.json`，保留其他语言已有的保存动作。Stylelint 负责样式诊断与修复，关闭内置 CSS / SCSS / Less 重复校验：
+先安装 [Stylelint 扩展](https://marketplace.visualstudio.com/items?itemName=stylelint.vscode-stylelint)，再将以下示例合并到消费项目的 `.vscode/settings.json`，保留其他语言已有的保存动作。关闭内置 CSS / SCSS 校验，避免重复诊断：
 
 ```jsonc
 {
@@ -241,8 +239,6 @@ Stylelint 配置没有 ESLint Flat Config 的 `files` 白名单，因此 CLI 应
   "css.validate": false,
   // 关闭编辑器内置 SCSS 校验，避免与 Stylelint 重复报告。
   "scss.validate": false,
-  // 停用内置 Less 校验，避免与 Stylelint 重复报告。
-  "less.validate": false,
   // Stylelint 扩展使用 pnpm 解析项目依赖。
   "stylelint.packageManager": "pnpm",
   // 让 Stylelint 扩展检查列出的样式与模板语言。
@@ -251,18 +247,9 @@ Stylelint 配置没有 ESLint Flat Config 的 `files` 白名单，因此 CLI 应
   "editor.codeActionsOnSave": {
     // 手动保存时应用 Stylelint 自动修复；explicit 不在自动保存时运行。
     "source.fixAll.stylelint": "explicit",
-    // 禁用编辑器单独整理导入，避免覆盖 ESLint 的导入排序约定。
-    "source.organizeImports": "never",
   },
 }
 ```
-
-## 注意事项
-
-- TypeScript 或 JavaScript 配置文件可以使用 `zzjtnb()` 工厂，也可以导出包含 `extends` 的原生配置对象；按所需合并语义选择。
-- 同名规则会替换共享规则；单条规则内部的选项不会深度合并。
-- 自定义 `languageOptions` 会替换完整的共享语言模型，包括 `rpx` 单位和 at-rule 例外列表。
-- Stylelint 负责 CSS、SCSS、Vue 和 HTML 样式；JavaScript、TypeScript 和 Markdown 应交给对应的 linter。
 
 ## 官方参考
 

@@ -8,17 +8,17 @@ import type { OptionsOverrides, TypedFlatConfigItem } from '@antfu/eslint-config
 export function withOverrides(
   options: boolean | OptionsOverrides | undefined,
   defaults: TypedFlatConfigItem['rules'],
+  overrides: TypedFlatConfigItem['rules'],
 ): false | OptionsOverrides {
   if (options === false)
     return false
-  let config: OptionsOverrides = {}
-  if (typeof options === 'object')
-    config = options
   return {
-    ...config,
+    ...(typeof options === 'object'
+      ? options
+      : {}),
     overrides: {
       ...defaults,
-      ...config.overrides,
+      ...overrides,
     },
   }
 }

@@ -1,12 +1,13 @@
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-
 import * as eslintConfigModule from '@zzjtnb/eslint-config'
+
 import { zzjtnb } from '@zzjtnb/eslint-config'
 import { ESLint } from 'eslint'
 import ts from 'typescript'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { paths } from './config'
 
 const eslintTypeFixture = fileURLToPath(new URL('./consumer.ts', import.meta.url))
 
@@ -43,9 +44,9 @@ describe('eslint 发布入口', () => {
   })
 
   it('默认加载器读取真实的 ESM JavaScript 配置，无需额外 flag', async () => {
-    const root = fileURLToPath(new URL('../../../.tmp/eslint-config-loading/', import.meta.url))
+    const root = paths.loading
     await mkdir(root, { recursive: true })
-    const cwd = await mkdtemp(join(root, 'consumer-'))
+    const cwd = await mkdtemp(root)
     const configFile = join(cwd, 'eslint.config.js')
     await writeFile(join(cwd, 'package.json'), JSON.stringify({ type: 'module' }))
     // 加载正式发布入口，不通过内存配置绕过配置文件加载。
@@ -130,9 +131,10 @@ export const config: Promise<Linter.Config[]> = zzjtnb(options, fileConfig)
     const source = `
 import { zzjtnb } from '@zzjtnb/eslint-config'
 async function configure() {
-  const configs = await zzjtnb()
-  const config = configs[0]!
-  config.rules = { 'no-console': ['warn', { allow: ['warn'] }] }
+  const configs = zzjtnb().override('antfu/javascript/rules', {
+    rules: { 'no-console': ['warn', { allow: ['warn'] }] },
+  })
+  await configs
 }
 void configure
 `
@@ -143,15 +145,13 @@ void configure
     expect(diagnostics.every(item => item.file?.fileName === eslintTypeFixture)).toBe(true)
   })
 
-  it.each(['files', 'overrides'] as const)('eSLint 首参不接受 %s，使用正式片段或集成选项', (field) => {
+  it.each(['files'] as const)('eSLint 首参不接受 %s，使用正式片段或集成选项', (field) => {
     const program = createConsumerTypeProgram(`
       import type { ESLintConfigOptions } from '@zzjtnb/eslint-config'
-      export const invalid: ESLintConfigOptions = { ${field}: ${field === 'files'
-        ? '[\'**/*.ts\']'
-        : '{}'} }
+      export const invalid: ESLintConfigOptions = { ${field}: ['**/*.ts'] }
     `)
     const diagnostics = ts.getPreEmitDiagnostics(program)
-    // 2353：文件范围和已弃用顶层字段不能作为首参属性。
+    // 文件范围遵循上游，首参中的旧覆盖字段仍保留其正式类型。
     expect(diagnostics.map(item => item.code)).toEqual([2353])
     expect(diagnostics[0]?.file?.fileName).toBe(eslintTypeFixture)
   }, 30_000)

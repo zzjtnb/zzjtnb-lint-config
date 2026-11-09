@@ -11,7 +11,7 @@
 | 包 | 用途 | 工具版本 |
 | --- | --- | --- |
 | [`@zzjtnb/eslint-config`](./packages/eslint/README.md) | 基于 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 的 Flat Config,覆盖 TypeScript,Vue,JSON,YAML,TOML,Markdown 与 pnpm 工作区 | ESLint 10 |
-| [`@zzjtnb/stylelint-config`](./packages/stylelint/README.md) | CSS,SCSS,Vue SFC,HTML,兼容 UnoCSS,Tailwind 风格指令与 uni-app 的 `rpx` | Stylelint 17 |
+| [`@zzjtnb/stylelint-config`](./packages/stylelint/README.md) | CSS,SCSS,Vue SFC,HTML,兼容 UnoCSS,Tailwind 风格指令与 uni-app 的 `rpx` | Stylelint 18 |
 | [`@zzjtnb/markdownlint-config`](./packages/markdownlint/README.md) | 带逐条说明的 JSONC 规则与 ESM 扫描配置，支持原生继承与项目覆盖 | markdownlint-cli2 |
 
 `eslint`,`stylelint` 和 `markdownlint-cli2` 由你的项目安装;解析器,预设和插件由配置包自身管理,不需要重复安装.
@@ -73,6 +73,8 @@ Playground 是独立的纯静态配置实验台，支持配置与规则检查、
 脚本的命名、排列与使用条件见[项目脚本](./docs/src/engineering/scripts.md)。
 
 环境要求以根 `package.json` 的 `engines` 与 `packageManager` 为准.
+
+`.nvmrc` 指定本仓库的开发 Node.js 版本，避免继承父目录的版本配置。使用 nvm 时运行 `nvm install` 和 `nvm use`；使用 pnpm 全局 Node.js 入口时会按此文件选择版本，首次准备运行时需要网络。
 
 ```bash
 # 首次准备仓库或本仓库依赖清单变化时安装；日常源码修改不需要重复安装。
